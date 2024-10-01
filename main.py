@@ -10,7 +10,6 @@ from PyQt6.QtWidgets import QMessageBox, QApplication
 from PyQt6.QtCore import Qt
 import sqlite3
 import sys
-import py2exe
 import os
 from PIL import Image , ImageOps
 import docx
@@ -25,7 +24,7 @@ import shutil
 import ctypes
 import pyautogui
 import time
-from PyPDF2 import PdfMerger
+# from PyPDF2 import PdfMerger
 import convert_numbers
 from docx2pdf import convert
 from stuff import suppress_output
@@ -127,7 +126,7 @@ if is_admin():
             addButton("images/savedReports.png", "التقارير المحفوظة", self.savedReportsFun)
             addButton("images/save.png", "حفظ باسم", self.SavePrograme)
             addButton("images/clearFields.png", "إفراغ الحقول", self.emptyFieldsFun)
-            addButton("images/images/summary.png", "ملخص التقارير", self.summaryReports)
+            addButton("images/summary.png", "ملخص التقارير", self.summaryReports)
             addButton("images/printer.png", "الطباعة", self.printDoc)
             addButton("images/control.png", "لوحة التحكم", self.controlPanel)
             addButton("images/dbExport.png", "تصدير", self.exportDb)
@@ -141,12 +140,6 @@ if is_admin():
             companyLogobutton.clicked.connect(self.openwebSite)         
             button_list_layout.addWidget(companyLogobutton) 
             
-            mylogo = QLabel()
-            MyLogopix = QPixmap("images/ownerlogo.png")
-            MyLogopix_resized = MyLogopix.scaled(250, 120)            
-            mylogo.setPixmap(MyLogopix_resized)
-            mylogo.setMaximumHeight(120)            
-            button_list_layout.addWidget(mylogo,alignment=  Qt.AlignmentFlag.AlignJustify)
             report_widget = QWidget(self.windowCreating)
 
 
@@ -234,7 +227,7 @@ if is_admin():
             self.addAdmins(self.cFrameshow)            
             self.cFrameshow.setGeometry(0,145,900,1150)
             layout_widget = QWidget(self.windowCreating)
-            layout_widget.setMaximumWidth(450)
+            layout_widget.setMaximumWidth(200)
 
 
             # ******************* left top section ******************* ******************* left top section  *******************
@@ -280,7 +273,7 @@ if is_admin():
 
             splitter.setStyleSheet("""
                 QSplitter::handle:horizontal {
-                    background-color: gray;  /* Set the handle color */
+                    background-color: gray; 
                 }
             """)
                         
@@ -291,7 +284,6 @@ if is_admin():
 
                 
         
-
         def openwebSite(self):
             webbrowser.open('https://www.ersal-m.com', new=2)
         # export current database
@@ -348,7 +340,7 @@ if is_admin():
 
 
         def importDb(self):
-            d = QMessageBox(parent=self.windowCreating,text="هل انت متأكد من استبدال قاعدة البيانات؟")
+            d = QMessageBox(parent=self.windowCreating,text="هل انت متأكد من استرداد قاعدة بيانات؟")
             d.setIcon(QMessageBox.Icon.Information)
             d.setWindowTitle(title)
             d.setStandardButtons(QMessageBox.StandardButton.Cancel|QMessageBox.StandardButton.Ok)
@@ -374,6 +366,8 @@ if is_admin():
                         d.setWindowTitle("نجاح")
                         d.setIcon(QMessageBox.Icon.Information)
                         d.exec()
+                        os.execv(sys.executable, ['python'] + sys.argv)
+    
                         app.closeAllWindows()
                     else:
                         raise Exception("notUseAble")
@@ -470,7 +464,7 @@ if is_admin():
             self.windowCreate.BenefitsCount.setCheckState(Qt.CheckState.Checked)
             self.windowCreate.Creator.setCheckState(Qt.CheckState.Checked)
             self.windowCreate.show()                
-
+        #Function To Open Control Panel
         def controlPanel(self):
             self.windowControl = Choices()
             self.windowControl.setFixedSize(300,570)
@@ -543,6 +537,7 @@ if is_admin():
             self.linethree.setText(values[2])
             self.linefour.setText(values[3])
             self.windowControl.show()
+
         def addPicLogo(self):
             responce = QFileDialog.getOpenFileName(self.windowControl,"اختر ملفا",desktopPath,filter="Image File (*.*)")
             if len(responce[0])!=0:
@@ -650,12 +645,6 @@ if is_admin():
             companyLogobutton.setStyleSheet(f"font-size:14px;qproperty-icon:url('images/companyLogo.png');qproperty-iconSize:150px 100px;background-color:transparent;")   
             companyLogobutton.clicked.connect(self.openwebSite)         
             button_list_layout.addWidget(companyLogobutton) 
-            mylogo = QLabel()
-            MyLogopix = QPixmap("images/ownerlogo.png")
-            MyLogopix_resized = MyLogopix.scaled(250, 120)            
-            mylogo.setPixmap(MyLogopix_resized)
-            mylogo.setMaximumHeight(120)            
-            button_list_layout.addWidget(mylogo,alignment=  Qt.AlignmentFlag.AlignJustify)
             report_widget = QWidget(self.windowCreating)
             
             
@@ -2090,7 +2079,7 @@ if is_admin():
                     runCells.add_text("\t\t\t\t\t")
                 else:
                     runCells.add_text("\t")
-                xsaw = runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
+                    runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
 
                 for row in headers_table.rows:
                     for cell in row.cells:
@@ -2462,7 +2451,7 @@ if is_admin():
 
                 
                 doc.save(f"{folderFinle}/{name2}")
-                s = False
+
                 if fromWhere =="Pdf":
                     subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".pdf")]
                     name3 = nameFile+".pdf"
@@ -2472,24 +2461,24 @@ if is_admin():
                             name3 = f"({i}) {name3}"
                             i+=1
 
-                with suppress_output():
-                    convert(f"{folderFinle}/{name2}",f"{folderFinle}/{name3}")
-                os.remove(f"{folderFinle}/{name2}")
-                d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير إلى {fromWhere} بنجاح")
+                    with suppress_output():
+                        convert(f"{folderFinle}/{name2}",f"{folderFinle}/{name3}")
+                    os.remove(f"{folderFinle}/{name2}")
+                d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
                 d.setWindowTitle("نجاح")
                 d.setIcon(QMessageBox.Icon.Information)
-                ret = d.exec()
+                d.exec()
             try:
-                os.remove("pic1")
-                os.remove("pic2")
-                os.remove("pic4")
-                os.remove("pic4")
+                os.remove("pic1.png")
+                os.remove("pic2.png")
+                os.remove("pic3.png")
+                os.remove("pic4.png")
                 os.remove("secretThing.png")
             except:
                 pass
 
 
-        def printDoc(self,pdf):
+        def printDoc(self):
             try:
                 os.remove("printFile.pdf")
                 os.remove("printFile.docx")
@@ -2561,7 +2550,7 @@ if is_admin():
                 runCells.add_text("\t\t\t\t\t")
             else:
                 runCells.add_text("\t")
-            xsaw = runCells.add_picture("logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
+            xsaw = runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
 
             for row in headers_table.rows:
                 for cell in row.cells:
@@ -2935,10 +2924,10 @@ if is_admin():
             
 
             try:
-                os.remove("pic1")
-                os.remove("pic2")
-                os.remove("pic4")
-                os.remove("pic4")
+                os.remove("pic1.png")
+                os.remove("pic2.png")
+                os.remove("pic3.png")
+                os.remove("pic4.png")
                 os.remove("secretThing.png")
             except:
                 pass
@@ -2949,12 +2938,15 @@ if is_admin():
 
         # Function To Get Summary Of Exist Reports
         def exportAllSummaryReports(self):
-                
                 self.pdfFilesPaths = []
-
                 cr.execute("SELECT id FROM reports")
-                ides = cr.fetchall()
-                self.eachValue = 100//len(ides)
+                reports = cr.fetchall()
+                if all(field for field in reports):
+                    print("yes**************")
+                else:
+                    print("no **************")
+
+                self.eachValue = 100//len(reports)
                 self.progressBarWindow = Choices()
                 self.progressBarWindow.setFixedSize(250,30)
                 self.progressBar = QProgressBar(self.progressBarWindow)
@@ -2962,7 +2954,7 @@ if is_admin():
 
                 folder_path = QFileDialog.getExistingDirectory(self.windowSaved, "اختر مسارا", desktopPath)
                 if(folder_path):
-                    for i in ides:
+                    for i in reports:
                       for j in i:
                          self.completeExportAllSummaryReports(j,folder_path)
                     
@@ -3433,7 +3425,8 @@ if is_admin():
                     paragraph.paragraph_format.space_after = docx.shared.Pt(0)
 
 
-
+            label1Maybe = ""  # or None
+            label2Maybe = ""  # or None
 
             if len(label1Maybe) > 0 or len(label2Maybe) > 0:
                 addmins_table = doc.add_table(rows=1, cols=2)
@@ -3475,14 +3468,16 @@ if is_admin():
                 run = paragraph13.runs
                 font = run[0].font
                 font.size= docx.shared.Pt(15)
+                
                 heights = (docx.shared.Pt(16),docx.shared.Pt(16))
                 for idx,row in enumerate(addmins_table.rows):
                     row.height = heights[idx]
+ 
 
             name = str(idFun)+".docx"
             doc.save(f"{folder_path}/{name}")
 
-
+        #Function To Obtain Summary Of Reports
         def exportSummaryScreen(self,fromWhere="Word"):
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
             if len(FileNameSave[0])>0:
@@ -3493,7 +3488,7 @@ if is_admin():
                 sections = doc.sections
                 for section in sections:
                     section.orientation = docx.enum.section.WD_ORIENTATION.LANDSCAPE
-                    section.page_width, section.page_height = section.page_height, section.page_width  #
+                    section.page_width, section.page_height = section.page_height, section.page_width
                     section.top_margin = docx.shared.Cm(0.7)
                     section.bottom_margin = docx.shared.Cm(0.7)
                     section.left_margin = docx.shared.Cm(0.7)
@@ -3550,7 +3545,6 @@ if is_admin():
                     while name in subFilesD:
                         name = f"({i}) {name}"
                         i+=1
-                
                 doc.save(f"{folderFinle}/{name}")
 
                 if fromWhere =="Pdf":
@@ -3571,7 +3565,7 @@ if is_admin():
 
                     os.remove(f"{folderFinle}/{name}")
 
-                d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير إلى {fromWhere} بنجاح")
+                d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
                 d.setWindowTitle("نجاح")
                 d.setIcon(QMessageBox.Icon.Information)
                 d.exec()

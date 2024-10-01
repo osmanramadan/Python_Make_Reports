@@ -18,7 +18,6 @@ import docx.enum.section
 from docx.oxml.xmlchemy import OxmlElement
 from docx.oxml.shared import qn
 from docx.oxml.ns import qn as qn2
-from docx import Document
 import webbrowser
 import shutil
 import ctypes
@@ -2461,8 +2460,8 @@ if is_admin():
                             name3 = f"({i}) {name3}"
                             i+=1
 
-                    with suppress_output():
-                        convert(f"{folderFinle}/{name2}",f"{folderFinle}/{name3}")
+                    # with suppress_output():
+                    convert(f"{folderFinle}/{name2}",f"{folderFinle}/{name3}")
                     os.remove(f"{folderFinle}/{name2}")
                 d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
                 d.setWindowTitle("نجاح")

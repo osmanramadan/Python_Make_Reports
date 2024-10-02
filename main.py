@@ -6,7 +6,6 @@ from PyQt6 import uic
 from PyQt6.QtCore import Qt,pyqtSignal,QStandardPaths
 from PyQt6.QtWidgets import QFileDialog, QInputDialog,QMessageBox, QVBoxLayout, QLabel, QWidget,QApplication
 
-
 import sqlite3
 import sys
 import os
@@ -23,9 +22,10 @@ import ctypes
 import pyautogui
 import time
 # from PyPDF2 import PdfMerger
+from contextlib import contextmanager
 import convert_numbers
 from docx2pdf import convert
-from stuff import suppress_output
+
 
 
 
@@ -103,6 +103,8 @@ if is_admin():
             button_list_layout = QVBoxLayout()            
             button_list_widget.setLayout(button_list_layout)
             button_list_widget.setMaximumWidth(200)   
+
+
 
             #Function To Add App Buttons
             def addButton(icon, text, callback):
@@ -274,7 +276,20 @@ if is_admin():
             self.setCentralWidget(splitter) 
 
                 
-        
+        #Deal With Errors
+        @contextmanager
+        def suppress_output(self):
+            with open(os.devnull,"w") as devnull:
+                old_stdout = sys.stdout
+                old_stderr = sys.stderr
+                sys.stdout = devnull
+                sys.stderr = devnull
+            try:
+                yield
+            finally:
+                sys.stdout = old_stdout
+                sys.stderr = old_stderr
+
         def openwebSite(self):
             webbrowser.open('https://www.ersal-m.com', new=2)
 
@@ -338,6 +353,7 @@ if is_admin():
             important = d.exec()
             if important == QMessageBox.StandardButton.Ok:
                 self.completeImportDb()
+        
 
         def completeImportDb(self):
             fileDbUser = QFileDialog.getOpenFileName(self.windowCreating,"اختر ملفا",desktopPath,filter="Database File (*.db)")
@@ -2379,26 +2395,17 @@ if is_admin():
                 doc.save(f"{folderFinle}/{name2}")
 
                 if fromWhere =="Pdf":
-                    # subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".pdf")]
+                    subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".pdf")]
                     name3 = nameFile+".pdf"
-                    # if name3 in subFilesD:
-                    #     i = 1
-                    #     while name3 in subFilesD:
-                    #         name3 = f"({i}) {name3}"
-                    #         i+=1
-                    # with suppress_output():
-                    in_file = f"{folderFinle}/{name2}"
-                    out_file = f"{folderFinle}/{name3}"
+                    if name3 in subFilesD:
+                        i = 1
+                        while name3 in subFilesD:
+                            name3 = f"({i}) {name3}"
+                            i+=1
+                    #ToDo 
+                    with self.suppress_output():
+                          pass
 
-                    try:
-                       
-                        with suppress_output():
-                          convert(in_file,out_file)
-                            
-                    except FileNotFoundError:
-                        print("The file could not be found.")
-                    except Exception as e:
-                        print(f"An error occurred: {e}")
 
                     os.remove(f"{folderFinle}/{name2}")
                 d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
@@ -2848,7 +2855,7 @@ if is_admin():
 
             doc.save("printFile.docx")
 
-            with suppress_output():
+            with self.suppress_output():
                 convert("printFile.docx","printFile.pdf")
             os.remove("printFile.docx")
             
@@ -3488,12 +3495,12 @@ if is_admin():
                             name = f"({i}) {name}"
                             i+=1
 
-
                     in_file = f"{folderFinle}/{name}"
                     out_file = f"{folderFinle}/{pdfname}"
 
-                    with suppress_output():
+                    with self.suppress_output():
                         convert(in_file,out_file)
+                        
 
                     os.remove(f"{folderFinle}/{name}")
 

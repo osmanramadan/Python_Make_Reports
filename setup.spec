@@ -22,9 +22,9 @@ hidden_imports = pyqt6_hiddenimports + pillow_hiddenimports + docx_hiddenimports
 # Datas list - specify the images folder and any other required files
 # We use "." to specify the current working directory, and we tell PyInstaller to place them in the same directory as the .exe
 datas = [
-    ('images', '.'),  # Moves 'images' folder to the .exe path
-    ('icons', '.'),   # Moves 'icons' folder to the .exe path
-    ('app.db', '.'),  # Moves 'app.db' to the .exe path
+    ('images', './images'),  # Moves 'images' folder to the .exe path
+    ('icons', './icons'),   # Moves 'icons' folder to the .exe path
+    ('app.db', './app.db'),  # Moves 'app.db' to the .exe path
 ]
 
 # Define the PyInstaller configuration
@@ -57,7 +57,7 @@ exe = EXE(
     strip=False,
     upx=True,
     console=False,
-    icon='icons/icon.ico',  # The icon to be used for the .exe
+    icon='./icons/icon.ico',  # The icon to be used for the .exe
     description='برنامج توثيق للتقارير',  # Description of the application
     company_name='Ersal',  # Your company name
     copyright='© 2024 Ersal',  # Copyright notice

@@ -19,17 +19,12 @@ docx2pdf_hiddenimports = collect_submodules('docx2pdf')
 hidden_imports = pyqt6_hiddenimports + pillow_hiddenimports + docx_hiddenimports + pdf_hiddenimports + \
                  convert_numbers_hiddenimports + docx2pdf_hiddenimports
 
-# Specify the folder containing images
-images_folder = os.path.join('E:/school_reports_python/python_make_reports/images')  # Update with the correct path
-icons_folder = os.path.join('E:/school_reports_python/python_make_reports/icons')
-app_db_file = os.path.join('E:/school_reports_python/python_make_reports/app.db') 
-
-
 # Datas list - specify the images folder and any other required files
+# We use "." to specify the current working directory, and we tell PyInstaller to place them in the same directory as the .exe
 datas = [
-    (images_folder, 'images'),
-    (icons_folder, 'icons'),
-    (app_db_file,'app.db')
+    ('images', '.'),  # Moves 'images' folder to the .exe path
+    ('icons', '.'),   # Moves 'icons' folder to the .exe path
+    ('app.db', '.'),  # Moves 'app.db' to the .exe path
 ]
 
 # Define the PyInstaller configuration
@@ -38,7 +33,7 @@ a = Analysis(
     pathex=['.'],  # Optional: add paths where your modules or data files exist
     hiddenimports=hidden_imports,
     binaries=[],
-    datas=datas,  # Add the datas (images folder) here
+    datas=datas,  # Add the datas (images, icons, app.db) here to be placed in the .exe folder
     hookspath=[],
     runtime_hooks=[],
     excludes=[],
@@ -62,8 +57,7 @@ exe = EXE(
     strip=False,
     upx=True,
     console=False,
-    icon='E:/school_reports_python/python_make_reports/icons/icon.ico',
-    version='1.0.0',  # Specify your application version
+    icon='icons/icon.ico',  # The icon to be used for the .exe
     description='برنامج توثيق للتقارير',  # Description of the application
     company_name='Ersal',  # Your company name
     copyright='© 2024 Ersal',  # Copyright notice

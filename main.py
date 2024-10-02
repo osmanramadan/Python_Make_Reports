@@ -4,10 +4,9 @@ QTextEdit,QFrame,QFileDialog,QScrollArea,QMainWindow,QTableWidget,QTableWidgetIt
 from PyQt6.QtGui import QIcon,QFont,QPixmap
 from PyQt6 import uic
 from PyQt6.QtCore import Qt,pyqtSignal,QStandardPaths
-import pyautogui
-from PyQt6.QtWidgets import QFileDialog, QInputDialog,QMessageBox, QVBoxLayout, QLabel, QWidget
-from PyQt6.QtWidgets import QMessageBox, QApplication
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QFileDialog, QInputDialog,QMessageBox, QVBoxLayout, QLabel, QWidget,QApplication
+
+
 import sqlite3
 import sys
 import os
@@ -35,7 +34,7 @@ from stuff import suppress_output
 xForImpo = 900
 yForImpo = 0
 title = "موثق البرامج"
-icon = "icons/icon.ico"
+
 desktopPath = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
 
 
@@ -61,7 +60,7 @@ if is_admin():
         def __init__(self):
             super().__init__()
             self.setWindowTitle(title)
-            self.setWindowIcon(QIcon(icon))
+            self.setWindowIcon(QIcon("icons/icon.ico"))
     class ClickableQFrame(QFrame):
         clicked = pyqtSignal()
 
@@ -133,12 +132,10 @@ if is_admin():
             addButton("images/word.png", "word حفظ بصيغة", self.writeWord)
             addButton("images/pdfIcon.png", "pdf حفظ بصيغة", lambda x, y="Pdf": self.writeWord(y))
 
-
             companyLogobutton = QPushButton()                
             companyLogobutton.setStyleSheet(f"font-size:14px;qproperty-icon:url('images/companyLogo.png');qproperty-iconSize:150px 100px;background-color:transparent;")   
             companyLogobutton.clicked.connect(self.openwebSite)         
             button_list_layout.addWidget(companyLogobutton) 
-            
             report_widget = QWidget(self.windowCreating)
 
 
@@ -253,8 +250,6 @@ if is_admin():
             self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.scroll.setWidgetResizable(True)
             self.scroll.setWidget(report_widget)
-                                     
-            
             Gridlayout_widget = QWidget()
             # Create a grid layout
             Gridlayout = QGridLayout()
@@ -267,9 +262,7 @@ if is_admin():
             Gridlayout.setRowStretch(0, 1)
             
             splitter = QSplitter(Qt.Orientation.Horizontal, self.windowCreating )            
-            
             splitter.setHandleWidth(5)
-
             splitter.setStyleSheet("""
                 QSplitter::handle:horizontal {
                     background-color: gray; 
@@ -278,13 +271,13 @@ if is_admin():
                         
             splitter.addWidget(layout_widget)
             splitter.addWidget(Gridlayout_widget)
-
             self.setCentralWidget(splitter) 
 
                 
         
         def openwebSite(self):
             webbrowser.open('https://www.ersal-m.com', new=2)
+
         # export current database
         def exportDb(self):
             # Get the user's desktop path
@@ -292,9 +285,11 @@ if is_admin():
 
             # Prompt the user for the database name
             database_name, ok = QInputDialog.getText(self, "اكتب قاعدة البيانات", "اكتب اسم قاعدة البيانات:")
-            if not ok or not database_name:
-              QMessageBox.warning(self, "فشل", "لم يتم اختيار اسما لقاعدة البيانات")
-              return  # User canceled input or entered an empty name
+            d = QMessageBox(parent=self.windowCreating)  # Set the parent to self.windowCreating
+            d.setWindowTitle("فشل")  # Set the title for the warning message box
+            d.setText("لم يتم اختيار اسما لقاعدة البيانات")  # Set the warning message text
+            d.setIcon(QMessageBox.Icon.Warning)  # Set the icon to Warning
+            d.exec()  # Execute the dialog to show it
 
             # Open a dialog to select a directory
             filePath = QFileDialog.getExistingDirectory(self, "اختار مسارا", desktopPath)
@@ -317,22 +312,19 @@ if is_admin():
               # Copy the database file to the specified location with the new name
               shutil.copy2("app.db", destination_path) 
 
-            # Create a custom message box with added space
-              msg_box = QMessageBox(parent=self)
-              msg_box.setWindowTitle("نجاح الانشاء")
-              msg_box.setText(f"تم تصدير قاعدة البيانات '{database_name}' بنجاح")
-
-
-            # Create a layout and add a label for the message
+              # Create a custom message box with added space
+              d = QMessageBox(parent=self.windowCreating,text=f"تم تصدير قاعدة البيانات '{database_name}' بنجاح")
+              d.setWindowTitle("نجاح")
+              d.setIcon(QMessageBox.Icon.Information)
+              d.exec()
+        
+              # Create a layout and add a label for the message
               layout = QVBoxLayout()
               layout.addWidget(QLabel(f"تم تصدير قاعدة البيانات '{database_name}' بنجاح"))
 
-             # Set layout margins (top, left, bottom, right)
+              # Set layout margins (top, left, bottom, right)
               layout.setContentsMargins(20, 20, 20, 20)  # Adjust margins as needed
             
-            # Set the layout to the message box
-              msg_box.setLayout(layout)
-              msg_box.exec()  # Show the message box
 
             except Exception as e:
               QMessageBox.critical(self, "فشل الاضافه: {str(e)}")
@@ -395,7 +387,7 @@ if is_admin():
             cr.execute("SELECT id,reportName FROM reports")
             for n,i in enumerate(cr.fetchall()):
                 self.savedReports.insertRow(self.savedReports.rowCount())
-                icon = QPixmap("images/trashicon.png")
+                QPixmap("images/trashicon.png")
                 button = QPushButton()
                 button.setStyleSheet(f"Qproperty-icon:url(images/trashicon.png);qproperty-iconSize:30px 30px;background-color:rgb(253, 253, 253)")
                 button.clicked.connect(lambda x,row=n:self.deleteReport(row))
@@ -462,7 +454,8 @@ if is_admin():
             self.windowCreate.Benefits.setCheckState(Qt.CheckState.Checked)
             self.windowCreate.BenefitsCount.setCheckState(Qt.CheckState.Checked)
             self.windowCreate.Creator.setCheckState(Qt.CheckState.Checked)
-            self.windowCreate.show()                
+            self.windowCreate.show()    
+
         #Function To Open Control Panel
         def controlPanel(self):
             self.windowControl = Choices()
@@ -528,9 +521,7 @@ if is_admin():
             cr.execute("SELECT * from start")
             values = cr.fetchall()[0]
 
-
             self.SaveButton.clicked.connect(self.Save)
-
             self.lineone.setText(values[0])
             self.linetwo.setText(values[1])
             self.linethree.setText(values[2])
@@ -561,6 +552,7 @@ if is_admin():
 
                 self.layoutFrameLogo.addWidget(picLabel)
                 os.remove("logo_image.png")
+
         def Save(self):
             if self.picBinaryMinLogo !="":
                 cr.execute(f"UPDATE start set line1='{self.lineone.text()}' ,line2='{self.linetwo.text()}' , line3='{self.linethree.text()}' , line4 = '{self.linefour.text()}',icon=?",([self.picBinaryMinLogo]))
@@ -570,7 +562,7 @@ if is_admin():
             d = QMessageBox(parent=self,text="تم التعديل بنجاح")
             d.setWindowTitle("نجاح")
             d.setIcon(QMessageBox.Icon.Information)
-            ret = d.exec()
+            d.exec()
             self.windowControl.destroy()
             
         def creating(self,fromW):
@@ -658,8 +650,7 @@ if is_admin():
             self.hidderFramePicshow.setStyleSheet(f"background-color:#EBEAE9;")
             self.hidderFramePicshow.setGeometry(40,5,250,130)
             self.hidderlayoutPicshow = QVBoxLayout()
-            self.hidderFramePicshow.setLayout(self.hidderlayoutPicshow)
-                                                
+            self.hidderFramePicshow.setLayout(self.hidderlayoutPicshow)                                    
             self.hidderFramePicshow.clicked.connect(lambda: self.putImage(f"ReportCover"))
             specialButton = QPushButton(self.hiderFrameshow)
             specialButton.setIcon(QIcon("images/cam.png"))
@@ -695,7 +686,6 @@ if is_admin():
 
             logoLabel = QLabel(self.hiderFrameshow)
             logoLabel.move(350,10)
-
             pix = QPixmap("logo.png")
             logoLabel.setPixmap(pix)
             self.hiderFrameshow.setGeometry(0,3,900,140)
@@ -703,16 +693,13 @@ if is_admin():
             self.cFrameshow = QFrame(report_widget) 
             self.cFrameshow.setStyleSheet("background-color: white")
 
-
-
             labelGood = QLabel("توثيق برنامج",self.cFrameshow)
             labelGood.setStyleSheet("font-size:20px")
             labelGood.move(410,20)
-
             
             self.programeNameShow = fromW
             if fromW=="Local":
-                self.programeNameShow = "ss12323"
+                self.programeNameShow = "توثيق برنامج"
             if fromW!="Local":
                 numberOfPictures = -1
                 if self.programeNameShow !="":
@@ -860,7 +847,6 @@ if is_admin():
                 self.addAdmins(self.cFrameshow)
             self.cFrameshow.setGeometry(0,145,900,1150)
             
-            
             layout_widget = QWidget(self.windowCreating)
             layout_widget.setMaximumWidth(450)
             
@@ -877,12 +863,9 @@ if is_admin():
             self.listWidget = QListWidget(layout_widget)
             layout.addWidget(self.listWidget)    
             self.load_data()        
-            
             self.listWidget.itemDoubleClicked.connect(self.onItemDoubleClicked)
-
             layout_widget.setMinimumWidth(200)
             
-                                
             self.scroll = QScrollArea()   
             self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
@@ -890,8 +873,6 @@ if is_admin():
             self.scroll.setWidget(report_widget)
              
               
-            
-            
             Gridlayout_widget = QWidget()
             # Create a grid layout
             Gridlayout = QGridLayout()
@@ -902,23 +883,16 @@ if is_admin():
            
             # Align the buttons to expand vertically (row stretch)
             Gridlayout.setRowStretch(0, 1)
-
             splitter = QSplitter(Qt.Orientation.Horizontal, self.windowCreating )            
-            
             splitter.setHandleWidth(5)
-
             splitter.setStyleSheet("""
                 QSplitter::handle:horizontal {
                     background-color: gray;  /* Set the handle color */
                 }
             """)
-                        
             splitter.addWidget(layout_widget)
             splitter.addWidget(Gridlayout_widget)
-
             self.setCentralWidget(splitter) 
-
-               
             self.show()
             
                 
@@ -928,23 +902,17 @@ if is_admin():
             self.creating(str(report_id))
 
         def showReport(self, programeNameShow):
-       
             self.windowshow = Choices() 
             self.windowshow.resize(920,1200)
             self.windowshow.setMinimumSize(920,1200)                                            
             self.setWindowTitle(title)
             self.windowshow.setWindowTitle(title)
             self.windowshow.setWindowIcon(QIcon("icons/icon.ico"))
-            
-                    
             global yForImpo
             global xForImpo
             yForImpo = 50
             xForImpo = 0
-            
-         
-                        
-            
+    
             # Create the current design frame on the right
             right_frame = QWidget(self.windowshow)
             right_layout = QVBoxLayout(self.windowshow)
@@ -952,11 +920,9 @@ if is_admin():
             right_frame.setMinimumHeight(1350)
             right_frame.setMinimumWidth(900)
             # Set initial sizes for splitter
-            
             # Set up the current design UI (existing code)
             hiderFrameshow = QFrame(right_frame)
-            hiderFrameshow.setStyleSheet("background-color: white")
-            
+            hiderFrameshow.setStyleSheet("background-color: white")        
             # Existing UI setup code for `self.hiderFrame` ...
             hidderFramePicshow = QFrame(hiderFrameshow)
             hidderFramePicshow.setStyleSheet(f"background-color:#EBEAE9;")
@@ -970,31 +936,25 @@ if is_admin():
             Frame_text.setGeometry(655, 0, 250, 140)
             text_layout = QVBoxLayout(Frame_text)
             Frame_text.setLayout(text_layout)
-            
             cr.execute("SELECT line1 FROM start")
             Label1 = QLabel(cr.fetchone()[0])
             text_layout.addWidget(Label1)
-            
             cr.execute("SELECT line2 FROM start")
             Label2 = QLabel("   " + cr.fetchone()[0])
             text_layout.addWidget(Label2)
-            
             cr.execute("SELECT line3 FROM start")
             Label3 = QLabel(cr.fetchone()[0])
             text_layout.addWidget(Label3)
-            
             cr.execute("SELECT line4 FROM start")
             Label4 = QLabel(cr.fetchone()[0])
             text_layout.addWidget(Label4)
             
             logoLabel = QLabel(hiderFrameshow)
             logoLabel.move(350, 10)
-          
             pix = QPixmap("images/logo.png")
             logoLabel.setPixmap(pix)
-            
             hiderFrameshow.setGeometry(0, 3, 900, 140)
-            
+
             cFrameshow = QFrame(right_frame)
             cFrameshow.setStyleSheet("background-color: white")
                                  
@@ -1032,7 +992,6 @@ if is_admin():
                 else:
                     programeNameE.setText(str(listImportant[2]))
 
-
             def createGoals():
                 global yForImpo
                 programeGoalsEName = QTextEdit(cFrameshow)
@@ -1049,12 +1008,13 @@ if is_admin():
                 programeGoalsE.setGeometry(0,0,565,110)            
                 programeGoalsE.setAlignment(Qt.AlignmentFlag.AlignJustify)
                 programeGoalsE.setFont(QFont("Arial",15))
-                programeGoalsE.move(135,yForImpo) # 280
+                programeGoalsE.move(135,yForImpo) 
                 yForImpo+=110
                 if listImportant[3] == " ":
                     programeGoalsE.setText(str(listImportant[3]).strip())
                 else:
                     programeGoalsE.setText(str(listImportant[3]))
+
             def createDescription():
                 global yForImpo
                 programeDescriptionEName = QTextEdit(cFrameshow)
@@ -1066,7 +1026,6 @@ if is_admin():
                 programeDescriptionEName.setDisabled(True)
                 programeDescriptionEName.move(700,yForImpo)
                 
-
                 programeDescriptionE = QTextEdit(cFrameshow)
                 programeDescriptionE.setGeometry(0,0,565,110)
                 programeDescriptionE.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -1077,6 +1036,7 @@ if is_admin():
                 else:
                     programeDescriptionE.setText(str(listImportant[4]))
                 yForImpo+=110
+
             def executer():
                 global yForImpo
                 programeCreatorEName = QTextEdit(cFrameshow)
@@ -1085,7 +1045,6 @@ if is_admin():
                 programeCreatorEName.setStyleSheet("background-color: #2ABCB5")
 
                 programeCreatorEName.setFont(QFont("Arial",15))
-                
                 programeCreatorEName.setDisabled(True)
                 programeCreatorEName.move(700,yForImpo)
                 
@@ -1100,6 +1059,7 @@ if is_admin():
                 else:
                     programeCreatorE.setText(str(listImportant[5]))                
                 yForImpo+=35
+
             def executeDate():
                 global yForImpo
                 programeWhenDateEName = QTextEdit(cFrameshow)
@@ -1110,7 +1070,6 @@ if is_admin():
                 programeWhenDateEName.setFont(QFont("Arial",15))
                 programeWhenDateEName.setDisabled(True)
                 programeWhenDateEName.move(700,yForImpo)
-                
                 
                 programeWhenDateE = QTextEdit(cFrameshow)
                 programeWhenDateE.setGeometry(10,10,565,35)
@@ -1131,12 +1090,10 @@ if is_admin():
                 programeBenefitsEName.setGeometry(0,0,100,30)
                 programeBenefitsEName.setStyleSheet("background-color: #2ABCB5")
 
-
                 programeBenefitsEName.setFont(QFont("Arial",13))
                 programeBenefitsEName.setDisabled(True)
                 programeBenefitsEName.move(700,yForImpo)
-                
-
+            
                 programeBenefitsE = QTextEdit(cFrameshow)
                 programeBenefitsE.setGeometry(10,10,565,30)            
                 programeBenefitsE.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -1159,7 +1116,6 @@ if is_admin():
                 CountBenefitsEName.setDisabled(True)
                 CountBenefitsEName.move(700,yForImpo)
                 
-
                 CountBenefitsE = QTextEdit(cFrameshow)
                 CountBenefitsE.setGeometry(10,10,565,30)
                 CountBenefitsE.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -1186,8 +1142,7 @@ if is_admin():
                     picters[i].setGeometry(0,0,350,200)
                     picters[i].setStyleSheet(f"background-color:#EBEAE9;")
                     picters[i].move(x,y)
-        
-                                    
+                            
                     CreatePictemplayout = QVBoxLayout()
                     picters[i].setLayout(CreatePictemplayout)
                     layouts.append(CreatePictemplayout)                    
@@ -1295,7 +1250,7 @@ if is_admin():
                         image1.write(listImportant[9])
                     
                     putImage(0)
-                    
+
                 if listImportant[10]!="" and listImportant[10]!=" ":
                     print("hi10")
                     with open(f"pic22.png","wb") as image2:
@@ -1341,7 +1296,6 @@ if is_admin():
                     consultName.setText(listImportant[17])
         
             cFrameshow.setGeometry(0,145,900,1150)
-            
             
             scroll = QScrollArea(self.windowshow)
             scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
@@ -1389,43 +1343,35 @@ if is_admin():
             self.pdfExport = QPushButton("Pdf تصدير",self.windowsummary,clicked=lambda:self.exportSummaryScreen("Pdf"))
             self.pdfExport.setStyleSheet("background-color:red;font-size:20px")
             self.pdfExport.setGeometry(0,470,360,30)
-
             self.WordExport = QPushButton("Word تصدير",self.windowsummary,clicked=self.exportSummaryScreen)
             self.WordExport.setStyleSheet("background-color:blue;font-size:20px")
             self.WordExport.setGeometry(self.pdfExport.width(),470,360,30)
-
             self.priwidth = 720
             self.prihei = 500
             self.windowsummary.show()
+
         def zoomSumarry(self,row,col):
             if col !=0 and col!=8 :
                 self.windowsummaryZoom = Choices()
                 self.windowsummaryZoom.setFixedSize(400,300)
                 self.windowsummaryZoom.setWindowTitle(title)
                 self.windowsummaryZoom.setWindowIcon(QIcon("icons/icon.ico"))
-                
                 summaryZoomText = QTextEdit(self.windowsummaryZoom)
                 summaryZoomText.setGeometry(0,0,400,300)
                 summaryZoomText.setAlignment(Qt.AlignmentFlag.AlignLeft)
                 summaryZoomText.setFont(QFont("Arial",15))
-                
                 summaryZoomText.setText(self.TableSummary.item(row,col).text())
-
                 self.windowsummaryZoom.show()
-        def resizeSummary(self,ev):
+
+        def resizeSummary(self,en):
             self.widthChanged = self.windowsummary.width() - self.priwidth
             self.heightChanged = self.windowsummary.height() - self.prihei - 10
-            each = self.widthChanged-5
-
-            
+            self.widthChanged-5
             self.TableSummary.resize(self.TableSummary.width()+self.widthChanged,self.TableSummary.height()+self.heightChanged)
-
             self.pdfExport.resize(self.pdfExport.width()+(round(self.widthChanged/2)),self.pdfExport.height())
             self.pdfExport.move(0,self.TableSummary.height()+3)
-            
             self.WordExport.resize(self.WordExport.width()+(round(self.widthChanged/2)),self.WordExport.height())
             self.WordExport.move(self.pdfExport.width(),self.TableSummary.height()+3)
-
 
             incread = ((self.TableSummary.width() - 29) // 7) - 4
             if incread >= 87:
@@ -1433,12 +1379,10 @@ if is_admin():
                     if i!=0 and i!=8:
                         self.TableSummary.setColumnWidth(i,incread)
 
-
             self.priwidth =self.windowsummary.width()
             self.prihei = self.windowsummary.height()- 10
-
-
             self.TableSummary.show()
+
         def updateAReport(self):
             namePrograme = ""
             Goals = ""
@@ -1508,8 +1452,9 @@ if is_admin():
             d = QMessageBox(parent=self.windowCreating,text="تم الحفظ بنجاح")
             d.setWindowTitle("نجاح")
             d.setIcon(QMessageBox.Icon.Information)
-            ret = d.exec()
+            d.exec()
             con.commit()
+
         def deleteImagesTemp(self,neNum):
             if neNum=="ReportCover":
                 for i in reversed(range(self.hidderlayoutPicshow.count())): 
@@ -1534,6 +1479,7 @@ if is_admin():
                 for i in reversed(range(self.layouts[3].count())): 
                     self.layouts[3].itemAt(i).widget().setParent(None)
                     self.pictersPaths[3] = ""
+
         def addAdmins(self,frame):
             self.label1Maye = QLineEdit(frame)
             self.label1Maye.setGeometry(40,900,180,25)
@@ -1580,9 +1526,7 @@ if is_admin():
                 self.picters[i].setStyleSheet(f"background-color:#EBEAE9;")
                 self.picters[i].move(x,y)
                 self.picters.append(ClickableQFrame(self.cFrameshow))
-    
-                self.picters[i].clicked.connect(lambda x=i: self.putImage(f"{x}"))
-                                
+                self.picters[i].clicked.connect(lambda x=i: self.putImage(f"{x}"))            
                 templayout = QVBoxLayout()
                 self.picters[i].setLayout(templayout)
                 self.layouts.append(templayout)
@@ -1615,7 +1559,6 @@ if is_admin():
                     self.secretLittleThing = responce[0]
                     finalImage = image.resize((240,110))
                     finalImage.save("reportheaderimage.png",quality=100)
-
                     with open("reportheaderimage.png","rb") as temp_binary:
                         binaryCode12 = temp_binary.read()
                     self.picLogoBinary = binaryCode12
@@ -1712,19 +1655,17 @@ if is_admin():
             programeName.setText("اسم البرنامج")
             programeName.setGeometry(0,0,100,35)
             programeName.setStyleSheet("background-color: #2ABCB5")
-
             programeName.setFont(QFont("Arial",15))
             programeName.setDisabled(True)
             programeName.move(700,yForImpo)
             
-
             self.programeNameE = QTextEdit(self.cFrameshow)
             self.programeNameE.setGeometry(0,0,565,35)            
             self.programeNameE.setAlignment(Qt.AlignmentFlag.AlignLeft)
-
             self.programeNameE.setFont(QFont("Arial",14))
             self.programeNameE.move(135,yForImpo)            
             yForImpo +=35                     
+
         def resizedWindow(self):
             newWidth = (self.width() - self.cFrameshow.width())//2
             self.cFrameshow.move(newWidth,self.cFrameshow.y())
@@ -1737,18 +1678,17 @@ if is_admin():
             programeName.setGeometry(0,0,100,110)
             programeName.setAlignment(Qt.AlignmentFlag.AlignRight)
             programeName.setStyleSheet("background-color: #2ABCB5")
-
             programeName.setFont(QFont("Arial",15))
             programeName.setDisabled(True)
             programeName.move(700,yForImpo)
             
-
             self.programeGoalsE = QTextEdit(self.cFrameshow)
             self.programeGoalsE.setGeometry(0,0,565,110)            
             self.programeGoalsE.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.programeGoalsE.setFont(QFont("Arial",15))
             self.programeGoalsE.move(135,yForImpo) # 280            
             yForImpo+=110
+
         def createDescription(self):
             global yForImpo
             programeName = QTextEdit(self.cFrameshow)
@@ -1759,21 +1699,20 @@ if is_admin():
             programeName.setFont(QFont("Arial",15))
             programeName.setDisabled(True)
             programeName.move(700,yForImpo)
-            
-
+        
             self.programeDescriptionE = QTextEdit(self.cFrameshow)
             self.programeDescriptionE.setGeometry(0,0,565,110)
             self.programeDescriptionE.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.programeDescriptionE.setFont(QFont("Arial",15))
             self.programeDescriptionE.move(135,yForImpo)            
             yForImpo+=110
+
         def executer(self):
             global yForImpo
             programeName = QTextEdit(self.cFrameshow)
             programeName.setText("المنفذ")
             programeName.setGeometry(0,0,100,35)
             programeName.setStyleSheet("background-color: #2ABCB5")
-
             programeName.setFont(QFont("Arial",15))
             programeName.setDisabled(True)
             programeName.move(700,yForImpo)
@@ -1785,24 +1724,24 @@ if is_admin():
             self.programeCreatorE.setFont(QFont("Arial",15))
             self.programeCreatorE.move(135,yForImpo)
             yForImpo+=35
+
         def executeDate(self):
             global yForImpo
             programeName = QTextEdit(self.cFrameshow)
             programeName.setText("تاريخ التنفيذ")
             programeName.setGeometry(0,0,100,35)
             programeName.setStyleSheet("background-color: #2ABCB5")
-
             programeName.setFont(QFont("Arial",15))
             programeName.setDisabled(True)
             programeName.move(700,yForImpo)
-            
-            
+                    
             self.programeWhenDateE = QTextEdit(self.cFrameshow)
             self.programeWhenDateE.setGeometry(10,10,565,35)
             self.programeWhenDateE.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.programeWhenDateE.setFont(QFont("Arial",14))
             self.programeWhenDateE.move(135,yForImpo)            
             yForImpo+=35
+
         def Benefits(self):
             global yForImpo
             global xForImpo
@@ -1810,7 +1749,6 @@ if is_admin():
             programeName.setText("المستفيدون")
             programeName.setGeometry(0,0,100,30)
             programeName.setStyleSheet("background-color: #2ABCB5")
-
             programeName.setFont(QFont("Arial",13))
             programeName.setDisabled(True)
             programeName.move(700,yForImpo)
@@ -1920,20 +1858,17 @@ if is_admin():
             programeName.setText("عدد المستفيدين")
             programeName.setGeometry(0,0,100,30)
             programeName.setStyleSheet("background-color: #2ABCB5")
-
             programeName.setFont(QFont("Arial",13))
             programeName.setDisabled(True)
             programeName.move(700,yForImpo)
             
 
-
-
             self.CountBenefitsE = QTextEdit(self.cFrameshow)
             self.CountBenefitsE .setGeometry(10,10,565,30)
             self.CountBenefitsE .setAlignment(Qt.AlignmentFlag.AlignRight)
             self.CountBenefitsE .setFont(QFont("Arial",13))
-
             self.CountBenefitsE.move(135,yForImpo)
+
         def saveReport(self):
             namePrograme = ""
             Goals = ""
@@ -2001,7 +1936,7 @@ if is_admin():
             d = QMessageBox(parent=self.windowCreating,text="تم الحفظ بنجاح")
             d.setWindowTitle("نجاح")
             d.setIcon(QMessageBox.Icon.Information)
-            ret = d.exec()
+            d.exec()
             self.saveProgrameWindow.destroy()
             con.commit()
             self.load_data()            
@@ -2046,7 +1981,6 @@ if is_admin():
                         cell.paragraphs[0].size = docx.shared.Pt(15)
 
                 hdr_Cells = headers_table.rows[0].cells
-
                 cr.execute("SELECT line1 FROM start")
                 hdr_Cells[1].text = cr.fetchone()[0]
                 cr.execute("SELECT line2 FROM start")
@@ -2055,7 +1989,6 @@ if is_admin():
                 hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
                 cr.execute("SELECT line4 FROM start")
                 hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
-
                 widths = (docx.shared.Inches(5.8),docx.shared.Inches(3))
                 for row in headers_table.rows:
                     for idx, width in enumerate(widths):
@@ -2085,7 +2018,6 @@ if is_admin():
                         cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
                 headers_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
 
-
                 """
                 if self.windowCreate.BenefitsCount.isChecked():
                     self.CountBenefits()
@@ -2107,7 +2039,6 @@ if is_admin():
                             final_text.append(i)
 
                     programeNameProgrameTable = doc.add_table(rows=1,cols=2)
-
                     programeNameProgrameTable.style = "Table Grid"
                     hdr_Cells = programeNameProgrameTable.rows[0].cells
                     hdr_Cells[1].text = "اسم البرنامج"
@@ -2121,7 +2052,6 @@ if is_admin():
                     table_cell_properties.append(shade_obj)
 
                     widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
-
                     for row in programeNameProgrameTable.rows:
                         for idx, width in enumerate(widths):
                             row.cells[idx].width = width
@@ -2446,22 +2376,30 @@ if is_admin():
                         name2 = f"({i}) {name2}"
                         i+=1
                 
-
-
-                
                 doc.save(f"{folderFinle}/{name2}")
 
                 if fromWhere =="Pdf":
-                    subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".pdf")]
+                    # subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".pdf")]
                     name3 = nameFile+".pdf"
-                    if name3 in subFilesD:
-                        i = 1
-                        while name3 in subFilesD:
-                            name3 = f"({i}) {name3}"
-                            i+=1
-
+                    # if name3 in subFilesD:
+                    #     i = 1
+                    #     while name3 in subFilesD:
+                    #         name3 = f"({i}) {name3}"
+                    #         i+=1
                     # with suppress_output():
-                    convert(f"{folderFinle}/{name2}",f"{folderFinle}/{name3}")
+                    in_file = f"{folderFinle}/{name2}"
+                    out_file = f"{folderFinle}/{name3}"
+
+                    try:
+                       
+                        with suppress_output():
+                          convert(in_file,out_file)
+                            
+                    except FileNotFoundError:
+                        print("The file could not be found.")
+                    except Exception as e:
+                        print(f"An error occurred: {e}")
+
                     os.remove(f"{folderFinle}/{name2}")
                 d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
                 d.setWindowTitle("نجاح")
@@ -2517,7 +2455,6 @@ if is_admin():
                     cell.paragraphs[0].size = docx.shared.Pt(15)
             
             hdr_Cells = headers_table.rows[0].cells
-
             cr.execute("SELECT line1 FROM start")
             hdr_Cells[1].text = cr.fetchone()[0]
             cr.execute("SELECT line2 FROM start")
@@ -2549,7 +2486,7 @@ if is_admin():
                 runCells.add_text("\t\t\t\t\t")
             else:
                 runCells.add_text("\t")
-            xsaw = runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
+                runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
 
             for row in headers_table.rows:
                 for cell in row.cells:
@@ -2566,7 +2503,6 @@ if is_admin():
             GoodPrograme.runs[0].font.size = docx.shared.Pt(20)
             GoodPrograme.paragraph_format.space_after = docx.shared.Pt(0.1)
             GoodPrograme.paragraph_format.space_before = docx.shared.Pt(1)
-
 
 
             if self.ablePrograme:
@@ -2620,9 +2556,7 @@ if is_admin():
                     else:
                         final_text.append(i)
 
-
                 programeGolasTable = doc.add_table(rows=1,cols=2)
-
                 programeGolasTable.style = "Table Grid"
                 hdr_Cells = programeGolasTable.rows[0].cells
                 hdr_Cells[1].text = "\t\tالأهداف"
@@ -2643,7 +2577,6 @@ if is_admin():
                 for idx,row in enumerate(programeGolasTable.rows):
                     row.height = heights[idx]
                 
-
                 for row in programeGolasTable.rows:
                     for cell in row.cells:
                         cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
@@ -2751,7 +2684,6 @@ if is_admin():
 
 
                 programeWhenDateTable = doc.add_table(rows=1,cols=2)
-
                 programeWhenDateTable.style = "Table Grid"
                 hdr_Cells = programeWhenDateTable.rows[0].cells
                 hdr_Cells[1].text = "تاريخ التنفيذ"
@@ -2793,7 +2725,6 @@ if is_admin():
                 hdr_Cells[1].text = "المستفيدون"
                 hdr_Cells[0].text = ''.join(final_text)
                 programeBenefitsTable.autofit = False
-
 
                 cell_xml_element = programeBenefitsTable.rows[0].cells[1]._tc
                 table_cell_properties = cell_xml_element.get_or_add_tcPr()
@@ -2921,7 +2852,6 @@ if is_admin():
                 convert("printFile.docx","printFile.pdf")
             os.remove("printFile.docx")
             
-
             try:
                 os.remove("pic1.png")
                 os.remove("pic2.png")
@@ -2940,31 +2870,38 @@ if is_admin():
                 self.pdfFilesPaths = []
                 cr.execute("SELECT id FROM reports")
                 reports = cr.fetchall()
-                if all(field for field in reports):
-                    print("yes**************")
-                else:
-                    print("no **************")
+                if reports:
 
-                self.eachValue = 100//len(reports)
-                self.progressBarWindow = Choices()
-                self.progressBarWindow.setFixedSize(250,30)
-                self.progressBar = QProgressBar(self.progressBarWindow)
-                self.progressBar.setGeometry(0,0,290,30)
+                    self.eachValue = 100//len(reports)
+                    self.progressBarWindow = Choices()
+                    self.progressBarWindow.setFixedSize(250,30)
+                    self.progressBar = QProgressBar(self.progressBarWindow)
+                    self.progressBar.setGeometry(0,0,290,30)
 
-                folder_path = QFileDialog.getExistingDirectory(self.windowSaved, "اختر مسارا", desktopPath)
-                if(folder_path):
-                    for i in reports:
-                      for j in i:
-                         self.completeExportAllSummaryReports(j,folder_path)
+                    folder_path = QFileDialog.getExistingDirectory(self.windowSaved, "اختر مسارا", desktopPath)
+                    if(folder_path):
+                        for i in reports:
+                          for j in i:
+                            self.completeExportAllSummaryReports(j,folder_path)
                     
-                    d = QMessageBox()
-                    d.setText("تم تصدير الملفات بنجاح")
-                    d.setIcon(QMessageBox.Icon.Information)  
-                    d.setStandardButtons(QMessageBox.StandardButton.Ok) 
-                    d.exec() 
+
+                        d = QMessageBox(parent=self.windowCreating,text="تم تصدير الملفات بنجاح")
+                        d.setWindowTitle("نجاح")
+                        d.setIcon(QMessageBox.Icon.Information)
+                        d.exec()
+                        # con.commit()
+                        # con.close()
+                    else:
+                      pass
+                    
                 else:
-                    pass
-                    
+                  d = QMessageBox()
+                  d.setText("ليس هناك ملفات للتصدير") 
+                  d.setIcon(QMessageBox.Icon.Critical)
+                  d.setStandardButtons(QMessageBox.StandardButton.Ok) 
+                  d.exec() 
+
+
 
         def completeExportAllSummaryReports(self,idFun,folder_path):
             try:
@@ -3289,7 +3226,7 @@ if is_admin():
                         final_text.append(i)
                 
                 programeBenefitsTable = doc.add_table(rows=1,cols=2)
-                programeBenefitsTable.style = 'Table Grid' #single lines in all cells
+                programeBenefitsTable.style = 'Table Grid' 
                 hdr_Cells = programeBenefitsTable.rows[0].cells
                 hdr_Cells[1].text = "المستفيدون"
                 hdr_Cells[0].text = ''.join(final_text)
@@ -3423,9 +3360,8 @@ if is_admin():
                         run.add_text("\n")
                     paragraph.paragraph_format.space_after = docx.shared.Pt(0)
 
-
-            label1Maybe = ""  # or None
-            label2Maybe = ""  # or None
+            label1Maybe = ""  
+            label2Maybe = ""  
 
             if len(label1Maybe) > 0 or len(label2Maybe) > 0:
                 addmins_table = doc.add_table(rows=1, cols=2)
@@ -3442,13 +3378,11 @@ if is_admin():
 
                 addmins_Cells = addmins_table.rows[0].cells
 
-
                 cr.execute(f"SELECT manger FROM reports WHERE id={idFun}")
                 manger = cr.fetchone()[0]
 
 
                 addmins_Cells[0].text = label1Maybe+"\n"+f"{manger}"
-
                 addmins_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.LEFT
 
                 cr.execute(f"SELECT co_manger FROM reports WHERE id={idFun}")
@@ -3472,7 +3406,6 @@ if is_admin():
                 for idx,row in enumerate(addmins_table.rows):
                     row.height = heights[idx]
  
-
             name = str(idFun)+".docx"
             doc.save(f"{folder_path}/{name}")
 
@@ -3579,10 +3512,9 @@ if is_admin():
                 reply.setText("هل تريد حفظ التقرير")
 
                 reply.setStandardButtons(QMessageBox.StandardButton.Yes|QMessageBox.StandardButton.No|QMessageBox.StandardButton.Cancel)
-                
                 bottonOk = reply.button(QMessageBox.StandardButton.Yes)
                 bottonOk.setText("نعم")
-                
+    
                 bottonCancel = reply.button(QMessageBox.StandardButton.No)
                 bottonCancel.setText("لا")
                 
@@ -3607,21 +3539,17 @@ if is_admin():
                 # Create a widget to hold the icon and label
                 item_widget = QWidget()
                 item_layout = QHBoxLayout()
-
-                # Set layout direction to RightToLeft
+                # Set layout direction to RsightToLeft
                 item_layout.setDirection(QHBoxLayout.Direction.RightToLeft)
-
                 # Create a QPushButton for the icon
                 icon_button = QPushButton()
                 icon_button.setStyleSheet("Qproperty-icon:url(images/popUpwindow.png); qproperty-iconSize:30px 30px; background-color:transparent")
                 icon_button.setFixedSize(40, 40)  # Size of the icon button (adjust as needed)
                 icon_button.clicked.connect(lambda event, name=str(i[0]): self.showReport(name))  # Connect to icon click event
-
                 # Create a QLabel for the report name
                 label = QLabel(str(i[1]))
                 label.setStyleSheet("background-color:transparent; padding: 5px;")
                 label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
                 # Add icon button and label to the layout (icon first in right-to-left)
                 item_layout.addWidget(icon_button)
                 item_layout.addWidget(label)
@@ -3629,7 +3557,6 @@ if is_admin():
 
                 # Set the layout for the widget
                 item_widget.setLayout(item_layout)
-
                 # Create a QListWidgetItem and add the widget to the QListWidget
                 list_item = QListWidgetItem(self.listWidget)
                 list_item.setSizeHint(item_widget.sizeHint())  # Adjust size based on widget
@@ -3651,7 +3578,6 @@ if is_admin():
             '''
         )
         window = ReportEditor()
-
         app.exec()
         
 else:

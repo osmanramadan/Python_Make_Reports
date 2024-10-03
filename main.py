@@ -107,7 +107,6 @@ if is_admin():
             button_list_widget.setLayout(button_list_layout)
             button_list_widget.setMaximumWidth(200)   
 
-
             #Function To Add App Buttons
             def addButton(icon, text, callback):
                 button = QPushButton(text)     
@@ -155,7 +154,7 @@ if is_admin():
 
             self.hidderFramePicshow = ClickableQFrame(self.hiderFrameshow)
             self.hidderFramePicshow.setStyleSheet(f"background-color:#EBEAE9;")
-            self.hidderFramePicshow.setGeometry(40,5,250,130)
+            # self.hidderFramePicshow.setGeometry(40,5,250,130)
 
             self.hidderlayoutPicshow = QVBoxLayout()
             self.hidderFramePicshow.setLayout(self.hidderlayoutPicshow)
@@ -227,7 +226,7 @@ if is_admin():
             self.addAdmins(self.cFrameshow)            
             self.cFrameshow.setGeometry(0,145,900,1150)
             layout_widget = QWidget(self.windowCreating)
-            layout_widget.setMaximumWidth(200)
+            layout_widget.setMaximumWidth(240)
 
 
             # ******************* left top section ******************* ******************* left top section  *******************
@@ -680,7 +679,7 @@ if is_admin():
 
             Frame_text = QFrame(self.hiderFrameshow)
             Frame_text.setStyleSheet("background-color: white")
-            Frame_text.setGeometry(655,0,550,140)
+            Frame_text.setGeometry(655,0,250,140)
 
             text_layout = QVBoxLayout(Frame_text)
 
@@ -865,7 +864,7 @@ if is_admin():
             self.cFrameshow.setGeometry(0,145,900,1150)
             
             layout_widget = QWidget(self.windowCreating)
-            layout_widget.setMaximumWidth(450)
+            layout_widget.setMaximumWidth(240)
             
             # Create a vertical layout to hold the header label and the list widget
             layout = QVBoxLayout()                        
@@ -1229,7 +1228,7 @@ if is_admin():
             if programeNameShow !="":               
                 cr.execute(f"SELECT * FROM reports WHERE id = '{programeNameShow}'")
                 listImportant = cr.fetchall()[0]
-        
+                
                 if listImportant[2]!="":
                     createNamePrograme()
                 if listImportant[3]!="":                    
@@ -2897,13 +2896,11 @@ if is_admin():
                         for i in reports:
                           for j in i:
                             self.completeExportAllSummaryReports(j,folder_path)
-                    
 
                         d = QMessageBox(parent=self.windowCreating,text="تم تصدير الملفات بنجاح")
                         d.setWindowTitle("نجاح")
                         d.setIcon(QMessageBox.Icon.Information)
                         d.exec()
-
                     else:
                       pass
                     
@@ -3424,7 +3421,6 @@ if is_admin():
 
         #Function To Obtain Summary Of Reports
         def exportSummaryScreen(self,fromWhere="Word"):
-                
             
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
             if len(FileNameSave[0])>0:

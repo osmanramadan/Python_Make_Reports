@@ -24,7 +24,10 @@ import time
 # from PyPDF2 import PdfMerger
 from contextlib import contextmanager
 import convert_numbers
-from docx2pdf import convert
+import aspose.words as aw
+import subprocess
+
+# from docx2pdf import convert
 
 
 
@@ -63,9 +66,9 @@ if is_admin():
             self.setWindowIcon(QIcon("icons/icon.ico"))
     class ClickableQFrame(QFrame):
         clicked = pyqtSignal()
-
         def mousePressEvent(self, event):
             self.clicked.emit()
+
     # Init variable to connect to database 
     con = sqlite3.connect("app.db")
     cr = con.cursor()
@@ -103,7 +106,6 @@ if is_admin():
             button_list_layout = QVBoxLayout()            
             button_list_widget.setLayout(button_list_layout)
             button_list_widget.setMaximumWidth(200)   
-
 
 
             #Function To Add App Buttons
@@ -243,7 +245,6 @@ if is_admin():
             # Connect double-click event to open the report
             self.listWidget.itemDoubleClicked.connect(self.onItemDoubleClicked)
             layout_widget.setMinimumWidth(200)
-            
                                     
             
             self.scroll = QScrollArea()
@@ -276,19 +277,19 @@ if is_admin():
             self.setCentralWidget(splitter) 
 
                 
-        #Deal With Errors
-        @contextmanager
-        def suppress_output(self):
-            with open(os.devnull,"w") as devnull:
-                old_stdout = sys.stdout
-                old_stderr = sys.stderr
-                sys.stdout = devnull
-                sys.stderr = devnull
-            try:
-                yield
-            finally:
-                sys.stdout = old_stdout
-                sys.stderr = old_stderr
+        # #Deal With Errors
+        # @contextmanager
+        # def suppress_output(self):
+        #     with open(os.devnull,"w") as devnull:
+        #         old_stdout = sys.stdout
+        #         old_stderr = sys.stderr
+        #         sys.stdout = devnull
+        #         sys.stderr = devnull
+        #     try:
+        #         yield
+        #     finally:
+        #         sys.stdout = old_stdout
+        #         sys.stderr = old_stderr
 
         def openwebSite(self):
             webbrowser.open('https://www.ersal-m.com', new=2)
@@ -299,18 +300,18 @@ if is_admin():
             desktopPath = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation)
 
             # Prompt the user for the database name
-            database_name, ok = QInputDialog.getText(self, "اكتب قاعدة البيانات", "اكتب اسم قاعدة البيانات:")
-            d = QMessageBox(parent=self.windowCreating)  # Set the parent to self.windowCreating
-            d.setWindowTitle("فشل")  # Set the title for the warning message box
-            d.setText("لم يتم اختيار اسما لقاعدة البيانات")  # Set the warning message text
-            d.setIcon(QMessageBox.Icon.Warning)  # Set the icon to Warning
-            d.exec()  # Execute the dialog to show it
+            database_name, ok = QInputDialog.getText(self.windowCreating, "اكتب قاعدة البيانات", "اكتب اسم قاعدة البيانات:")
+
+            if not  database_name:
+                return
 
             # Open a dialog to select a directory
-            filePath = QFileDialog.getExistingDirectory(self, "اختار مسارا", desktopPath)
+            filePath = QFileDialog.getExistingDirectory(self.windowCreating, "اختار مسارا", desktopPath)
             if len(filePath) > 0:
               # Construct the full path for the new database file
               destination_path = os.path.join(filePath, database_name)
+            else:
+                return
 
             # Check if a file with the same name already exists
             if os.path.exists(destination_path):
@@ -369,7 +370,7 @@ if is_admin():
                         con.commit()
                         con.close()
                         self.con1.close()
-                        d = QMessageBox(parent=self,text="تم استيراد قاعدة البيانات بنجاح")
+                        d = QMessageBox(parent=self.windowCreating,text="تم استيراد قاعدة البيانات بنجاح")
                         d.setWindowTitle("نجاح")
                         d.setIcon(QMessageBox.Icon.Information)
                         d.exec()
@@ -380,7 +381,7 @@ if is_admin():
                         raise Exception("notUseAble")
                 except:
                     self.con1.close()
-                    d = QMessageBox(parent=self,text="قاعدة البيانات غير صالحة")
+                    d = QMessageBox(parent=self.windowCreating,text="قاعدة البيانات غير صالحة")
                     d.setWindowTitle("ERROR")
                     d.setIcon(QMessageBox.Icon.Critical)
                     d.exec()
@@ -429,9 +430,9 @@ if is_admin():
 
         def deleteReport(self,row,fRom="Original"):
             if fRom=="OutSide":
-                d = QMessageBox(parent=self,text=f"تأكيد حذف تقرير {self.TableSummary.item(row,8).text()}")
+                d = QMessageBox(parent=self.windowCreating,text=f"تأكيد حذف تقرير {self.TableSummary.item(row,8).text()}")
             else:
-                d = QMessageBox(parent=self,text=f"تأكيد حذف تقرير {self.savedReports.item(row,3).text()}")
+                d = QMessageBox(parent=self.windowCreating,text=f"تأكيد حذف تقرير {self.savedReports.item(row,3).text()}")
             d.setIcon(QMessageBox.Icon.Information)
             d.setWindowTitle(title)
             d.setStandardButtons(QMessageBox.StandardButton.Cancel|QMessageBox.StandardButton.Ok)
@@ -575,7 +576,7 @@ if is_admin():
             else:
                 cr.execute(f"UPDATE start set line1='{self.lineone.text()}' ,line2='{self.linetwo.text()}' , line3='{self.linethree.text()}' , line4 = '{self.linefour.text()}'")
             con.commit()
-            d = QMessageBox(parent=self,text="تم التعديل بنجاح")
+            d = QMessageBox(parent=self.windowCreating,text="تم التعديل بنجاح")
             d.setWindowTitle("نجاح")
             d.setIcon(QMessageBox.Icon.Information)
             d.exec()
@@ -679,7 +680,7 @@ if is_admin():
 
             Frame_text = QFrame(self.hiderFrameshow)
             Frame_text.setStyleSheet("background-color: white")
-            Frame_text.setGeometry(655,0,250,140)
+            Frame_text.setGeometry(655,0,550,140)
 
             text_layout = QVBoxLayout(Frame_text)
 
@@ -1228,28 +1229,21 @@ if is_admin():
             if programeNameShow !="":               
                 cr.execute(f"SELECT * FROM reports WHERE id = '{programeNameShow}'")
                 listImportant = cr.fetchall()[0]
-                
+        
                 if listImportant[2]!="":
                     createNamePrograme()
                 if listImportant[3]!="":                    
                     createGoals()
-
                 if listImportant[4]!="":
                     createDescription()
-
                 if listImportant[5]!="":                    
                     executer()
                 if listImportant[6]!="":                    
                     executeDate()
-
-
                 if listImportant[7]!="":                    
                     Benefits()
-                    
-                    
                 if listImportant[8]!="":                    
                     CountBenefits()
-
                 if listImportant[9]!="":
                     numberOfPictures+=1
                 if listImportant[10]!="":
@@ -2403,9 +2397,16 @@ if is_admin():
                             name3 = f"({i}) {name3}"
                             i+=1
                     #ToDo 
-                    with self.suppress_output():
-                          pass
-
+                    
+                    in_file = f"{folderFinle}/{name2}"
+                    out_file = f"{folderFinle}/{name3}"
+                    doc = aw.Document(in_file)
+                    doc.save("tempHtml/index.html")
+                    try:
+                        subprocess.run(['wkhtmltopdf', '--enable-local-file-access',"tempHtml/index.html",out_file], check=True)
+                        print("Successfully converted HTML to PDF.")
+                    except subprocess.CalledProcessError as e:
+                        print(f"An error occurred during PDF conversion: {e}")
 
                     os.remove(f"{folderFinle}/{name2}")
                 d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
@@ -2855,8 +2856,14 @@ if is_admin():
 
             doc.save("printFile.docx")
 
-            with self.suppress_output():
-                convert("printFile.docx","printFile.pdf")
+            printdoc = aw.Document("printFile.docx")
+            printdoc.save("tempPdf/osmanramadan.html")
+
+            try:
+               subprocess.run(['wkhtmltopdf', '--enable-local-file-access', 'tempPdf/osmanramadan.html', "printFile.pdf"], check=True)
+               print("Successfully converted HTML to PDF.")
+            except subprocess.CalledProcessError as e:
+               print(f"An error occurred during PDF conversion: {e}")
             os.remove("printFile.docx")
             
             try:
@@ -2896,8 +2903,7 @@ if is_admin():
                         d.setWindowTitle("نجاح")
                         d.setIcon(QMessageBox.Icon.Information)
                         d.exec()
-                        # con.commit()
-                        # con.close()
+
                     else:
                       pass
                     
@@ -3418,6 +3424,8 @@ if is_admin():
 
         #Function To Obtain Summary Of Reports
         def exportSummaryScreen(self,fromWhere="Word"):
+                
+            
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
             if len(FileNameSave[0])>0:
                 folder = (str(FileNameSave[0]).split(f"/"))
@@ -3497,10 +3505,13 @@ if is_admin():
 
                     in_file = f"{folderFinle}/{name}"
                     out_file = f"{folderFinle}/{pdfname}"
-
-                    with self.suppress_output():
-                        convert(in_file,out_file)
-                        
+                    doc = aw.Document(in_file)
+                    doc.save("tempHtml/index.html")
+                    try:
+                        subprocess.run(['wkhtmltopdf', '--enable-local-file-access',"tempHtml/index.html",out_file], check=True)
+                        print("Successfully converted HTML to PDF.")
+                    except subprocess.CalledProcessError as e:
+                        print(f"An error occurred during PDF conversion: {e}")
 
                     os.remove(f"{folderFinle}/{name}")
 

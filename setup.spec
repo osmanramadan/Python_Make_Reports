@@ -11,19 +11,23 @@ pyqt6_hiddenimports = collect_submodules('PyQt6')
 # Collect submodules for libraries used in the script
 pillow_hiddenimports = collect_submodules('PIL')
 docx_hiddenimports = collect_submodules('docx')
-pdf_hiddenimports = collect_submodules('PyPDF2')
 convert_numbers_hiddenimports = collect_submodules('convert_numbers')
-docx2pdf_hiddenimports = collect_submodules('docx2pdf')
+aspose_words_hiddenimports = collect_submodules('aspose.words')
 
 # Combine all hidden imports
-hidden_imports = pyqt6_hiddenimports + pillow_hiddenimports + docx_hiddenimports + pdf_hiddenimports + \
-                 convert_numbers_hiddenimports + docx2pdf_hiddenimports
+hidden_imports = (
+    pyqt6_hiddenimports + 
+    pillow_hiddenimports + 
+    docx_hiddenimports + 
+    convert_numbers_hiddenimports + 
+    aspose_words_hiddenimports
+)
 
 # Datas list - specify the images folder and any other required files
 # We use "." to specify the current working directory, and we tell PyInstaller to place them in the same directory as the .exe
 datas = [
     ('images', './images'),  # Moves 'images' folder to the .exe path
-    ('icons', './icons'),   # Moves 'icons' folder to the .exe path
+    ('icons', './icons'),    # Moves 'icons' folder to the .exe path
     ('app.db', './app.db'),  # Moves 'app.db' to the .exe path
 ]
 

@@ -21,13 +21,10 @@ import shutil
 import ctypes
 import pyautogui
 import time
-# from PyPDF2 import PdfMerger
-from contextlib import contextmanager
 import convert_numbers
 import aspose.words as aw
-import subprocess
 
-# from docx2pdf import convert
+
 
 
 
@@ -77,6 +74,7 @@ if is_admin():
             super().__init__()
             self.setWindowTitle('Report Editor')
             self.setGeometry(100, 100, 1200, 800)
+            self.setWindowIcon(QIcon('icons/icon.ico'))
             self.initUI()
             self.show()
         # Init App Variables
@@ -89,7 +87,7 @@ if is_admin():
             self.ableBenefits= False
             self.ableCount= False
             self.countPic = 0
-            self.secretLittleThing = ""            
+            self.secretLittleThing = ""
             global yForImpo
             global xForImpo
             yForImpo = 50
@@ -154,8 +152,6 @@ if is_admin():
 
             self.hidderFramePicshow = ClickableQFrame(self.hiderFrameshow)
             self.hidderFramePicshow.setStyleSheet(f"background-color:#EBEAE9;")
-            # self.hidderFramePicshow.setGeometry(40,5,250,130)
-
             self.hidderlayoutPicshow = QVBoxLayout()
             self.hidderFramePicshow.setLayout(self.hidderlayoutPicshow)
                                                 
@@ -275,20 +271,7 @@ if is_admin():
             splitter.addWidget(Gridlayout_widget)
             self.setCentralWidget(splitter) 
 
-                
-        # #Deal With Errors
-        # @contextmanager
-        # def suppress_output(self):
-        #     with open(os.devnull,"w") as devnull:
-        #         old_stdout = sys.stdout
-        #         old_stderr = sys.stderr
-        #         sys.stdout = devnull
-        #         sys.stderr = devnull
-        #     try:
-        #         yield
-        #     finally:
-        #         sys.stdout = old_stdout
-        #         sys.stderr = old_stderr
+            
 
         def openwebSite(self):
             webbrowser.open('https://www.ersal-m.com', new=2)
@@ -303,7 +286,7 @@ if is_admin():
 
             if not  database_name:
                 return
-
+            
             # Open a dialog to select a directory
             filePath = QFileDialog.getExistingDirectory(self.windowCreating, "اختار مسارا", desktopPath)
             if len(filePath) > 0:
@@ -332,14 +315,12 @@ if is_admin():
               d.setWindowTitle("نجاح")
               d.setIcon(QMessageBox.Icon.Information)
               d.exec()
-        
+              
               # Create a layout and add a label for the message
               layout = QVBoxLayout()
               layout.addWidget(QLabel(f"تم تصدير قاعدة البيانات '{database_name}' بنجاح"))
-
               # Set layout margins (top, left, bottom, right)
               layout.setContentsMargins(20, 20, 20, 20)  # Adjust margins as needed
-            
 
             except Exception as e:
               QMessageBox.critical(self, "فشل الاضافه: {str(e)}")
@@ -374,7 +355,6 @@ if is_admin():
                         d.setIcon(QMessageBox.Icon.Information)
                         d.exec()
                         os.execv(sys.executable, ['python'] + sys.argv)
-    
                         app.closeAllWindows()
                     else:
                         raise Exception("notUseAble")
@@ -384,6 +364,7 @@ if is_admin():
                     d.setWindowTitle("ERROR")
                     d.setIcon(QMessageBox.Icon.Critical)
                     d.exec()
+
         #Functions To Get Saved Reports
         def savedReportsFun(self):
             self.windowSaved = Choices()
@@ -448,6 +429,7 @@ if is_admin():
                 else:
                     self.savedReports.hideRow(row)
                 self.load_data()
+
         # Function To Create New Report 
         def createReportFun(self):                    
             self.windowCreate = Choices()
@@ -480,16 +462,15 @@ if is_admin():
             self.windowControl.setWindowIcon(QIcon("icons/icon.ico"))
             self.picPathMinLogo = ""
             self.picBinaryMinLogo = ""
-            
             layout = QVBoxLayout()
-            self.windowControl.setLayout(layout)
 
+            self.windowControl.setLayout(layout)
             self.lineone = QLineEdit(self.windowControl)
             Label1 = QLabel("الترويسة الأولى",self.windowControl)
             Label1.setFont(QFont("Normal",15))
             Label1.move(198,10)
             self.lineone.setGeometry(7,40,290,30)
-            
+
             self.linetwo = QLineEdit(self.windowControl)
             Label2 = QLabel("الترويسة الثانية",self.windowControl)
             Label2.setFont(QFont("Normal",15))
@@ -529,7 +510,6 @@ if is_admin():
             specialButtonS.clicked.connect(self.addPicLogo)
             specialButtonS.setGeometry(130,490,30,30)
 
-
             self.SaveButton = QPushButton("حفظ",self.windowControl)
             self.SaveButton.setGeometry(55,530,200,30)
 
@@ -551,14 +531,12 @@ if is_admin():
                 self.picPathMinLogo = responce[0]
 
                 finalImage = image.resize((250,170))
-
                 finalImage.save("logo_image.png",quality=100)
 
                 with open("logo_image.png","rb") as temp_binary:
                     binaryCode12 = temp_binary.read()
 
                 self.picBinaryMinLogo = binaryCode12
-
                 picLabel = QLabel(self.FrameMin)
                 pix = QPixmap("logo_image.png")
                 picLabel.setPixmap(pix)
@@ -680,7 +658,7 @@ if is_admin():
             Frame_text = QFrame(self.hiderFrameshow)
             Frame_text.setStyleSheet("background-color: white")
             Frame_text.setGeometry(655,0,250,140)
-
+            
             text_layout = QVBoxLayout(Frame_text)
 
             Frame_text.setLayout(text_layout)
@@ -887,8 +865,7 @@ if is_admin():
             self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
             self.scroll.setWidgetResizable(True)
             self.scroll.setWidget(report_widget)
-             
-              
+                           
             Gridlayout_widget = QWidget()
             # Create a grid layout
             Gridlayout = QGridLayout()
@@ -896,7 +873,6 @@ if is_admin():
             # Add buttons to the layout at row 0, and columns 0, 1, and 2      
             Gridlayout.addWidget(self.scroll,0, 0)
             Gridlayout.addWidget(button_list_widget,0, 1)
-           
             # Align the buttons to expand vertically (row stretch)
             Gridlayout.setRowStretch(0, 1)
             splitter = QSplitter(Qt.Orientation.Horizontal, self.windowCreating )            
@@ -946,7 +922,6 @@ if is_admin():
             hidderlayoutPicshow = QVBoxLayout()
             hidderFramePicshow.setLayout(hidderlayoutPicshow)
             
-            
             Frame_text = QFrame(hiderFrameshow)
             Frame_text.setStyleSheet("background-color: white")
             Frame_text.setGeometry(655, 0, 250, 140)
@@ -973,12 +948,10 @@ if is_admin():
 
             cFrameshow = QFrame(right_frame)
             cFrameshow.setStyleSheet("background-color: white")
-                                 
             # Create the main layout for the windowCreating widget
             layout = QVBoxLayout(self.windowshow)
             layout.addWidget(right_frame)
             self.windowshow.setLayout(layout)
-            
             
             # Set the central widget and layout
             def createNamePrograme():
@@ -993,11 +966,9 @@ if is_admin():
                 
 
                 programeNameE = QTextEdit(cFrameshow)
-                programeNameE.setGeometry(0,0,565,35)
-    
+                programeNameE.setGeometry(0,0,565,35)    
                 programeNameE.setAlignment(Qt.AlignmentFlag.AlignLeft)
                 programeNameE.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-                
                 programeNameE.setFont(QFont("Arial",14))
                 programeNameE.move(135,yForImpo)
 
@@ -1014,7 +985,6 @@ if is_admin():
                 programeGoalsEName.setText("\n\n  الاهداف ")
                 programeGoalsEName.setGeometry(0,0,100,110)
                 programeGoalsEName.setStyleSheet("background-color: #2ABCB5")
-
                 programeGoalsEName.setFont(QFont("Arial",15))
                 programeGoalsEName.setDisabled(True)
                 programeGoalsEName.move(700,yForImpo)
@@ -1037,7 +1007,6 @@ if is_admin():
                 programeDescriptionEName.setText("\n\n  الوصف ")
                 programeDescriptionEName.setGeometry(0,0,100,110)
                 programeDescriptionEName.setStyleSheet("background-color: #2ABCB5")
-
                 programeDescriptionEName.setFont(QFont("Arial",15))
                 programeDescriptionEName.setDisabled(True)
                 programeDescriptionEName.move(700,yForImpo)
@@ -1059,7 +1028,6 @@ if is_admin():
                 programeCreatorEName.setText("المنفذ")
                 programeCreatorEName.setGeometry(0,0,100,35)
                 programeCreatorEName.setStyleSheet("background-color: #2ABCB5")
-
                 programeCreatorEName.setFont(QFont("Arial",15))
                 programeCreatorEName.setDisabled(True)
                 programeCreatorEName.move(700,yForImpo)
@@ -1082,7 +1050,6 @@ if is_admin():
                 programeWhenDateEName.setText("تاريخ التنفيذ")
                 programeWhenDateEName.setGeometry(0,0,100,35)
                 programeWhenDateEName.setStyleSheet("background-color: #2ABCB5")
-
                 programeWhenDateEName.setFont(QFont("Arial",15))
                 programeWhenDateEName.setDisabled(True)
                 programeWhenDateEName.move(700,yForImpo)
@@ -1090,7 +1057,6 @@ if is_admin():
                 programeWhenDateE = QTextEdit(cFrameshow)
                 programeWhenDateE.setGeometry(10,10,565,35)
                 programeWhenDateE.setAlignment(Qt.AlignmentFlag.AlignLeft)
-
                 programeWhenDateE.setFont(QFont("Arial",14))
                 programeWhenDateE.move(135,yForImpo)
                 yForImpo+=35
@@ -1105,7 +1071,6 @@ if is_admin():
                 programeBenefitsEName.setText("المستفيدون")
                 programeBenefitsEName.setGeometry(0,0,100,30)
                 programeBenefitsEName.setStyleSheet("background-color: #2ABCB5")
-
                 programeBenefitsEName.setFont(QFont("Arial",13))
                 programeBenefitsEName.setDisabled(True)
                 programeBenefitsEName.move(700,yForImpo)
@@ -1223,7 +1188,6 @@ if is_admin():
                         hidderlayoutPicshow.addWidget(picLabel)
 
  
- 
             numberOfPictures = -1                
             if programeNameShow !="":               
                 cr.execute(f"SELECT * FROM reports WHERE id = '{programeNameShow}'")
@@ -1311,9 +1275,7 @@ if is_admin():
             scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             scroll.setWidgetResizable(True)            
             scroll.setWidget(right_frame)
-            
-            layout.addWidget(scroll)
-                                            
+            layout.addWidget(scroll)                                            
             self.windowshow.show()
 
         # Function To Generate Summary For Reports
@@ -1517,6 +1479,7 @@ if is_admin():
             SaveButton.setFont(QFont("Arial",15))
             SaveButton.move(20,130)
             self.saveProgrameWindow.show()
+
         def CreatePic(self,Count):
             x = 100
             y = 440
@@ -1573,8 +1536,7 @@ if is_admin():
                     self.picLogoBinary = binaryCode12
                     picLabel = QLabel(self.hidderFramePicshow)
                     pix = QPixmap("reportheaderimage.png")
-                    picLabel.setPixmap(pix)
-                    
+                    picLabel.setPixmap(pix)        
                     for i in reversed(range(self.hidderlayoutPicshow.count())): 
                         self.hidderlayoutPicshow.itemAt(i).widget().setParent(None)
 
@@ -1704,7 +1666,6 @@ if is_admin():
             programeName.setText("\n\n  الوصف ")
             programeName.setGeometry(0,0,100,110)
             programeName.setStyleSheet("background-color: #2ABCB5")
-
             programeName.setFont(QFont("Arial",15))
             programeName.setDisabled(True)
             programeName.move(700,yForImpo)
@@ -1952,10 +1913,24 @@ if is_admin():
 
         def writeWord(self,fromWhere="Word"):            
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
+                
             if len(FileNameSave[0])>0:
                 folder = (str(FileNameSave[0]).split(f"/"))
                 nameFile = folder[-1]
                 folderFinle = "/".join(folder[:-1])
+                pdfname= nameFile+".pdf"
+                destination_path=f"{folderFinle}/{pdfname}"
+
+                # Check if a file with the same name already exists
+                if os.path.exists(destination_path):
+                    confirm = QMessageBox.question(
+                    self,
+                    "تنبيه",
+                    f"الملف موجود بالفعل هل تريد اعادة انشائه؟",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    )
+                    if confirm == QMessageBox.StandardButton.No:
+                       return  # User chose not to overwrite the 
                 doc = docx.Document()
                 sections = doc.sections
                 for section in sections:
@@ -2214,7 +2189,6 @@ if is_admin():
                             final_text.append(i)
 
                     programeWhenDateTable = doc.add_table(rows=1,cols=2)
-
                     programeWhenDateTable.style = "Table Grid"
                     hdr_Cells = programeWhenDateTable.rows[0].cells
                     hdr_Cells[1].text = "تاريخ التنفيذ"
@@ -2395,19 +2369,28 @@ if is_admin():
                         while name3 in subFilesD:
                             name3 = f"({i}) {name3}"
                             i+=1
-                    #ToDo 
-                    
-                    in_file = f"{folderFinle}/{name2}"
-                    out_file = f"{folderFinle}/{name3}"
-                    doc = aw.Document(in_file)
-                    doc.save("tempHtml/index.html")
-                    try:
-                        subprocess.run(['wkhtmltopdf', '--enable-local-file-access',"tempHtml/index.html",out_file], check=True)
-                        print("Successfully converted HTML to PDF.")
-                    except subprocess.CalledProcessError as e:
-                        print(f"An error occurred during PDF conversion: {e}")
 
-                    os.remove(f"{folderFinle}/{name2}")
+                    # This method has limit in its free plan
+                    try:
+                        in_file = f"{folderFinle}/{name2}"
+                        out_file = f"{folderFinle}/{name3}"
+                        doc = aw.Document(in_file)
+                        doc.save(out_file)
+                        os.remove(f"{folderFinle}/{name2}")
+                    except:
+                        d = QMessageBox(parent=self.windowCreating) 
+                        d.setWindowTitle("فشل") 
+                        d.setText("حدث خطأ حاول مره أخرى") 
+                        d.setIcon(QMessageBox.Icon.Warning) 
+                        d.exec()  
+
+                    # In this method you to download "wkhtmltopdf" 
+                    # try:
+                    #     subprocess.run(['wkhtmltopdf', '--enable-local-file-access',"tempHtml/index.html",out_file], check=True)
+                    #     print("Successfully converted HTML to PDF.")
+                    # except subprocess.CalledProcessError as e:
+                    #     print(f"An error occurred during PDF conversion: {e}")
+                    
                 d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
                 d.setWindowTitle("نجاح")
                 d.setIcon(QMessageBox.Icon.Information)
@@ -2603,9 +2586,7 @@ if is_admin():
                     else:
                         final_text.append(i)
 
-
                 programeDescriptionTable = doc.add_table(rows=1,cols=2)
-
                 programeDescriptionTable.style = "Table Grid"
                 hdr_Cells = programeDescriptionTable.rows[0].cells
                 hdr_Cells[1].text = "\t\tالوصف"
@@ -2649,7 +2630,6 @@ if is_admin():
 
 
                 programeCreatorTable = doc.add_table(rows=1,cols=2)
-
                 programeCreatorTable.style = "Table Grid"
                 hdr_Cells = programeCreatorTable.rows[0].cells
 
@@ -2855,14 +2835,23 @@ if is_admin():
 
             doc.save("printFile.docx")
 
-            printdoc = aw.Document("printFile.docx")
-            printdoc.save("tempPdf/osmanramadan.html")
 
             try:
-               subprocess.run(['wkhtmltopdf', '--enable-local-file-access', 'tempPdf/osmanramadan.html', "printFile.pdf"], check=True)
-               print("Successfully converted HTML to PDF.")
-            except subprocess.CalledProcessError as e:
-               print(f"An error occurred during PDF conversion: {e}")
+                # This method has limit in its free plan
+                doc = aw.Document("printFile.docx")
+                doc.save("printFile.pdf")
+            except:
+                d = QMessageBox(parent=self.windowCreating) 
+                d.setWindowTitle("فشل") 
+                d.setText("حدث خطأ حاول مره أخرى") 
+                d.setIcon(QMessageBox.Icon.Warning) 
+                d.exec()  
+
+            # try:
+            #    subprocess.run(['wkhtmltopdf', '--enable-local-file-access', 'tempPdf/osmanramadan.html', "printFile.pdf"], check=True)
+            #    print("Successfully converted HTML to PDF.")
+            # except subprocess.CalledProcessError as e:
+            #    print(f"An error occurred during PDF conversion: {e}")
             os.remove("printFile.docx")
             
             try:
@@ -2873,10 +2862,13 @@ if is_admin():
                 os.remove("secretThing.png")
             except:
                 pass
-            webbrowser.open("printFile.pdf", new=2)
 
-            time.sleep(5)
-            pyautogui.hotkey("ctrl","p")
+            try:
+                webbrowser.open("printFile.pdf", new=2)
+                time.sleep(5)
+                pyautogui.hotkey("ctrl","p")
+            except:
+                pass
 
         # Function To Get Summary Of Exist Reports
         def exportAllSummaryReports(self):
@@ -2990,8 +2982,7 @@ if is_admin():
                 runCells.add_text("\t")
             else:
                 runCells.add_text("\t\t\t\t\t")
-
-            xsaw = runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
+                runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
 
             for row in headers_table.rows:
                 for cell in row.cells:
@@ -3020,7 +3011,6 @@ if is_admin():
 
 
                 programeNameProgrameTable = doc.add_table(rows=1,cols=2)
-
                 programeNameProgrameTable.style = "Table Grid"
                 hdr_Cells = programeNameProgrameTable.rows[0].cells
                 hdr_Cells[1].text = "اسم البرنامج"
@@ -3064,7 +3054,6 @@ if is_admin():
                         final_text.append(i)
 
                 programeGolasTable = doc.add_table(rows=1,cols=2)
-
                 programeGolasTable.style = "Table Grid"
                 hdr_Cells = programeGolasTable.rows[0].cells
                 hdr_Cells[1].text = "\t\tالأهداف"
@@ -3108,7 +3097,6 @@ if is_admin():
                         final_text.append(i)
 
                 programeDescriptionTable = doc.add_table(rows=1,cols=2)
-
                 programeDescriptionTable.style = "Table Grid"
                 hdr_Cells = programeDescriptionTable.rows[0].cells
                 hdr_Cells[1].text = "\t\tالوصف"
@@ -3499,15 +3487,25 @@ if is_admin():
                             name = f"({i}) {name}"
                             i+=1
 
-                    in_file = f"{folderFinle}/{name}"
-                    out_file = f"{folderFinle}/{pdfname}"
-                    doc = aw.Document(in_file)
-                    doc.save("tempHtml/index.html")
+                    # This method has limit in its free plan
+
                     try:
-                        subprocess.run(['wkhtmltopdf', '--enable-local-file-access',"tempHtml/index.html",out_file], check=True)
-                        print("Successfully converted HTML to PDF.")
-                    except subprocess.CalledProcessError as e:
-                        print(f"An error occurred during PDF conversion: {e}")
+                        in_file = f"{folderFinle}/{name}"
+                        out_file = f"{folderFinle}/{pdfname}"
+                        doc = aw.Document(in_file)
+                        doc.save(out_file)
+                    except:
+                        d = QMessageBox(parent=self.windowCreating)  # Set the parent to self.windowCreating
+                        d.setWindowTitle("فشل")  # Set the title for the warning message box
+                        d.setText("حدث خطأ حاول مرة أخرى")  # Set the warning message text
+                        d.setIcon(QMessageBox.Icon.Warning)  # Set the icon to Warning
+                        d.exec()  # Execute the dialog to show it
+
+                    # try:
+                    #     subprocess.run(['wkhtmltopdf', '--enable-local-file-access',"tempHtml/index.html",out_file], check=True)
+                    #     print("Successfully converted HTML to PDF.")
+                    # except subprocess.CalledProcessError as e:
+                    #     print(f"An error occurred during PDF conversion: {e}")
 
                     os.remove(f"{folderFinle}/{name}")
 
@@ -3546,7 +3544,6 @@ if is_admin():
         def load_data(self):
             # Clear current items
             self.listWidget.clear()
-
             # Execute the query to fetch reports
             cr.execute("SELECT id, reportName FROM reports")
             for i in cr.fetchall():
@@ -3575,7 +3572,6 @@ if is_admin():
                 list_item = QListWidgetItem(self.listWidget)
                 list_item.setSizeHint(item_widget.sizeHint())  # Adjust size based on widget
                 list_item.setData(Qt.ItemDataRole.UserRole, i[0])  # Store report ID
-
                 self.listWidget.addItem(list_item)
                 self.listWidget.setItemWidget(list_item, item_widget)
                   

@@ -1,10 +1,9 @@
 # Import Required libraries
 from PyQt6.QtWidgets import QGridLayout, QHBoxLayout, QApplication , QListWidgetItem, QListWidget,QSplitter,QWidget,QVBoxLayout,QPushButton,QLineEdit,QLabel,QMessageBox,QItemDelegate, \
-QTextEdit,QFrame,QFileDialog,QScrollArea,QMainWindow,QTableWidget,QTableWidgetItem,QRadioButton,QProgressBar
+QTextEdit,QFrame,QFileDialog,QScrollArea,QMainWindow,QTableWidget,QTableWidgetItem,QRadioButton,QProgressBar,QLabel,QInputDialog
 from PyQt6.QtGui import QIcon,QFont,QPixmap
 from PyQt6 import uic
-from PyQt6.QtCore import Qt,pyqtSignal,QStandardPaths
-from PyQt6.QtWidgets import QFileDialog, QInputDialog,QMessageBox, QVBoxLayout, QLabel, QWidget,QApplication
+from PyQt6.QtCore import Qt,pyqtSignal
 
 import sqlite3
 import sys
@@ -128,8 +127,8 @@ if is_admin():
             addButton("images/summary.png", "ملخص التقارير", self.summaryReports)
             addButton("images/printer.png", "الطباعة", self.printDoc)
             addButton("images/control.png", "لوحة التحكم", self.controlPanel)
-            addButton("images/dbExport.png", "تصدير", self.exportDb)
-            addButton("images/importDb.png", "إستيراد", self.importDb)
+            addButton("images/dbExport.png", "تصدير قاعدة البيانات" , self.exportDb)
+            addButton("images/importDb.png", "إستيراد قاعدة البيانات", self.importDb)
             addButton("images/word.png", "word حفظ بصيغة", self.writeWord)
             addButton("images/pdfIcon.png", "pdf حفظ بصيغة", lambda x, y="Pdf": self.writeWord(y))
 
@@ -152,6 +151,9 @@ if is_admin():
 
             self.hidderFramePicshow = ClickableQFrame(self.hiderFrameshow)
             self.hidderFramePicshow.setStyleSheet(f"background-color:#EBEAE9;")
+
+            self.hidderFramePicshow.setGeometry(40,5,250,130)
+
             self.hidderlayoutPicshow = QVBoxLayout()
             self.hidderFramePicshow.setLayout(self.hidderlayoutPicshow)
                                                 
@@ -186,6 +188,8 @@ if is_admin():
             text_layout.addWidget(Label3)
 
             cr.execute("SELECT line4 FROM start")
+
+            
             Label4 = QLabel(cr.fetchone()[0])
             text_layout.addWidget(Label4)
 
@@ -239,7 +243,7 @@ if is_admin():
             
             # Connect double-click event to open the report
             self.listWidget.itemDoubleClicked.connect(self.onItemDoubleClicked)
-            layout_widget.setMinimumWidth(200)
+            layout_widget.setMinimumWidth(330)
                                     
             
             self.scroll = QScrollArea()
@@ -278,33 +282,23 @@ if is_admin():
 
         # export current database
         def exportDb(self):
-            # Get the user's desktop path
-            desktopPath = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation)
 
-            # Prompt the user for the database name
-            database_name, ok = QInputDialog.getText(self.windowCreating, "اكتب قاعدة البيانات", "اكتب اسم قاعدة البيانات:")
-
-            if not  database_name:
-                return
-            
-            # Open a dialog to select a directory
-            filePath = QFileDialog.getExistingDirectory(self.windowCreating, "اختار مسارا", desktopPath)
-            if len(filePath) > 0:
-              # Construct the full path for the new database file
-              destination_path = os.path.join(filePath, database_name)
-            else:
-                return
-
-            # Check if a file with the same name already exists
-            if os.path.exists(destination_path):
-             confirm = QMessageBox.question(
-                self,
-                "تنبيه",
-                f"الملف موجود بالفعل هل تريد اعادة انشائه؟",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-             )
-             if confirm == QMessageBox.StandardButton.No:
-                return  # User chose not to overwrite the file
+            FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)    
+            if len(FileNameSave[0])>0:
+                folder = (str(FileNameSave[0]).split(f"/"))
+                nameFile = folder[-1]
+                folderFinle = "/".join(folder[:-1])
+                database_name= nameFile+".db"
+                destination_path=f"{folderFinle}/{database_name}"
+                if os.path.exists(destination_path):
+                    confirm = QMessageBox.question(
+                       self,
+                      "تنبيه",
+                      f"الملف موجود بالفعل هل تريد اعادة انشائه؟",
+                      QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                      )
+                    if confirm == QMessageBox.StandardButton.No:
+                        return 
 
             try:
               # Copy the database file to the specified location with the new name
@@ -315,13 +309,8 @@ if is_admin():
               d.setWindowTitle("نجاح")
               d.setIcon(QMessageBox.Icon.Information)
               d.exec()
-              
-              # Create a layout and add a label for the message
-              layout = QVBoxLayout()
-              layout.addWidget(QLabel(f"تم تصدير قاعدة البيانات '{database_name}' بنجاح"))
-              # Set layout margins (top, left, bottom, right)
-              layout.setContentsMargins(20, 20, 20, 20)  # Adjust margins as needed
 
+             
             except Exception as e:
               QMessageBox.critical(self, "فشل الاضافه: {str(e)}")
 
@@ -358,7 +347,7 @@ if is_admin():
                         app.closeAllWindows()
                     else:
                         raise Exception("notUseAble")
-                except:
+                except Exception as e:
                     self.con1.close()
                     d = QMessageBox(parent=self.windowCreating,text="قاعدة البيانات غير صالحة")
                     d.setWindowTitle("ERROR")
@@ -402,7 +391,7 @@ if is_admin():
             createButton.clicked.connect(lambda:self.creating(str(i[0])))
             createButton.setStyleSheet("background-color:green")
             createButton.setGeometry(150,460,150,30)
-            extractAllButton = QPushButton("تصدير جميع التقارير",self.windowSaved)
+            extractAllButton = QPushButton("word تصدير",self.windowSaved)
             extractAllButton.clicked.connect(self.exportAllSummaryReports)
             extractAllButton.setStyleSheet("background-color:green")
             extractAllButton.setGeometry(320,460,160,30)
@@ -620,8 +609,8 @@ if is_admin():
             addButton("images/summary.png", "ملخص التقارير", self.summaryReports)
             addButton("images/printer.png", "الطباعة", self.printDoc)
             addButton("images/control.png", "لوحة التحكم", self.controlPanel)
-            addButton("images/dbExport.png", "تصدير", self.exportDb)
-            addButton("images/importDb.png", "إستيراد", self.importDb)
+            addButton("images/dbExport.png", "قاعدة البيانات", self.exportDb)
+            addButton("images/importDb.png", "إستيراد قاعدة البيانات", self.importDb)
             addButton("images/word.png", "word حفظ بصيغة", self.writeWord)
             addButton("images/pdfIcon.png", "pdf حفظ بصيغة", lambda x, y="Pdf": self.writeWord(y))
             
@@ -649,6 +638,12 @@ if is_admin():
             specialButton = QPushButton(self.hiderFrameshow)
             specialButton.setIcon(QIcon("images/cam.png"))
             specialButton.clicked.connect(lambda:self.putImage(f"ReportCover"))
+            
+            logoLabel = QLabel(self.hiderFrameshow)
+            logoLabel.move(350,10)
+            pix = QPixmap("images/logo.png")
+            logoLabel.setPixmap(pix)
+
             specialButton.move(290,65)
             DeleteButtonHidder = QPushButton(self.hiderFrameshow)
             DeleteButtonHidder.setStyleSheet(f"Qproperty-icon:url(images/trashicon.png);qproperty-iconSize:15px 15px;background-color:rgb(253, 253, 253)")
@@ -842,7 +837,7 @@ if is_admin():
             self.cFrameshow.setGeometry(0,145,900,1150)
             
             layout_widget = QWidget(self.windowCreating)
-            layout_widget.setMaximumWidth(240)
+            layout_widget.setMaximumWidth(330)
             
             # Create a vertical layout to hold the header label and the list widget
             layout = QVBoxLayout()                        
@@ -1280,6 +1275,7 @@ if is_admin():
 
         # Function To Generate Summary For Reports
         def summaryReports(self):
+
             self.windowsummary = Choices()
             self.windowsummary.resize(720,500)
             self.windowsummary.setWindowTitle(title)
@@ -1311,7 +1307,7 @@ if is_admin():
             self.TableSummary.setGeometry(0,0,720,470)
             self.TableSummary.cellDoubleClicked.connect(self.zoomSumarry)
             
-            self.pdfExport = QPushButton("Pdf تصدير",self.windowsummary,clicked=lambda:self.exportSummaryScreen("Pdf"))
+            self.pdfExport = QPushButton("Pdf تصدير",self.windowsummary,clicked=lambda:self.exportSummaryScreen(fromWhere="Pdf"))
             self.pdfExport.setStyleSheet("background-color:red;font-size:20px")
             self.pdfExport.setGeometry(0,470,360,30)
             self.WordExport = QPushButton("Word تصدير",self.windowsummary,clicked=self.exportSummaryScreen)
@@ -1509,6 +1505,7 @@ if is_admin():
                 self.buttons.append(button)
                 self.buttons[i].move(buttonx+tempvar.width()//2 - 10,buttony+tempvar.height())
                 self.buttons[i].setIcon(QIcon("images/cam.png"))
+                
                 self.buttons[i].setObjectName(f"{i}")
                 self.buttons[i].clicked.connect(lambda ch,i=i:self.putImage(f"{i}"))
 
@@ -1919,18 +1916,19 @@ if is_admin():
                 nameFile = folder[-1]
                 folderFinle = "/".join(folder[:-1])
                 pdfname= nameFile+".pdf"
-                destination_path=f"{folderFinle}/{pdfname}"
-
-                # Check if a file with the same name already exists
-                if os.path.exists(destination_path):
-                    confirm = QMessageBox.question(
-                    self,
-                    "تنبيه",
-                    f"الملف موجود بالفعل هل تريد اعادة انشائه؟",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                    )
-                    if confirm == QMessageBox.StandardButton.No:
-                       return  # User chose not to overwrite the 
+                
+                if fromWhere=="Pdf":
+                    destination_path=f"{folderFinle}/{pdfname}"
+                    # Check if a file with the same name already exists
+                    if os.path.exists(destination_path):
+                        confirm = QMessageBox.question(
+                        self,
+                        "تنبيه",
+                        f"الملف موجود بالفعل هل تريد اعادة انشائه؟",
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                        )
+                        if confirm == QMessageBox.StandardButton.No:
+                          return  # User chose not to overwrite the 
                 doc = docx.Document()
                 sections = doc.sections
                 for section in sections:
@@ -1973,6 +1971,13 @@ if is_admin():
                 hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
                 cr.execute("SELECT line4 FROM start")
                 hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
+                
+                logoLabel = QLabel(self.hiderFrameshow)
+                logoLabel.move(350,10)
+
+                pix = QPixmap("images/logo.png")
+                logoLabel.setPixmap(pix)
+                
                 widths = (docx.shared.Inches(5.8),docx.shared.Inches(3))
                 for row in headers_table.rows:
                     for idx, width in enumerate(widths):
@@ -2384,12 +2389,6 @@ if is_admin():
                         d.setIcon(QMessageBox.Icon.Warning) 
                         d.exec()  
 
-                    # In this method you to download "wkhtmltopdf" 
-                    # try:
-                    #     subprocess.run(['wkhtmltopdf', '--enable-local-file-access',"tempHtml/index.html",out_file], check=True)
-                    #     print("Successfully converted HTML to PDF.")
-                    # except subprocess.CalledProcessError as e:
-                    #     print(f"An error occurred during PDF conversion: {e}")
                     
                 d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
                 d.setWindowTitle("نجاح")
@@ -2847,11 +2846,6 @@ if is_admin():
                 d.setIcon(QMessageBox.Icon.Warning) 
                 d.exec()  
 
-            # try:
-            #    subprocess.run(['wkhtmltopdf', '--enable-local-file-access', 'tempPdf/osmanramadan.html', "printFile.pdf"], check=True)
-            #    print("Successfully converted HTML to PDF.")
-            # except subprocess.CalledProcessError as e:
-            #    print(f"An error occurred during PDF conversion: {e}")
             os.remove("printFile.docx")
             
             try:
@@ -2965,6 +2959,8 @@ if is_admin():
             heights = (docx.shared.Inches(1.1),docx.shared.Inches(1.1))
             for idx,row in enumerate(headers_table.rows):
                 row.height = heights[idx]
+
+            
 
             paragraph12322 =hdr_Cells[1].paragraphs[0]
             run = paragraph12322.runs
@@ -3406,6 +3402,9 @@ if is_admin():
  
             name = str(idFun)+".docx"
             doc.save(f"{folder_path}/{name}")
+        
+        
+
 
         #Function To Obtain Summary Of Reports
         def exportSummaryScreen(self,fromWhere="Word"):
@@ -3488,7 +3487,6 @@ if is_admin():
                             i+=1
 
                     # This method has limit in its free plan
-
                     try:
                         in_file = f"{folderFinle}/{name}"
                         out_file = f"{folderFinle}/{pdfname}"
@@ -3501,11 +3499,6 @@ if is_admin():
                         d.setIcon(QMessageBox.Icon.Warning)  # Set the icon to Warning
                         d.exec()  # Execute the dialog to show it
 
-                    # try:
-                    #     subprocess.run(['wkhtmltopdf', '--enable-local-file-access',"tempHtml/index.html",out_file], check=True)
-                    #     print("Successfully converted HTML to PDF.")
-                    # except subprocess.CalledProcessError as e:
-                    #     print(f"An error occurred during PDF conversion: {e}")
 
                     os.remove(f"{folderFinle}/{name}")
 
@@ -3519,7 +3512,7 @@ if is_admin():
                 self.sender().objectName()
                 event.accept()
             except:
-                reply = QMessageBox()
+                reply = QMessageBox(self.windowCreating)
                 reply.setWindowTitle("تأكيد حفظ")
                 reply.setText("هل تريد حفظ التقرير")
 
@@ -3592,4 +3585,3 @@ if is_admin():
         
 else:
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
-

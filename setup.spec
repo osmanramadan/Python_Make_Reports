@@ -5,26 +5,32 @@ import os
 # Define the main Python file to execute
 main_file = "main.py"
 
-# PyQt6: Selectively import submodules that are actually needed
+# PyQt6: Import submodules needed
 pyqt6_hiddenimports = collect_submodules('PyQt6.QtWidgets') + \
                       collect_submodules('PyQt6.QtGui') + \
                       collect_submodules('PyQt6.QtCore')
 
-# Pillow (PIL): Only import necessary submodules and exclude unused plugins
+# Pillow (PIL): Only import necessary submodules
 pillow_hiddenimports = collect_submodules('PIL.Image') + \
                        collect_submodules('PIL.ImageOps')
 
-# Docx: Only import required submodules
+# Docx: Import required submodules
 docx_hiddenimports = collect_submodules('docx') + \
+                     collect_submodules('docx.enum') + \
+                     collect_submodules('docx.enum.section') + \
                      collect_submodules('docx.oxml.xmlchemy') + \
                      collect_submodules('docx.oxml.shared') + \
-                     collect_submodules('docx.enum.section')
+                     collect_submodules('docx.oxml.ns')
 
-# Aspose Words: Only import the required modules
-aspose_words_hiddenimports = collect_submodules('aspose.words')
 
 # convert_numbers: Only import needed modules
 convert_numbers_hiddenimports = collect_submodules('convert_numbers')
+
+# Mammoth: Import submodules for DOCX to HTML conversion
+mammoth_hiddenimports = collect_submodules('mammoth')
+
+# pyautogui: Import submodules for automation
+pyautogui_hiddenimports = collect_submodules('pyautogui')
 
 # Combine all hidden imports
 hidden_imports = (
@@ -32,12 +38,12 @@ hidden_imports = (
     pillow_hiddenimports + 
     docx_hiddenimports + 
     convert_numbers_hiddenimports + 
-    aspose_words_hiddenimports
+    mammoth_hiddenimports +
+    pyautogui_hiddenimports
 )
 
 # Exclude unused PyQt6 modules to reduce size
 excluded_modules = ['PyQt6.QtMultimedia', 'PyQt6.QtNetwork', 'PyQt6.QtQml']
-
 
 # Define the PyInstaller configuration
 a = Analysis(

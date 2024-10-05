@@ -21,9 +21,7 @@ import ctypes
 import pyautogui
 import time
 import convert_numbers
-import aspose.words as aw
-
-
+import mammoth
 
 
 
@@ -279,6 +277,84 @@ if is_admin():
 
         def openwebSite(self):
             webbrowser.open('https://www.ersal-m.com', new=2)
+
+        def convertWordToHtml(self,docx_file_path,html_output_path):
+ 
+            with open(docx_file_path, "rb") as docx_file:
+               result = mammoth.convert_to_html(docx_file)  # Convert to HTML
+               html_content = result.value  # Get the generated HTML content
+               html_content = html_content.replace("توثيق برنامج", "توثيق برنامج")
+               html_content = html_content.replace("توثيق برنامج", "<div style='font-size:20px;text-align: center;font-weight:bold'>توثيق برنامج</div>")
+               html_content = html_content.replace("المملكة العربية السعودية","المملكة العربية السعودية")
+               html_content = html_content.replace("المملكة العربية السعودية", "<div style='width:100%;font-size:20px;margin:0px;padding:0px;padding-right:180px;'>المملكة العربية السعودية</div>")
+
+               html_content = f"""
+                <!DOCTYPE html>
+                <html lang='ar' dir='ltr'>
+                 <head>
+                   <meta charset='UTF-8'>
+                <style>
+                body {{
+                  font-family: Cairo; /* Change font-family as needed */
+                  margin-left: 100px;
+                  margin-right:100px;
+                  padding: 20px;
+                  line-height: 1.6;
+                  background-color: #f9f9f9;
+                 }}
+                h1, h2, h3, h4, h5, h6 {{
+                text-align: right; 
+                color: #333; 
+                 }}
+                 p {{
+                text-align: right;
+                 margin: 0 0 10px 0;
+                }}
+               p:first-of-type {{
+    
+                font-weight: bold; 
+                font-size: 22px; 
+                }}
+            table {{
+             border-collapse: collapse;
+             width: 100%; 
+             margin: 20px 0;
+             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }}
+            th, td {{
+              border: 1px solid #ddd;
+              padding: 10px; /* Increased padding for better spacing */
+              text-align: right; /* Align text to the right for Arabic */
+             font-size: 20px; /* Adjust font size as needed */
+            }}
+            th {{ 
+             color: #333; /* Dark color for header text */
+             height: auto; /* Allow height to fit content */
+            }}
+            td:nth-child(2) {{
+              width: 100px; /* Set a fixed width for the first column */
+            }}
+            tr:nth-child(even) {{
+              background-color: #f9f9f9;
+            }}
+            tr:hover {{
+             background-color: #f1f1f1; 
+            }}
+            img{{
+             text-align:center
+            }}
+           </style>
+           </head>
+           <body>
+           {html_content}
+           </body>
+          </html>
+               """
+
+            with open(html_output_path, "w", encoding="utf-8") as output_file:
+               output_file.write(html_content)  
+
+
 
         # export current database
         def exportDb(self):
@@ -2357,37 +2433,40 @@ if is_admin():
                     for idx,row in enumerate(addmins_table.rows):
                         row.height = heights[idx]
                 subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".docx")]
-                name2 = nameFile+".docx"
-                if name2 in subFilesD:
+                docxname = nameFile+".docx"
+                if docxname in subFilesD:
                     i = 1
-                    while name2 in subFilesD:
-                        name2 = f"({i}) {name2}"
+                    while docxname in subFilesD:
+                        docxname = f"({i}) {docxname}"
                         i+=1
                 
-                doc.save(f"{folderFinle}/{name2}")
+                doc.save(f"{folderFinle}/{docxname}")
 
                 if fromWhere =="Pdf":
-                    subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".pdf")]
-                    name3 = nameFile+".pdf"
-                    if name3 in subFilesD:
+                    subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".html")]
+                    htmlname = nameFile+".html"
+                    if htmlname in subFilesD:
                         i = 1
-                        while name3 in subFilesD:
-                            name3 = f"({i}) {name3}"
+                        while htmlname in subFilesD:
+                            htmlname= f"({i}) {htmlname}"
                             i+=1
 
-                    # This method has limit in its free plan
                     try:
-                        in_file = f"{folderFinle}/{name2}"
-                        out_file = f"{folderFinle}/{name3}"
-                        doc = aw.Document(in_file)
-                        doc.save(out_file)
-                        os.remove(f"{folderFinle}/{name2}")
+                        in_file = f"{folderFinle}/{docxname}"
+                        out_file = f"{folderFinle}/{htmlname}"
+                        self.convertWordToHtml(in_file,out_file)
+                        webbrowser.open(out_file, new=2)
+                        time.sleep(2)
+                        pyautogui.hotkey("ctrl","p")
+                        
+                        os.remove(in_file)
                     except:
-                        d = QMessageBox(parent=self.windowCreating) 
-                        d.setWindowTitle("فشل") 
-                        d.setText("حدث خطأ حاول مره أخرى") 
-                        d.setIcon(QMessageBox.Icon.Warning) 
-                        d.exec()  
+                        d = QMessageBox(parent=self.windowCreating)  
+                        d.setWindowTitle("فشل")  
+                        d.setText("حدث خطأ حاول مرة أخرى")
+                        d.setIcon(QMessageBox.Icon.Warning)
+                        d.exec() 
+
 
                     
                 d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
@@ -2406,7 +2485,7 @@ if is_admin():
 
         def printDoc(self):
             try:
-                os.remove("printFile.pdf")
+                os.remove("printFile.html")
                 os.remove("printFile.docx")
             except:
                 pass
@@ -2833,18 +2912,19 @@ if is_admin():
                     row.height = heights[idx]
 
             doc.save("printFile.docx")
+            self.convertWordToHtml("printFile.docx","printFile.html")
 
 
-            try:
-                # This method has limit in its free plan
-                doc = aw.Document("printFile.docx")
-                doc.save("printFile.pdf")
-            except:
-                d = QMessageBox(parent=self.windowCreating) 
-                d.setWindowTitle("فشل") 
-                d.setText("حدث خطأ حاول مره أخرى") 
-                d.setIcon(QMessageBox.Icon.Warning) 
-                d.exec()  
+            # try:
+            #     # This method has limit in its free plan
+            #     doc = aw.Document("printFile.docx")
+            #     doc.save("printFile.pdf")
+            # except:
+            #     d = QMessageBox(parent=self.windowCreating) 
+            #     d.setWindowTitle("فشل") 
+            #     d.setText("حدث خطأ حاول مره أخرى") 
+            #     d.setIcon(QMessageBox.Icon.Warning) 
+            #     d.exec()  
 
             os.remove("printFile.docx")
             
@@ -2858,9 +2938,10 @@ if is_admin():
                 pass
 
             try:
-                webbrowser.open("printFile.pdf", new=2)
-                time.sleep(5)
+                webbrowser.open("printFile.html", new=2)
+                time.sleep(2)
                 pyautogui.hotkey("ctrl","p")
+                    
             except:
                 pass
 
@@ -3405,8 +3486,6 @@ if is_admin():
         
         
 
-
-        #Function To Obtain Summary Of Reports
         def exportSummaryScreen(self,fromWhere="Word"):
             
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
@@ -3478,26 +3557,38 @@ if is_admin():
                 doc.save(f"{folderFinle}/{name}")
 
                 if fromWhere =="Pdf":
-                    subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".pdf")]
-                    pdfname = nameFile+".pdf"
+                    subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".html")]
+                    htmlname = nameFile+".html"
                     if name in subFilesD:
                         i = 1
                         while name in subFilesD:
                             name = f"({i}) {name}"
                             i+=1
 
-                    # This method has limit in its free plan
                     try:
                         in_file = f"{folderFinle}/{name}"
-                        out_file = f"{folderFinle}/{pdfname}"
-                        doc = aw.Document(in_file)
-                        doc.save(out_file)
+                        out_file = f"{folderFinle}/{htmlname}"
+                        self.convertWordToHtml(in_file,out_file)
+                        webbrowser.open(out_file, new=2)
+                        time.sleep(2)
+                        pyautogui.hotkey("ctrl","p")
+                        time.sleep(2)  # Wait for the print dialog to open
+
+                        pyautogui.press("tab", presses=5, interval=0.5)  # Adjust number of presses based on the system
+                        pyautogui.press("down")  # Select "Save as PDF" option
+                        pyautogui.press("enter")  # Confirm selection  
+                        time.sleep(2)  # Wait for the save dialog to open
+                        pyautogui.write("output.pdf")
+                        pyautogui.press("enter")
+                        time.sleep(2)  # Wait for the PDF to be saved
+
+                        
                     except:
-                        d = QMessageBox(parent=self.windowCreating)  # Set the parent to self.windowCreating
-                        d.setWindowTitle("فشل")  # Set the title for the warning message box
-                        d.setText("حدث خطأ حاول مرة أخرى")  # Set the warning message text
-                        d.setIcon(QMessageBox.Icon.Warning)  # Set the icon to Warning
-                        d.exec()  # Execute the dialog to show it
+                        d = QMessageBox(parent=self.windowCreating)  
+                        d.setWindowTitle("فشل")  
+                        d.setText("حدث خطأ حاول مرة أخرى")
+                        d.setIcon(QMessageBox.Icon.Warning)
+                        d.exec() 
 
 
                     os.remove(f"{folderFinle}/{name}")

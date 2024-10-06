@@ -172,7 +172,7 @@
     <string notr="true">font: 16pt &quot;MS Shell Dlg 2&quot;;</string>
    </property>
    <property name="text">
-    <string>انشاء</string>
+    <string style="cursor: pointer;">انشاء</string>
    </property>
   </widget>
   <widget class="QComboBox" name="manyPic">

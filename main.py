@@ -31,7 +31,6 @@ import mammoth
 xForImpo = 900
 yForImpo = 0
 title = "موثق البرامج"
-
 desktopPath = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
 
 
@@ -110,12 +109,14 @@ if is_admin():
                                         font-size: 14px;
                                         qproperty-icon: url('{icon}');
                                         qproperty-iconSize: 25px 25px;
-                                        background-color: #2ABCB5;                                        
+                                        background-color: #2ABCB5;   
+                                        cursor: pointer !important;
                                         """
                                     )
                 button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
                 button.setMinimumHeight(40) 
                 button.clicked.connect(callback)           
+                button.setCursor(Qt.CursorShape.PointingHandCursor)
                 button_list_layout.addWidget(button)     
             # Add buttons to the layout instead of toolbar
             addButton("images/addNewreport.png", "إنشاء تقرير", self.createReportFun)
@@ -132,7 +133,8 @@ if is_admin():
 
             companyLogobutton = QPushButton()                
             companyLogobutton.setStyleSheet(f"font-size:14px;qproperty-icon:url('images/companyLogo.png');qproperty-iconSize:150px 100px;background-color:transparent;")   
-            companyLogobutton.clicked.connect(self.openwebSite)         
+            companyLogobutton.clicked.connect(self.openwebSite)     
+            companyLogobutton.setCursor(Qt.CursorShape.PointingHandCursor)    
             button_list_layout.addWidget(companyLogobutton) 
             report_widget = QWidget(self.windowCreating)
 
@@ -149,9 +151,8 @@ if is_admin():
 
             self.hidderFramePicshow = ClickableQFrame(self.hiderFrameshow)
             self.hidderFramePicshow.setStyleSheet(f"background-color:#EBEAE9;")
-
             self.hidderFramePicshow.setGeometry(40,5,250,130)
-
+            self.hidderFramePicshow.setCursor(Qt.CursorShape.PointingHandCursor)
             self.hidderlayoutPicshow = QVBoxLayout()
             self.hidderFramePicshow.setLayout(self.hidderlayoutPicshow)
                                                 
@@ -159,11 +160,13 @@ if is_admin():
             specialButton = QPushButton(self.hiderFrameshow)
             specialButton.setIcon(QIcon("images/cam.png"))
             specialButton.clicked.connect(lambda:self.putImage(f"ReportCover"))
+            specialButton.setCursor(Qt.CursorShape.PointingHandCursor)
             specialButton.move(290,65)
 
             DeleteButtonHidder = QPushButton(self.hiderFrameshow)
             DeleteButtonHidder.setStyleSheet(f"Qproperty-icon:url(images/trashicon.png);qproperty-iconSize:15px 15px;background-color:rgb(253, 253, 253)")
             DeleteButtonHidder.clicked.connect(lambda:self.deleteImagesTemp(f"ReportCover"))
+            DeleteButtonHidder.setCursor(Qt.CursorShape.PointingHandCursor)
             DeleteButtonHidder.move(290,90)
 
 
@@ -241,7 +244,8 @@ if is_admin():
             
             # Connect double-click event to open the report
             self.listWidget.itemDoubleClicked.connect(self.onItemDoubleClicked)
-            layout_widget.setMinimumWidth(330)
+            self.listWidget.setCursor(Qt.CursorShape.PointingHandCursor)
+            layout_widget.setMinimumWidth(380)
                                     
             
             self.scroll = QScrollArea()
@@ -281,8 +285,8 @@ if is_admin():
         def convertWordToHtml(self,docx_file_path,html_output_path):
  
             with open(docx_file_path, "rb") as docx_file:
-               result = mammoth.convert_to_html(docx_file)  # Convert to HTML
-               html_content = result.value  # Get the generated HTML content
+               result = mammoth.convert_to_html(docx_file)  
+               html_content = result.value 
                html_content = html_content.replace("توثيق برنامج", "توثيق برنامج")
                html_content = html_content.replace("توثيق برنامج", "<div style='font-size:20px;text-align: center;font-weight:bold'>توثيق برنامج</div>")
                html_content = html_content.replace("المملكة العربية السعودية","المملكة العربية السعودية")
@@ -355,7 +359,6 @@ if is_admin():
                output_file.write(html_content)  
 
 
-
         # export current database
         def exportDb(self):
 
@@ -385,13 +388,13 @@ if is_admin():
               d.setWindowTitle("نجاح")
               d.setIcon(QMessageBox.Icon.Information)
               d.exec()
-
              
             except Exception as e:
               QMessageBox.critical(self, "فشل الاضافه: {str(e)}")
 
 
         def importDb(self):
+
             d = QMessageBox(parent=self.windowCreating,text="هل انت متأكد من استرداد قاعدة بيانات؟")
             d.setIcon(QMessageBox.Icon.Information)
             d.setWindowTitle(title)
@@ -400,8 +403,8 @@ if is_admin():
             if important == QMessageBox.StandardButton.Ok:
                 self.completeImportDb()
         
-
         def completeImportDb(self):
+
             fileDbUser = QFileDialog.getOpenFileName(self.windowCreating,"اختر ملفا",desktopPath,filter="Database File (*.db)")
             if len(fileDbUser[0]) > 0:
                 try:
@@ -432,6 +435,7 @@ if is_admin():
 
         #Functions To Get Saved Reports
         def savedReportsFun(self):
+
             self.windowSaved = Choices()
             self.windowSaved.setFixedSize(600,500)
             self.windowSaved.setWindowTitle(title)
@@ -453,8 +457,10 @@ if is_admin():
                 button = QPushButton()
                 button.setStyleSheet(f"Qproperty-icon:url(images/trashicon.png);qproperty-iconSize:30px 30px;background-color:rgb(253, 253, 253)")
                 button.clicked.connect(lambda x,row=n:self.deleteReport(row))
+                button.setCursor(Qt.CursorShape.PointingHandCursor)
                 self.savedReports.setIndexWidget(self.savedReports.model().index(n,1),button)
                 self.savedReports.setItem(n,3,QTableWidgetItem(i[1]))
+                self.savedReports.setCursor(Qt.CursorShape.PointingHandCursor)
                 self.savedReports.setItem(n,0,QTableWidgetItem(str(i[0])))
                 button = QRadioButton()
                 self.savedReports.setIndexWidget(self.savedReports.model().index(n,2),button)
@@ -465,10 +471,12 @@ if is_admin():
                         
             createButton = QPushButton("عرض",self.windowSaved)
             createButton.clicked.connect(lambda:self.creating(str(i[0])))
+            createButton.setCursor(Qt.CursorShape.PointingHandCursor)
             createButton.setStyleSheet("background-color:green")
             createButton.setGeometry(150,460,150,30)
             extractAllButton = QPushButton("word تصدير",self.windowSaved)
             extractAllButton.clicked.connect(self.exportAllSummaryReports)
+            extractAllButton.setCursor(Qt.CursorShape.PointingHandCursor)
             extractAllButton.setStyleSheet("background-color:green")
             extractAllButton.setGeometry(320,460,160,30)
             self.windowSaved.show()
@@ -504,6 +512,7 @@ if is_admin():
             self.windowCreate.setWindowIcon(QIcon("icons/icon.ico"))
             self.windowCreate.CreateButton.setStyleSheet("background-color: cyan")
             self.windowCreate.CreateButton.clicked.connect(lambda:self.creating("Local"))
+            self.windowCreate.setCursor(Qt.CursorShape.PointingHandCursor)
             self.windowCreate.manyPic.addItem("بدون")
             self.windowCreate.manyPic.addItem("1")
             self.windowCreate.manyPic.addItem("2")
@@ -573,9 +582,11 @@ if is_admin():
             specialButtonS = QPushButton(self.windowControl)
             specialButtonS.setStyleSheet(f"Qproperty-icon:url(images/cam.png);qproperty-iconSize:15px 15px;background-color:rgb(253, 253, 253)")
             specialButtonS.clicked.connect(self.addPicLogo)
+            specialButtonS.setCursor(Qt.CursorShape.PointingHandCursor)
             specialButtonS.setGeometry(130,490,30,30)
 
             self.SaveButton = QPushButton("حفظ",self.windowControl)
+            self.SaveButton.setCursor(Qt.CursorShape.PointingHandCursor)
             self.SaveButton.setGeometry(55,530,200,30)
 
 
@@ -672,6 +683,7 @@ if is_admin():
                                     )
                 button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
                 button.setMinimumHeight(40) 
+                button.setCursor(Qt.CursorShape.PointingHandCursor)
                 button.clicked.connect(callback)
                 button_list_layout.addWidget(button)
 
@@ -685,7 +697,7 @@ if is_admin():
             addButton("images/summary.png", "ملخص التقارير", self.summaryReports)
             addButton("images/printer.png", "الطباعة", self.printDoc)
             addButton("images/control.png", "لوحة التحكم", self.controlPanel)
-            addButton("images/dbExport.png", "قاعدة البيانات", self.exportDb)
+            addButton("images/dbExport.png", "تصدير  قاعدة البيانات", self.exportDb)
             addButton("images/importDb.png", "إستيراد قاعدة البيانات", self.importDb)
             addButton("images/word.png", "word حفظ بصيغة", self.writeWord)
             addButton("images/pdfIcon.png", "pdf حفظ بصيغة", lambda x, y="Pdf": self.writeWord(y))
@@ -693,7 +705,8 @@ if is_admin():
             
             companyLogobutton = QPushButton()                
             companyLogobutton.setStyleSheet(f"font-size:14px;qproperty-icon:url('images/companyLogo.png');qproperty-iconSize:150px 100px;background-color:transparent;")   
-            companyLogobutton.clicked.connect(self.openwebSite)         
+            companyLogobutton.clicked.connect(self.openwebSite)   
+            companyLogobutton.setCursor(Qt.CursorShape.PointingHandCursor)      
             button_list_layout.addWidget(companyLogobutton) 
             report_widget = QWidget(self.windowCreating)
             
@@ -711,8 +724,10 @@ if is_admin():
             self.hidderlayoutPicshow = QVBoxLayout()
             self.hidderFramePicshow.setLayout(self.hidderlayoutPicshow)                                    
             self.hidderFramePicshow.clicked.connect(lambda: self.putImage(f"ReportCover"))
+            self.hidderFramePicshow.setCursor(Qt.CursorShape.PointingHandCursor)
             specialButton = QPushButton(self.hiderFrameshow)
             specialButton.setIcon(QIcon("images/cam.png"))
+            specialButton.setCursor(Qt.CursorShape.PointingHandCursor)
             specialButton.clicked.connect(lambda:self.putImage(f"ReportCover"))
             
             logoLabel = QLabel(self.hiderFrameshow)
@@ -724,6 +739,7 @@ if is_admin():
             DeleteButtonHidder = QPushButton(self.hiderFrameshow)
             DeleteButtonHidder.setStyleSheet(f"Qproperty-icon:url(images/trashicon.png);qproperty-iconSize:15px 15px;background-color:rgb(253, 253, 253)")
             DeleteButtonHidder.clicked.connect(lambda:self.deleteImagesTemp(f"ReportCover"))
+            DeleteButtonHidder.setCursor(Qt.CursorShape.PointingHandCursor)
             DeleteButtonHidder.move(290,90)
 
             Frame_text = QFrame(self.hiderFrameshow)
@@ -842,38 +858,46 @@ if is_admin():
                     if numberOfPictures > -1:
                         self.CreatePic(numberOfPictures+1)
                         self.countPic = numberOfPictures+1
-                    if listImportant[9]!="" and listImportant[9]!=" ":
-                        with open(f"pic1.png","wb") as image:
-                            image.write(listImportant[9])
-                        self.pictersPaths[0] = "pic1.png"
-                        self.putImage("Other",0)
-                    if listImportant[10]!="" and listImportant[10]!=" ":
-                        with open(f"pic2.png","wb") as image:
-                            image.write(listImportant[10])
-                        self.pictersPaths[1] = "pic2.png"
-                        self.putImage("Other",1)
-                    if listImportant[11]!="" and listImportant[12]!=" ":
-                        with open(f"pic3.png","wb") as image:
-                            image.write(listImportant[11])
-                        self.pictersPaths[2] = "pic3.png"
-                        self.putImage("Other",2)
-                    if listImportant[12]!="" and listImportant[12]!=" ":
-                        with open(f"pic4.png","wb") as image:
-                            image.write(listImportant[12])
-                        self.pictersPaths[3] = "pic4.png"
-                        self.putImage("Other",3)
-                    if listImportant[13]!="":
-                        self.secretLittleThing =listImportant[13]
-                        self.picLogoBinary = listImportant[13]
-                        with open(f"secretThing.png","wb") as image:
-                            image.write(self.secretLittleThing)
-                        image = Image.open("secretThing.png")
-                        finalImage = image.resize((350,200))
+                    try:
+                        if listImportant[9]!="" and listImportant[9]!=" ":
+                            with open(f"pic1.png","wb") as image:
+                               image.write(listImportant[9])
+                            self.pictersPaths[0] = "pic1.png"
+                            self.putImage("Other",0)
+                            
+                        if listImportant[10]!="" and listImportant[10]!=" ":
+                            with open(f"pic2.png","wb") as image:
+                               image.write(listImportant[10])
+                            self.pictersPaths[1] = "pic2.png"
+                            self.putImage("Other",1)
 
-                        finalImage.save("secretThing.png",quality=100)
-                        self.secretLittleThing = "secretThing.png"
-                        self.putImage("Other",1000)
-                    self.addAdmins(self.cFrameshow)
+                        if listImportant[11]!="" and listImportant[12]!=" ":
+                            with open(f"pic3.png","wb") as image:
+                              image.write(listImportant[11])
+                            self.pictersPaths[2] = "pic3.png"
+                            self.putImage("Other",2)
+
+                        if listImportant[12]!="" and listImportant[12]!=" ":
+                            with open(f"pic4.png","wb") as image:
+                               image.write(listImportant[12])
+                            self.pictersPaths[3] = "pic4.png"
+                            self.putImage("Other",3)
+
+                        if listImportant[13]!="":
+                            self.secretLittleThing =listImportant[13]
+                            self.picLogoBinary = listImportant[13]
+                            with open(f"secretThing.png","wb") as image:
+                              image.write(self.secretLittleThing)
+                            image = Image.open("secretThing.png")
+                            finalImage = image.resize((350,200))
+
+                            finalImage.save("secretThing.png",quality=100)
+                            self.secretLittleThing = "secretThing.png"
+                            self.putImage("Other",1000)
+                            self.addAdmins(self.cFrameshow)
+                    except:
+                        pass
+
                     if listImportant[14]!="":
                         self.label1Maye.setText(listImportant[14])
                     if listImportant[15]!="":
@@ -911,7 +935,9 @@ if is_admin():
                     self.CreatePic(self.windowCreate.manyPic.currentText())
                 self.addAdmins(self.cFrameshow)
             self.cFrameshow.setGeometry(0,145,900,1150)
-            
+
+            # ******************* left top section ******************* ******************* left top section  *******************
+
             layout_widget = QWidget(self.windowCreating)
             layout_widget.setMaximumWidth(330)
             
@@ -929,7 +955,9 @@ if is_admin():
             layout.addWidget(self.listWidget)    
             self.load_data()        
             self.listWidget.itemDoubleClicked.connect(self.onItemDoubleClicked)
-            layout_widget.setMinimumWidth(200)
+            self.listWidget.setCursor(Qt.CursorShape.PointingHandCursor)
+
+            layout_widget.setMinimumWidth(380)
             
             self.scroll = QScrollArea()   
             self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
@@ -1026,6 +1054,7 @@ if is_admin():
             
             # Set the central widget and layout
             def createNamePrograme():
+
                 global yForImpo
                 programeName = QTextEdit(cFrameshow)
                 programeName.setText("اسم البرنامج")
@@ -1226,6 +1255,7 @@ if is_admin():
                         picLabel = QLabel(picters[number])
                         pix = QPixmap("image1.png")
                         picLabel.setPixmap(pix)
+                        picLabel.setCursor(Qt.CursorShape.PointingHandCursor)
                         for i in reversed(range(layouts[number].count())): 
                             layouts[number].itemAt(i).widget().setParent(None)
                         layouts[number].addWidget(picLabel)
@@ -1233,6 +1263,7 @@ if is_admin():
                         picLabel = QLabel(picters[number])
                         pix = QPixmap("image1.png")
                         picLabel.setPixmap(pix)
+                        picLabel.setCursor(Qt.CursorShape.PointingHandCursor)
                         for i in reversed(range(layouts[number].count())): 
                             layouts[number].itemAt(i).widget().setParent(None)
                         layouts[number].addWidget(picLabel)
@@ -1240,6 +1271,7 @@ if is_admin():
                         picLabel = QLabel(picters[number])
                         pix = QPixmap("image1.png")
                         picLabel.setPixmap(pix)
+                        picLabel.setCursor(Qt.CursorShape.PointingHandCursor)
                         for i in reversed(range(layouts[number].count())): 
                             layouts[number].itemAt(i).widget().setParent(None)
                         layouts[number].addWidget(picLabel)
@@ -1247,6 +1279,7 @@ if is_admin():
                         picLabel = QLabel(hidderFramePicshow)
                         pix = QPixmap("image1.png")
                         picLabel.setPixmap(pix)
+                        picLabel.setCursor(Qt.CursorShape.PointingHandCursor)
                         for i in reversed(range(layouts[number].count())): 
                             layouts[number].itemAt(i).widget().setParent(None)
                         layouts[number].addWidget(picLabel)
@@ -1254,6 +1287,7 @@ if is_admin():
                         picLabel = QLabel(hidderFramePicshow)
                         pix = QPixmap("image1.png")
                         picLabel.setPixmap(pix)
+                        picLabel.setCursor(Qt.CursorShape.PointingHandCursor)
                         for i in reversed(range(hidderlayoutPicshow.count())): 
                             hidderlayoutPicshow.itemAt(i).widget().setParent(None)
                         hidderlayoutPicshow.addWidget(picLabel)
@@ -1357,13 +1391,13 @@ if is_admin():
             self.windowsummary.setWindowTitle(title)
             self.windowsummary.setWindowIcon(QIcon("icons/icon.ico"))
             self.TableSummary = QTableWidget(self.windowsummary)
-            self.TableSummary.setColumnCount(9)
-            self.TableSummary.setHorizontalHeaderLabels(["","عدد المستفيدين","المستفيدون","تاريخ التنفيذ","المنفذ","الوصف","الأهداف","اسم البرنامج",""])
-            self.TableSummary.setColumnHidden(8,True)
+            self.TableSummary.setColumnCount(7)
+            self.TableSummary.setHorizontalHeaderLabels(["","عدد المستفيدين","المستفيدون","تاريخ التنفيذ","المنفذ","اسم البرنامج",""])
+            self.TableSummary.setColumnHidden(6,True)
             self.windowsummary.resizeEvent = self.resizeSummary
-            self.TableSummary.setColumnWidth(0,30)
+            self.TableSummary.setColumnWidth(0,200)
 
-            cr.execute("SELECT id,name,Goals,description,executer,executeDate,benefits,countBenefits From reports")
+            cr.execute("SELECT name,executer,executeDate,benefits,countBenefits From reports")
             result = cr.fetchall()
             for r,i in enumerate(result):
                 self.TableSummary.insertRow(self.TableSummary.rowCount())
@@ -1374,6 +1408,7 @@ if is_admin():
                         button = QPushButton()
                         button.setStyleSheet(f"Qproperty-icon:url(images/trashIcon.png);qproperty-iconSize:30px 30px;background-color:rgb(253, 253, 253)")
                         button.clicked.connect(lambda x,row=r:self.deleteReport(row,"OutSide"))
+                        button.setCursor(Qt.CursorShape.PointingHandCursor)
                         self.TableSummary.setIndexWidget(self.TableSummary.model().index(r,0),button)
                     else:
                         item = QTableWidgetItem(str(c))
@@ -1385,8 +1420,10 @@ if is_admin():
             
             self.pdfExport = QPushButton("Pdf تصدير",self.windowsummary,clicked=lambda:self.exportSummaryScreen(fromWhere="Pdf"))
             self.pdfExport.setStyleSheet("background-color:red;font-size:20px")
+            self.pdfExport.setCursor(Qt.CursorShape.PointingHandCursor)
             self.pdfExport.setGeometry(0,470,360,30)
             self.WordExport = QPushButton("Word تصدير",self.windowsummary,clicked=self.exportSummaryScreen)
+            self.WordExport.setCursor(Qt.CursorShape.PointingHandCursor)
             self.WordExport.setStyleSheet("background-color:blue;font-size:20px")
             self.WordExport.setGeometry(self.pdfExport.width(),470,360,30)
             self.priwidth = 720
@@ -1394,6 +1431,7 @@ if is_admin():
             self.windowsummary.show()
 
         def zoomSumarry(self,row,col):
+
             if col !=0 and col!=8 :
                 self.windowsummaryZoom = Choices()
                 self.windowsummaryZoom.setFixedSize(400,300)
@@ -1407,6 +1445,7 @@ if is_admin():
                 self.windowsummaryZoom.show()
 
         def resizeSummary(self,en):
+
             self.widthChanged = self.windowsummary.width() - self.priwidth
             self.heightChanged = self.windowsummary.height() - self.prihei - 10
             self.widthChanged-5
@@ -1499,6 +1538,7 @@ if is_admin():
             con.commit()
 
         def deleteImagesTemp(self,neNum):
+
             if neNum=="ReportCover":
                 for i in reversed(range(self.hidderlayoutPicshow.count())): 
                     self.hidderlayoutPicshow.itemAt(i).widget().setParent(None)
@@ -1524,6 +1564,7 @@ if is_admin():
                     self.pictersPaths[3] = ""
 
         def addAdmins(self,frame):
+
             self.label1Maye = QLineEdit(frame)
             self.label1Maye.setGeometry(40,900,180,25)
             self.consultName = QLineEdit(frame)
@@ -1535,6 +1576,7 @@ if is_admin():
 
         # Save The Report As New File 
         def SavePrograme(self):
+            
             self.saveProgrameWindow = Choices()
             self.saveProgrameWindow.setFixedSize(200,200)
             self.saveProgrameWindow.setWindowTitle(title)
@@ -1570,17 +1612,20 @@ if is_admin():
                 self.picters[i].setStyleSheet(f"background-color:#EBEAE9;")
                 self.picters[i].move(x,y)
                 self.picters.append(ClickableQFrame(self.cFrameshow))
+                self.picters[i].setCursor(Qt.CursorShape.PointingHandCursor)
                 self.picters[i].clicked.connect(lambda x=i: self.putImage(f"{x}"))            
                 templayout = QVBoxLayout()
                 self.picters[i].setLayout(templayout)
                 self.layouts.append(templayout)
                 button = QPushButton(self.cFrameshow)
+                button.setCursor(Qt.CursorShape.PointingHandCursor)
                 tempvar = self.picters[i].geometry()
                 buttonx = tempvar.x()
                 buttony = tempvar.y()
                 self.buttons.append(button)
                 self.buttons[i].move(buttonx+tempvar.width()//2 - 10,buttony+tempvar.height())
                 self.buttons[i].setIcon(QIcon("images/cam.png"))
+                self.buttons[i].setCursor(Qt.CursorShape.PointingHandCursor)
                 
                 self.buttons[i].setObjectName(f"{i}")
                 self.buttons[i].clicked.connect(lambda ch,i=i:self.putImage(f"{i}"))
@@ -1588,6 +1633,7 @@ if is_admin():
                 DeleteButtonHidderInside = QPushButton(self.cFrameshow)
                 DeleteButtonHidderInside.setStyleSheet(f"Qproperty-icon:url(images/trashicon.png);qproperty-iconSize:15px 16px;background-color:rgb(253, 253, 253)")
                 DeleteButtonHidderInside.clicked.connect(lambda ch,x=i:self.deleteImagesTemp(x))
+                DeleteButtonHidderInside.setCursor(Qt.CursorShape.PointingHandCursor)
                 DeleteButtonHidderInside.move(buttonx+tempvar.width()//2 - 35,buttony+tempvar.height())
                 if i<=1:
                     x+=360
@@ -1610,6 +1656,7 @@ if is_admin():
                     picLabel = QLabel(self.hidderFramePicshow)
                     pix = QPixmap("reportheaderimage.png")
                     picLabel.setPixmap(pix)        
+                    pix.setCursor(Qt.CursorShape.PointingHandCursor)
                     for i in reversed(range(self.hidderlayoutPicshow.count())): 
                         self.hidderlayoutPicshow.itemAt(i).widget().setParent(None)
 
@@ -1640,6 +1687,7 @@ if is_admin():
                     picLabel = QLabel(self.picters[number])
                     pix = QPixmap("image.png")
                     picLabel.setPixmap(pix)
+                    picLabel.setCursor(Qt.CursorShape.PointingHandCursor)
                     for i in reversed(range(self.layouts[number].count())): 
                         self.layouts[number].itemAt(i).widget().setParent(None)
                     self.layouts[number].addWidget(picLabel)
@@ -1647,6 +1695,7 @@ if is_admin():
                     picLabel = QLabel(self.picters[number])
                     pix = QPixmap("image.png")
                     picLabel.setPixmap(pix)
+                    picLabel.setCursor(Qt.CursorShape.PointingHandCursor)
                     for i in reversed(range(self.layouts[number].count())): 
                         self.layouts[number].itemAt(i).widget().setParent(None)
                     self.layouts[number].addWidget(picLabel)
@@ -1687,6 +1736,7 @@ if is_admin():
                     picLabel = QLabel(self.picters[int(ob)])
                     pix = QPixmap("image.png")
                     picLabel.setPixmap(pix)
+                    picLabel.setCursor(Qt.CursorShape.PointingHandCursor)
 
                     for i in reversed(range(self.layouts[int(ob)].count())): 
                         self.layouts[int(ob)].itemAt(i).widget().setParent(None)
@@ -1986,7 +2036,6 @@ if is_admin():
 
         def writeWord(self,fromWhere="Word"):            
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
-                
             if len(FileNameSave[0])>0:
                 folder = (str(FileNameSave[0]).split(f"/"))
                 nameFile = folder[-1]
@@ -2456,9 +2505,11 @@ if is_admin():
                         out_file = f"{folderFinle}/{htmlname}"
                         self.convertWordToHtml(in_file,out_file)
                         webbrowser.open(out_file, new=2)
-                        time.sleep(2)
-                        pyautogui.hotkey("ctrl","p")
-                        
+    
+                        time.sleep(4)
+                        pyautogui.hotkey("ctrl", "p")
+                        time.sleep(3)  # Adjust this time if needed
+
                         os.remove(in_file)
                     except:
                         d = QMessageBox(parent=self.windowCreating)  
@@ -2914,18 +2965,6 @@ if is_admin():
             doc.save("printFile.docx")
             self.convertWordToHtml("printFile.docx","printFile.html")
 
-
-            # try:
-            #     # This method has limit in its free plan
-            #     doc = aw.Document("printFile.docx")
-            #     doc.save("printFile.pdf")
-            # except:
-            #     d = QMessageBox(parent=self.windowCreating) 
-            #     d.setWindowTitle("فشل") 
-            #     d.setText("حدث خطأ حاول مره أخرى") 
-            #     d.setIcon(QMessageBox.Icon.Warning) 
-            #     d.exec()  
-
             os.remove("printFile.docx")
             
             try:
@@ -2939,7 +2978,7 @@ if is_admin():
 
             try:
                 webbrowser.open("printFile.html", new=2)
-                time.sleep(2)
+                time.sleep(6)
                 pyautogui.hotkey("ctrl","p")
                     
             except:
@@ -2947,6 +2986,7 @@ if is_admin():
 
         # Function To Get Summary Of Exist Reports
         def exportAllSummaryReports(self):
+                
                 self.pdfFilesPaths = []
                 cr.execute("SELECT id FROM reports")
                 reports = cr.fetchall()
@@ -3557,14 +3597,7 @@ if is_admin():
                 doc.save(f"{folderFinle}/{name}")
 
                 if fromWhere =="Pdf":
-                    subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".html")]
                     htmlname = nameFile+".html"
-                    if name in subFilesD:
-                        i = 1
-                        while name in subFilesD:
-                            name = f"({i}) {name}"
-                            i+=1
-
                     try:
                         in_file = f"{folderFinle}/{name}"
                         out_file = f"{folderFinle}/{htmlname}"
@@ -3572,24 +3605,13 @@ if is_admin():
                         webbrowser.open(out_file, new=2)
                         time.sleep(2)
                         pyautogui.hotkey("ctrl","p")
-                        time.sleep(2)  # Wait for the print dialog to open
-
-                        pyautogui.press("tab", presses=5, interval=0.5)  # Adjust number of presses based on the system
-                        pyautogui.press("down")  # Select "Save as PDF" option
-                        pyautogui.press("enter")  # Confirm selection  
-                        time.sleep(2)  # Wait for the save dialog to open
-                        pyautogui.write("output.pdf")
-                        pyautogui.press("enter")
-                        time.sleep(2)  # Wait for the PDF to be saved
-
-                        
+   
                     except:
                         d = QMessageBox(parent=self.windowCreating)  
                         d.setWindowTitle("فشل")  
                         d.setText("حدث خطأ حاول مرة أخرى")
                         d.setIcon(QMessageBox.Icon.Warning)
                         d.exec() 
-
 
                     os.remove(f"{folderFinle}/{name}")
 

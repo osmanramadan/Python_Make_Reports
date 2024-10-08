@@ -21,11 +21,19 @@ import ctypes
 import pyautogui
 import time
 import convert_numbers
-import mammoth
-
-
-
-
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+import arabic_reshaper
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph,Image as img
+from bidi.algorithm import get_display
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.enums import TA_LEFT, TA_RIGHT
+from reportlab.lib.units import inch
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 
 xForImpo = 900
@@ -129,7 +137,7 @@ if is_admin():
             addButton("images/dbExport.png", "تصدير قاعدة البيانات" , self.exportDb)
             addButton("images/importDb.png", "إستيراد قاعدة البيانات", self.importDb)
             addButton("images/word.png", "word حفظ بصيغة", self.writeWord)
-            addButton("images/pdfIcon.png", "pdf حفظ بصيغة", lambda x, y="Pdf": self.writeWord(y))
+            addButton("images/pdfIcon.png", "pdf حفظ بصيغة", lambda: self.writePdf(fromWhere="convert"))
 
             companyLogobutton = QPushButton()                
             companyLogobutton.setStyleSheet(f"font-size:14px;qproperty-icon:url('images/companyLogo.png');qproperty-iconSize:150px 100px;background-color:transparent;")   
@@ -197,9 +205,19 @@ if is_admin():
             logoLabel = QLabel(self.hiderFrameshow)
             logoLabel.move(350,10)
 
+            cr.execute("SELECT icon FROM start")
+            
+            try:
+                with open("images/logo.png","wb") as logoImpo:
+                  logoImpo.write(cr.fetchone()[0])
+                img = Image.open("images/logo.png")
+                img = img.resize((260,125),Image.LANCZOS)
+                img.save("images/logo.png",quality=100)
+                pix = QPixmap("images/logo.png")
+                logoLabel.setPixmap(pix)
+            except:
+                pass
 
-            pix = QPixmap("images/logo.png")
-            logoLabel.setPixmap(pix)
             self.hiderFrameshow.setGeometry(0,3,900,140)
             self.cFrameshow = QFrame(report_widget)
             self.cFrameshow.setStyleSheet("background-color: white")
@@ -281,82 +299,6 @@ if is_admin():
 
         def openwebSite(self):
             webbrowser.open('https://www.ersal-m.com', new=2)
-
-        def convertWordToHtml(self,docx_file_path,html_output_path):
- 
-            with open(docx_file_path, "rb") as docx_file:
-               result = mammoth.convert_to_html(docx_file)  
-               html_content = result.value 
-               html_content = html_content.replace("توثيق برنامج", "توثيق برنامج")
-               html_content = html_content.replace("توثيق برنامج", "<div style='font-size:20px;text-align: center;font-weight:bold'>توثيق برنامج</div>")
-               html_content = html_content.replace("المملكة العربية السعودية","المملكة العربية السعودية")
-               html_content = html_content.replace("المملكة العربية السعودية", "<div style='width:100%;font-size:20px;margin:0px;padding:0px;padding-right:180px;'>المملكة العربية السعودية</div>")
-
-               html_content = f"""
-                <!DOCTYPE html>
-                <html lang='ar' dir='ltr'>
-                 <head>
-                   <meta charset='UTF-8'>
-                <style>
-                body {{
-                  font-family: Cairo; /* Change font-family as needed */
-                  margin-left: 100px;
-                  margin-right:100px;
-                  padding: 20px;
-                  line-height: 1.6;
-                  background-color: #f9f9f9;
-                 }}
-                h1, h2, h3, h4, h5, h6 {{
-                text-align: right; 
-                color: #333; 
-                 }}
-                 p {{
-                text-align: right;
-                 margin: 0 0 10px 0;
-                }}
-               p:first-of-type {{
-    
-                font-weight: bold; 
-                font-size: 22px; 
-                }}
-            table {{
-             border-collapse: collapse;
-             width: 100%; 
-             margin: 20px 0;
-             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            }}
-            th, td {{
-              border: 1px solid #ddd;
-              padding: 10px; /* Increased padding for better spacing */
-              text-align: right; /* Align text to the right for Arabic */
-             font-size: 20px; /* Adjust font size as needed */
-            }}
-            th {{ 
-             color: #333; /* Dark color for header text */
-             height: auto; /* Allow height to fit content */
-            }}
-            td:nth-child(2) {{
-              width: 100px; /* Set a fixed width for the first column */
-            }}
-            tr:nth-child(even) {{
-              background-color: #f9f9f9;
-            }}
-            tr:hover {{
-             background-color: #f1f1f1; 
-            }}
-            img{{
-             text-align:center
-            }}
-           </style>
-           </head>
-           <body>
-           {html_content}
-           </body>
-          </html>
-               """
-
-            with open(html_output_path, "w", encoding="utf-8") as output_file:
-               output_file.write(html_content)  
 
 
         # export current database
@@ -574,8 +516,18 @@ if is_admin():
             self.FrameMin.setLayout(self.layoutFrameLogo)
 
             picLabel = QLabel(self.FrameMin)
-            pix = QPixmap("images/logo.png")
-            picLabel.setPixmap(pix)
+            cr.execute("SELECT icon FROM start")
+            
+            try:
+                with open("images/logo.png","wb") as logoImpo:
+                   logoImpo.write(cr.fetchone()[0])
+                img = Image.open("images/logo.png")
+                img = img.resize((220,125),Image.LANCZOS)
+                img.save("images/logo.png",quality=100)
+                pix = QPixmap("images/logo.png")
+                picLabel.setPixmap(pix)
+            except:
+                pass
 
             self.layoutFrameLogo.addWidget(picLabel)
 
@@ -700,7 +652,8 @@ if is_admin():
             addButton("images/dbExport.png", "تصدير  قاعدة البيانات", self.exportDb)
             addButton("images/importDb.png", "إستيراد قاعدة البيانات", self.importDb)
             addButton("images/word.png", "word حفظ بصيغة", self.writeWord)
-            addButton("images/pdfIcon.png", "pdf حفظ بصيغة", lambda x, y="Pdf": self.writeWord(y))
+            addButton("images/pdfIcon.png", "pdf حفظ بصيغة", lambda: self.writePdf(fromWhere="convert"))
+
             
             
             companyLogobutton = QPushButton()                
@@ -732,8 +685,21 @@ if is_admin():
             
             logoLabel = QLabel(self.hiderFrameshow)
             logoLabel.move(350,10)
-            pix = QPixmap("images/logo.png")
-            logoLabel.setPixmap(pix)
+
+            cr.execute("SELECT icon FROM start")
+            
+            try:
+
+                with open("images/logo.png","wb") as logoImpo:
+                   logoImpo.write(cr.fetchone()[0])
+                img = Image.open("images/logo.png")
+                img = img.resize((220,125),Image.LANCZOS)
+                img.save("images/logo.png",quality=100)
+                pix = QPixmap("images/logo.png")
+                logoLabel.setPixmap(pix)
+                
+            except:
+                pass
 
             specialButton.move(290,65)
             DeleteButtonHidder = QPushButton(self.hiderFrameshow)
@@ -767,10 +733,20 @@ if is_admin():
 
             logoLabel = QLabel(self.hiderFrameshow)
             logoLabel.move(350,10)
-            pix = QPixmap("logo.png")
-            logoLabel.setPixmap(pix)
-            self.hiderFrameshow.setGeometry(0,3,900,140)
             
+            try:
+                cr.execute("SELECT icon FROM start")
+                with open("images/logo.png","wb") as logoImpo:
+                  logoImpo.write(cr.fetchone()[0])
+                img = Image.open("images/logo.png")
+                img = img.resize((220,125),Image.LANCZOS)
+                img.save("images/logo.png",quality=100)
+                pix = QPixmap("images/logo.png")
+                logoLabel.setPixmap(pix)
+            except:
+                pass
+
+            self.hiderFrameshow.setGeometry(0,3,900,140)
             self.cFrameshow = QFrame(report_widget) 
             self.cFrameshow.setStyleSheet("background-color: white")
 
@@ -864,7 +840,7 @@ if is_admin():
                                image.write(listImportant[9])
                             self.pictersPaths[0] = "pic1.png"
                             self.putImage("Other",0)
-                            
+
                         if listImportant[10]!="" and listImportant[10]!=" ":
                             with open(f"pic2.png","wb") as image:
                                image.write(listImportant[10])
@@ -1041,10 +1017,20 @@ if is_admin():
             
             logoLabel = QLabel(hiderFrameshow)
             logoLabel.move(350, 10)
-            pix = QPixmap("images/logo.png")
-            logoLabel.setPixmap(pix)
-            hiderFrameshow.setGeometry(0, 3, 900, 140)
 
+            try:
+                cr.execute("SELECT icon FROM start")
+                with open("images/logo.png","wb") as logoImpo:
+                  logoImpo.write(cr.fetchone()[0])
+                img = Image.open("images/logo.png")
+                img = img.resize((220,125),Image.LANCZOS)
+                img.save("images/logo.png",quality=100)
+                pix = QPixmap("images/logo.png")
+                logoLabel.setPixmap(pix)
+            except:
+                pass
+
+            hiderFrameshow.setGeometry(0, 3, 900, 140)
             cFrameshow = QFrame(right_frame)
             cFrameshow.setStyleSheet("background-color: white")
             # Create the main layout for the windowCreating widget
@@ -1418,11 +1404,11 @@ if is_admin():
             self.TableSummary.setGeometry(0,0,720,470)
             self.TableSummary.cellDoubleClicked.connect(self.zoomSumarry)
             
-            self.pdfExport = QPushButton("Pdf تصدير",self.windowsummary,clicked=lambda:self.exportSummaryScreen(fromWhere="Pdf"))
+            self.pdfExport = QPushButton("Pdf تصدير",self.windowsummary,clicked=self.exportSummaryAsPdf)
             self.pdfExport.setStyleSheet("background-color:red;font-size:20px")
             self.pdfExport.setCursor(Qt.CursorShape.PointingHandCursor)
             self.pdfExport.setGeometry(0,470,360,30)
-            self.WordExport = QPushButton("Word تصدير",self.windowsummary,clicked=self.exportSummaryScreen)
+            self.WordExport = QPushButton("Word تصدير",self.windowsummary,clicked=self.exportSummaryAsWord)
             self.WordExport.setCursor(Qt.CursorShape.PointingHandCursor)
             self.WordExport.setStyleSheet("background-color:blue;font-size:20px")
             self.WordExport.setGeometry(self.pdfExport.width(),470,360,30)
@@ -1477,6 +1463,7 @@ if is_admin():
             pic2 = ""
             pic3 = ""
             pic4 = ""
+            
             if self.ablePrograme:
                 namePrograme = self.programeNameE.toPlainText() if len(self.programeNameE.toPlainText()) > 0 else " "
             if self.ableGoals:
@@ -1525,8 +1512,10 @@ if is_admin():
             if self.hidderlayoutPicshow.count() > 0:
                 picLogo = self.picLogoBinary
             reportName = self.programeNameShow
-            label1Maybe = self.label1Maye.text()
-            label2Maybe = self.label2Maye.text()
+            if self.label1Maye:
+                label1Maybe = self.label1Maye.text()
+            if self.label2Maye:
+               label2Maybe = self.label2Maye.text()
             manger = str(self.MangerName.text())
             co_manger = str(self.consultName.text())
             cr.execute(f"""UPDATE reports set name=?,Goals=?,description=?,executer=?,executeDate=?,benefits=?,countBenefits=?,pic1=?,pic2=?,pic3=?,pic4=?,picLogo=?,label1Maybe=?,label2Maybe=?,manger=?,co_manger=? WHERE id = ?""",(namePrograme,Goals,description,executer,executeDate,benefits,countBenefits,pic1,pic2,pic3,pic4,picLogo,label1Maybe,label2Maybe,manger,co_manger,reportName))
@@ -1656,7 +1645,7 @@ if is_admin():
                     picLabel = QLabel(self.hidderFramePicshow)
                     pix = QPixmap("reportheaderimage.png")
                     picLabel.setPixmap(pix)        
-                    pix.setCursor(Qt.CursorShape.PointingHandCursor)
+                    # pix.setCursor(Qt.CursorShape.PointingHandCursor)
                     for i in reversed(range(self.hidderlayoutPicshow.count())): 
                         self.hidderlayoutPicshow.itemAt(i).widget().setParent(None)
 
@@ -2032,28 +2021,290 @@ if is_admin():
             d.exec()
             self.saveProgrameWindow.destroy()
             con.commit()
-            self.load_data()            
+            self.load_data()  
 
-        def writeWord(self,fromWhere="Word"):            
+        def writePdf(self,fromWhere):
+
+            content = [] 
+            if fromWhere=="convert":
+               FileNameSave = QFileDialog.getSaveFileName(self.windowCreating, "اختر مسارا", desktopPath, "PDF Documents (*.pdf);;All Files (*)")
+            else:
+                # Get the directory of the running script
+                # script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
+                # file_path = os.path.join(script_directory, "printFile.pdf")
+               file_path = "printFile.pdf"
+               FileNameSave = [file_path]
+          
+            if len(FileNameSave[0]) > 0:
+                
+                pdf_file_path = FileNameSave[0]
+                doc = SimpleDocTemplate(pdf_file_path, pagesize=letter)
+
+                # Register the Amiri font
+                font_path = 'font/Amiri-Regular.ttf' 
+                pdfmetrics.registerFont(TTFont('ArabicFont', font_path))
+                font_path_bold = 'font/Amiri-Bold.ttf'  
+                pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_path_bold))
+
+                # Set up styles
+                styles = getSampleStyleSheet()
+                custom_style = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=16, spaceAfter=30, alignment=1)
+                custom_style.fontName = 'ArabicFont-bold'  
+
+                custom_style_header = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=14, spaceAfter=20, alignment=1)
+                custom_style_header.fontName = 'ArabicFont'  
+
+                # Prepare header data with text and placeholders for images
+                header_data = [[
+                 "",  # Placeholder for the second column (image)
+                 "",  # Placeholder for the third column (image)
+                Paragraph(f"""
+                          {get_display(arabic_reshaper.reshape("المملكة العربية السعودية"))}
+                          <br/><br/>
+                          {get_display(arabic_reshaper.reshape("وزارة التعليم"))}
+                          <br/><br/>
+                          {get_display(arabic_reshaper.reshape(" الادارة العامة للتعليم بالقصيم "))}
+                          """, 
+                          custom_style_header
+                          ), 
+                 ]]
+
+                
+                # Add images to the header
+                if os.path.exists("images/logo.png"):
+                  piclogo =img("images/logo.png", width=140, height=80) 
+                  header_data[0][1] = piclogo  # Assign the first image to the second column
+
+                if os.path.exists(self.secretLittleThing):
+                  logo2 = img(self.secretLittleThing, width=155, height=80)  # Adjust dimensions as needed
+                  header_data[0][0] = logo2  # Assign the second image to the third column
+                else:
+                  pass
+          
+                # Calculate dynamic column widths
+                page_width = letter[0]  # The width of the letter page
+                image_width = 2 * inch  # Width allocated for each image column
+                max_text_width = page_width - (2 * image_width) - 1 * inch  # Remaining width for the first column
+                # Create the header table
+                header_table = Table(header_data, colWidths=[max_text_width,image_width,image_width])
+                header_table.setStyle(TableStyle([
+                 ('SIZE', (0, 0), (-1, -1), 14), 
+                 ('VALIGN', (1, 0), (1, 0), 'MIDDLE'),
+                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                 ('FONTNAME', (0, 0), (-1, 0),'ArabicFont'),
+                 ('BOTTOMPADDING', (0, 0), (-1, 0), 16)
+                ]))
+
+                content.append(header_table)
+                # Add additional text (Title)
+                title = Paragraph(get_display(arabic_reshaper.reshape("\t\t\t\t\t\t\tتوثيق برنامج")), custom_style)
+                content.append(title)
+
+               # *Get Report Content*
+               # Style for the section names (right column)
+                section_right_style = ParagraphStyle(
+                  name="rightContent",
+                  alignment=TA_RIGHT,
+                  textColor=colors.black,
+                  fontSize=12,
+                  spaceAfter=10
+                )
+                section_right_style.fontName = 'ArabicFont-bold'  # Set the custom style font to ArabicFont
+                # Style for the section content (left column)
+                section_left_style = ParagraphStyle(
+                  name="leftContent",
+                  alignment=TA_RIGHT,
+                  fontSize=12,
+                  spaceAfter=10
+                )
+                section_left_style.fontName = 'ArabicFont' 
+
+                data=[]
+                if self.ablePrograme:
+                  data.append(
+                    ((get_display(arabic_reshaper.reshape("اسم البرنامج")), get_display(arabic_reshaper.reshape(self.programeNameE.toPlainText()))))
+                   )
+                if self.ableGoals:
+                  data.append(   
+                    (get_display(arabic_reshaper.reshape("ألاهداف")),get_display(arabic_reshaper.reshape(self.programeGoalsE.toPlainText())))
+                  )
+                if self.ableDescription:
+                  data.append(   
+                    (get_display(arabic_reshaper.reshape("الوصف")),get_display(arabic_reshaper.reshape(self.programeDescriptionE.toPlainText())))
+                    )
+                if self.ableCreator:
+                  data.append(   
+                   (get_display(arabic_reshaper.reshape("المنفذ")),get_display(arabic_reshaper.reshape(self.programeCreatorE.toPlainText())))
+                   ) 
+                if self.ableDate:
+                   data.append(   
+                   (get_display(arabic_reshaper.reshape("تاريخ التنفيذ")),get_display(arabic_reshaper.reshape(self.programeWhenDateE.toPlainText())))
+                   )
+                if self.ableBenefits:
+                   data.append(   
+                   (get_display(arabic_reshaper.reshape("المستفيدون")),get_display(arabic_reshaper.reshape(self.programeBenefitsE.toPlainText())))
+                   ) 
+                if self.ableCount:
+                   data.append(   
+                   (get_display(arabic_reshaper.reshape("عدد المستفيدون")),get_display(arabic_reshaper.reshape(self.CountBenefitsE.toPlainText())))
+                   )
+        
+                # Create the table data by formatting each section name and content
+                table_items = []
+                for section_name, section_content in data:
+                    # Right column: Section name (red text)
+                    right_col = Paragraph(section_name,section_right_style)
+                    # Left column: Section content
+                    left_col = Paragraph(section_content,section_left_style)
+                    # Append the two-column row to table_data
+                    table_items.append([left_col, right_col])
+                table = Table(table_items, colWidths=[3.7 * inch, 3.7 * inch])
+
+                # Add some basic styling to the table (optional)
+                table.setStyle(TableStyle([
+                  ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Center vertically
+                  ('ALIGN', (0, 0), (-1, -1), 'CENTER'),    # Center horizontally
+                  ('BACKGROUND', (1, 0), (1, -1), colors.HexColor("#2ABCB5")),  # Right cell background
+                  ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                  ('BOX', (0, 0), (-1, -1), 0.1, colors.black),
+                  ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
+                  ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
+                  ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
+                  ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
+                  ('TOPPADDING', (0, 0), (-1, -1), 5),  # Add top padding
+                  ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  # Add bottom padding
+                ]))
+                content.append(table)
+
+                if self.countPic !=0: 
+                    images_data = []
+                    max_images_per_row = 2 
+                    current_row = []
+ 
+                    for i in range(len(self.pictersPaths)):
+
+                        if self.pictersPaths[i] != "":
+                            # Calculate dynamic width for images
+                            page_width, _ = letter  # Get the width of the page
+                            image_width = page_width / 2 - 80  # Set image width to half the page width, minus some padding
+                            image = img(self.pictersPaths[i],width=image_width,height=150)  # Adjust dimensions as needed
+                            current_row.append(image)
+
+                            if len(current_row) == max_images_per_row:
+                              images_data.append([""] + current_row + [""])  # Empty cells on either side
+                              current_row = []  # Reset for the next row
+
+                    if current_row:
+                        images_data.append([""] + current_row + [""])
+
+                    if images_data:
+                        images_table = Table(images_data, colWidths=[max_text_width] + [image_width] * len(current_row) + [max_text_width])
+                        images_table.setStyle(TableStyle([
+                            ('SIZE', (0, 0), (-1, -1), 14),              
+                            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),       
+                            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),         
+                            ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),  
+                            ('TOPPADDING', (0, 0), (-1, -1), 20),     
+                            ('RIGHTPADDING', (0, 0), (-1, -1), 20),       
+                            ]))
+
+                        content.append(images_table)
+
+            # * For One Image In Every Row * #
+            # images_data = []
+            # if self.countPic != 0:
+            #     for i in range(len(self.pictersPaths)):
+            #        if self.pictersPaths[i] != "":
+            #           image = img(self.pictersPaths[i], width=450, height=150)  
+            #           images_data.append(["",image, ""])
+            # images_table = Table(images_data, colWidths=[max_text_width, image_width, max_text_width])
+            # images_table.setStyle(TableStyle([
+            #    ('SIZE', (0, 0), (-1, -1), 14),              
+            #    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),       
+            #    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),         
+            #   ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),  
+            #   ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  
+            #   ('TOPPADDING', (0, 0), (-1, -1), 20),       
+            # ]))
+            # content.append(images_table)
+
+
+
+                    # *Get Footer Content*
+                    # Style for  (right column)
+                    footer_right_style = ParagraphStyle(
+                       name="rightContent",
+                       alignment=TA_RIGHT,
+                       textColor=colors.black,
+                       fontSize=12,
+                       spaceAfter=10
+                     )
+                    footer_right_style.fontName = 'ArabicFont-bold'  # Set the custom style font to ArabicFont
+                    # Style for  (left column)
+                    footer_left_style = ParagraphStyle(
+                      name="leftContent",
+                      alignment=TA_LEFT,
+                      fontSize=12,
+                      spaceAfter=10
+                     )
+            
+                    footer_left_style.fontName = 'ArabicFont-bold' 
+                    footer_data = [[[],[]],[[],[]]] 
+
+                    if len(self.label2Maye.text()) > 0:
+                        footer_data[0][0].append(get_display(arabic_reshaper.reshape(self.label2Maye.text())))
+                    if len(self.consultName.text()) > 0:
+                        footer_data[1][1].append(get_display(arabic_reshaper.reshape(self.consultName.text())))
+                    if len(self.label1Maye.text()) > 0:
+                        footer_data[0][1].append(get_display(arabic_reshaper.reshape(self.label1Maye.text())))
+                    if len(self.MangerName.text()) > 0:
+                        footer_data[1][0].append(get_display(arabic_reshaper.reshape(self.MangerName.text())))
+
+
+                    footer_table_items = []
+                    for first_list, second_list in footer_data:
+                       # Convert lists to strings before creating Paragraphs
+                       first = ' '.join(first_list) if first_list else ''
+                       second = ' '.join(second_list) if second_list else ''
+                       right_col = Paragraph(first, footer_right_style)
+                       left_col = Paragraph(second, footer_left_style)
+                       # Append the two-column row to table_data
+                       footer_table_items.append([left_col, right_col])
+
+                    # Create the Table
+                    table = Table(footer_table_items, colWidths=[3.7 * inch, 3.7 * inch])
+
+                    # Add some basic styling to the table (optional)
+                    table.setStyle(TableStyle([
+                      ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
+                      ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
+                      ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
+                      ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
+                      ('TOPPADDING', (0, 0), (-1, -1), 10),  # Add top padding
+                      ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  # Add bottom padding
+                    ]))
+                    content.append(table)
+                    def add_border(canvas, doc):
+                      # Draw a border around the page
+                      width, height = letter  # Get the page dimensions
+                      border_offset = 20  # Thickness of the border
+                      canvas.setStrokeColor(colors.black)
+                      canvas.setLineWidth(1)  # Border width
+                      canvas.rect(border_offset, border_offset, width - 2 * border_offset, height - 2 * border_offset, stroke=1, fill=0)
+
+                    # Build the PDF document
+                    doc.build(content, onFirstPage=add_border, onLaterPages=add_border) 
+            
+        
+
+        def writeWord(self):    
+
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
             if len(FileNameSave[0])>0:
                 folder = (str(FileNameSave[0]).split(f"/"))
                 nameFile = folder[-1]
                 folderFinle = "/".join(folder[:-1])
-                pdfname= nameFile+".pdf"
                 
-                if fromWhere=="Pdf":
-                    destination_path=f"{folderFinle}/{pdfname}"
-                    # Check if a file with the same name already exists
-                    if os.path.exists(destination_path):
-                        confirm = QMessageBox.question(
-                        self,
-                        "تنبيه",
-                        f"الملف موجود بالفعل هل تريد اعادة انشائه؟",
-                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                        )
-                        if confirm == QMessageBox.StandardButton.No:
-                          return  # User chose not to overwrite the 
                 doc = docx.Document()
                 sections = doc.sections
                 for section in sections:
@@ -2123,6 +2374,8 @@ if is_admin():
                     runCells.add_picture(self.secretLittleThing,width=docx.shared.Inches(2.1),height=docx.shared.Inches(1))
                 if self.hidderlayoutPicshow.count() <= 0:
                     runCells.add_text("\t\t\t\t\t")
+                    # runCells.add_text("\t")
+                    # runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
                 else:
                     runCells.add_text("\t")
                     runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
@@ -2490,35 +2743,6 @@ if is_admin():
                         i+=1
                 
                 doc.save(f"{folderFinle}/{docxname}")
-
-                if fromWhere =="Pdf":
-                    subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".html")]
-                    htmlname = nameFile+".html"
-                    if htmlname in subFilesD:
-                        i = 1
-                        while htmlname in subFilesD:
-                            htmlname= f"({i}) {htmlname}"
-                            i+=1
-
-                    try:
-                        in_file = f"{folderFinle}/{docxname}"
-                        out_file = f"{folderFinle}/{htmlname}"
-                        self.convertWordToHtml(in_file,out_file)
-                        webbrowser.open(out_file, new=2)
-    
-                        time.sleep(4)
-                        pyautogui.hotkey("ctrl", "p")
-                        time.sleep(3)  # Adjust this time if needed
-
-                        os.remove(in_file)
-                    except:
-                        d = QMessageBox(parent=self.windowCreating)  
-                        d.setWindowTitle("فشل")  
-                        d.setText("حدث خطأ حاول مرة أخرى")
-                        d.setIcon(QMessageBox.Icon.Warning)
-                        d.exec() 
-
-
                     
                 d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
                 d.setWindowTitle("نجاح")
@@ -2536,448 +2760,16 @@ if is_admin():
 
         def printDoc(self):
             try:
-                os.remove("printFile.html")
-                os.remove("printFile.docx")
+                os.remove("printFile.pdf")
             except:
                 pass
-            doc = docx.Document()
-            sections = doc.sections
-            for section in sections:
-                section.top_margin = docx.shared.Cm(0.7)
-                section.bottom_margin = docx.shared.Cm(0.7)
-                section.left_margin = docx.shared.Cm(0.7)
-                section.right_margin = docx.shared.Cm(0.7)
-            sec_pr = doc.sections[0]._sectPr # get the section properties el
-            # create new borders el
-            pg_borders = OxmlElement('w:pgBorders')
-            # specifies how the relative positioning of the borders should be calculated
-            pg_borders.set(qn('w:offsetFrom'), 'page')
-            for border_name in ('top', 'left', 'bottom', 'right',): # set all borders
-                border_el = OxmlElement(f'w:{border_name}')
-                border_el.set(qn('w:val'), 'triple') # a single line
-                border_el.set(qn('w:sz'), '4') # for meaning of  remaining attrs please look docs
-                border_el.set(qn('w:space'), '10')
-                border_el.set(qn('w:color'), 'black')
-                pg_borders.append(border_el) # register single border to border el
-            sec_pr.append(pg_borders) # apply border changes to section
-
-            headers_table = doc.add_table(rows=1, cols=2)
-            for row in headers_table.rows:
-                for cell in row.cells:
-                    tc = cell._element.tcPr
-                    tc.left = None
-                    tc.top = None
-                    tc.right = None
-                    tc.bottom = None
-                    cell.vertical_alignment = docx.enum.table.WD_CELL_VERTICAL_ALIGNMENT.CENTER
-                    cell.paragraphs[0].alignment = docx.enum.table.WD_TABLE_ALIGNMENT.CENTER
-                    cell.paragraphs[0].size = docx.shared.Pt(15)
-            
-            hdr_Cells = headers_table.rows[0].cells
-            cr.execute("SELECT line1 FROM start")
-            hdr_Cells[1].text = cr.fetchone()[0]
-            cr.execute("SELECT line2 FROM start")
-            hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]+"\t"
-            cr.execute("SELECT line3 FROM start")
-            hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
-            cr.execute("SELECT line4 FROM start")
-            hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
-
-            widths = (docx.shared.Inches(5.8),docx.shared.Inches(3))
-            for row in headers_table.rows:
-                for idx, width in enumerate(widths):
-                    row.cells[idx].width = width
-
-            heights = (docx.shared.Inches(1.1),docx.shared.Inches(1.1))
-            for idx,row in enumerate(headers_table.rows):
-                row.height = heights[idx]
-
-            paragraph12322 =hdr_Cells[1].paragraphs[0]
-            run = paragraph12322.runs
-            font = run[0].font
-            font.size= docx.shared.Pt(15)
-
-            cells = headers_table.rows[0].cells[0].paragraphs[0]
-            runCells = cells.add_run()
-            if self.secretLittleThing !="":
-                runCells.add_picture(self.secretLittleThing,width=docx.shared.Inches(2.1),height=docx.shared.Inches(1))
-            if self.hidderlayoutPicshow.count() <= 0:
-                runCells.add_text("\t\t\t\t\t")
-            else:
-                runCells.add_text("\t")
-                runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
-
-            for row in headers_table.rows:
-                for cell in row.cells:
-                    cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-            headers_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-
-
-            """
-            if self.windowCreate.BenefitsCount.isChecked():
-                self.CountBenefits()
-            """
-
-            GoodPrograme = doc.add_paragraph("\t\t\t\t\t\t\tتوثيق برنامج")
-            GoodPrograme.runs[0].font.size = docx.shared.Pt(20)
-            GoodPrograme.paragraph_format.space_after = docx.shared.Pt(0.1)
-            GoodPrograme.paragraph_format.space_before = docx.shared.Pt(1)
-
-
-            if self.ablePrograme:
-                text = self.programeNameE.toPlainText()
-                listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
-                final_text = []
-                for i in text:
-                    if i in listNubmers:
-                        final_text.append(convert_numbers.english_to_hindi(i))
-                    else:
-                        final_text.append(i)
-
-                programeNameProgrameTable = doc.add_table(rows=1,cols=2)
-
-                programeNameProgrameTable.style = "Table Grid"
-                hdr_Cells = programeNameProgrameTable.rows[0].cells
-                hdr_Cells[1].text = "اسم البرنامج"
-                hdr_Cells[0].text = ''.join(final_text)
-                programeNameProgrameTable.autofit = False
-
-                cell_xml_element = programeNameProgrameTable.rows[0].cells[1]._tc
-                table_cell_properties = cell_xml_element.get_or_add_tcPr()
-                shade_obj = OxmlElement("w:shd")
-                shade_obj.set(qn2("w:fill"),"2ABCB5")
-                table_cell_properties.append(shade_obj)
-
-                widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
-
-                for row in programeNameProgrameTable.rows:
-                    for idx, width in enumerate(widths):
-                        row.cells[idx].width = width
-                
-                for row in programeNameProgrameTable.rows:
-                    for cell in row.cells:
-                        cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-                        paragraphs = cell.paragraphs
-                        for paragraph in paragraphs:
-                            for run in paragraph.runs:
-                                font = run.font
-                                font.size= docx.shared.Pt(17)
-                heights = (docx.shared.Inches(.35), docx.shared.Inches(.35))
-                for idx,row in enumerate(programeNameProgrameTable.rows):
-                        row.height = heights[idx]
-            if self.ableGoals:
-                text = self.programeGoalsE.toPlainText()
-                listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
-                final_text = []
-                for i in text:
-                    if i in listNubmers:
-                        final_text.append(convert_numbers.english_to_hindi(i))
-                    else:
-                        final_text.append(i)
-
-                programeGolasTable = doc.add_table(rows=1,cols=2)
-                programeGolasTable.style = "Table Grid"
-                hdr_Cells = programeGolasTable.rows[0].cells
-                hdr_Cells[1].text = "\t\tالأهداف"
-                hdr_Cells[0].text = ''.join(final_text)
-                programeGolasTable.autofit = False
-
-                cell_xml_element = programeGolasTable.rows[0].cells[1]._tc
-                table_cell_properties = cell_xml_element.get_or_add_tcPr()
-                shade_obj = OxmlElement("w:shd")
-                shade_obj.set(qn2("w:fill"),"2ABCB5")
-                table_cell_properties.append(shade_obj)
-
-                widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
-                heights = (docx.shared.Inches(1.4), docx.shared.Inches(1.4))
-                for row in programeGolasTable.rows:
-                    for idx, width in enumerate(widths):
-                        row.cells[idx].width = width
-                for idx,row in enumerate(programeGolasTable.rows):
-                    row.height = heights[idx]
-                
-                for row in programeGolasTable.rows:
-                    for cell in row.cells:
-                        cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-                        paragraphs = cell.paragraphs
-                        for paragraph in paragraphs:
-                            for run in paragraph.runs:
-                                font = run.font
-                                font.size= docx.shared.Pt(18)
-
-            if self.ableDescription:
-                text = self.programeDescriptionE.toPlainText()
-                listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
-                final_text = []
-                for i in text:
-                    if i in listNubmers:
-                        final_text.append(convert_numbers.english_to_hindi(i))
-                    else:
-                        final_text.append(i)
-
-                programeDescriptionTable = doc.add_table(rows=1,cols=2)
-                programeDescriptionTable.style = "Table Grid"
-                hdr_Cells = programeDescriptionTable.rows[0].cells
-                hdr_Cells[1].text = "\t\tالوصف"
-                hdr_Cells[0].text = ''.join(final_text)
-                programeDescriptionTable.autofit = False
-
-                cell_xml_element = programeDescriptionTable.rows[0].cells[1]._tc
-                table_cell_properties = cell_xml_element.get_or_add_tcPr()
-                shade_obj = OxmlElement("w:shd")
-                shade_obj.set(qn2("w:fill"),"2ABCB5")
-                table_cell_properties.append(shade_obj)
-
-                widths = (docx.shared.Inches(7), docx.shared.Inches(0.9))
-                heights = (docx.shared.Inches(1.4), docx.shared.Inches(1.4))
-
-                for row in programeDescriptionTable.rows:
-                    for idx, width in enumerate(widths):
-                        row.cells[idx].width = width
-
-                for idx,row in enumerate(programeDescriptionTable.rows):
-                        row.height = heights[idx]
-
-                for row in programeDescriptionTable.rows:
-                    for cell in row.cells:
-                        cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-                        paragraphs = cell.paragraphs
-                        for paragraph in paragraphs:
-                            for run in paragraph.runs:
-                                font = run.font
-                                font.size= docx.shared.Pt(18)
-
-            if self.ableCreator:
-                text = self.programeCreatorE.toPlainText()
-                listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
-                final_text = []
-                for i in text:
-                    if i in listNubmers:
-                        final_text.append(convert_numbers.english_to_hindi(i))
-                    else:
-                        final_text.append(i)
-
-
-                programeCreatorTable = doc.add_table(rows=1,cols=2)
-                programeCreatorTable.style = "Table Grid"
-                hdr_Cells = programeCreatorTable.rows[0].cells
-
-                hdr_Cells[0].text = ''.join(final_text)
-                hdr_Cells[1].text = "المنفذ"
-                programeCreatorTable.autofit = False
-
-
-                cell_xml_element = programeCreatorTable.rows[0].cells[1]._tc
-                table_cell_properties = cell_xml_element.get_or_add_tcPr()
-                shade_obj = OxmlElement("w:shd")
-                shade_obj.set(qn2("w:fill"),"2ABCB5")
-                table_cell_properties.append(shade_obj)
-
-                widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
-                for row in programeCreatorTable.rows:
-                    for idx, width in enumerate(widths):
-                        row.cells[idx].width = width
-
-                for row in programeCreatorTable.rows:
-                    for cell in row.cells:
-                        cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-                        paragraphs = cell.paragraphs
-                        for paragraph in paragraphs:
-                            for run in paragraph.runs:
-                                font = run.font
-                                font.size= docx.shared.Pt(18)
 
         
-            if self.ableDate:
-                text = self.programeWhenDateE.toPlainText()
-                listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
-                final_text = []
-                for i in text:
-                    if i in listNubmers:
-                        final_text.append(convert_numbers.english_to_hindi(i))
-                    else:
-                        final_text.append(i)
-
-
-                programeWhenDateTable = doc.add_table(rows=1,cols=2)
-                programeWhenDateTable.style = "Table Grid"
-                hdr_Cells = programeWhenDateTable.rows[0].cells
-                hdr_Cells[1].text = "تاريخ التنفيذ"
-                hdr_Cells[0].text = ''.join(final_text)
-                programeWhenDateTable.autofit = False
-
-                cell_xml_element = programeWhenDateTable.rows[0].cells[1]._tc
-                table_cell_properties = cell_xml_element.get_or_add_tcPr()
-                shade_obj = OxmlElement("w:shd")
-                shade_obj.set(qn2("w:fill"),"2ABCB5")
-                table_cell_properties.append(shade_obj)
-
-                widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
-                for row in programeWhenDateTable.rows:
-                    for idx, width in enumerate(widths):
-                        row.cells[idx].width = width
-                
-                for row in programeWhenDateTable.rows:
-                    for cell in row.cells:
-                        cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-                        paragraphs = cell.paragraphs
-                        for paragraph in paragraphs:
-                            for run in paragraph.runs:
-                                font = run.font
-                                font.size= docx.shared.Pt(17)
-            if self.ableBenefits:
-                text = self.programeBenefitsE.toPlainText()
-                listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
-                final_text = []
-                for i in text:
-                    if i in listNubmers:
-                        final_text.append(convert_numbers.english_to_hindi(i))
-                    else:
-                        final_text.append(i)
-
-                programeBenefitsTable = doc.add_table(rows=1,cols=2)
-                programeBenefitsTable.style = 'Table Grid' #single lines in all cells
-                hdr_Cells = programeBenefitsTable.rows[0].cells
-                hdr_Cells[1].text = "المستفيدون"
-                hdr_Cells[0].text = ''.join(final_text)
-                programeBenefitsTable.autofit = False
-
-                cell_xml_element = programeBenefitsTable.rows[0].cells[1]._tc
-                table_cell_properties = cell_xml_element.get_or_add_tcPr()
-                shade_obj = OxmlElement("w:shd")
-                shade_obj.set(qn2("w:fill"),"2ABCB5")
-                table_cell_properties.append(shade_obj)
-
-                widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
-                for row in programeBenefitsTable.rows:
-                    for idx, width in enumerate(widths):
-                        row.cells[idx].width = width            
-                for row in programeBenefitsTable.rows:
-                    for cell in row.cells:
-                        cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-                        paragraphs = cell.paragraphs
-                        for paragraph in paragraphs:
-                            for run in paragraph.runs:
-                                font = run.font
-                                font.size= docx.shared.Pt(15)
-            if self.ableCount:
-                text = self.CountBenefitsE.toPlainText()
-                listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
-                final_text = []
-                for i in text:
-                    if i in listNubmers:
-                        final_text.append(convert_numbers.english_to_hindi(i))
-                    else:
-                        final_text.append(i)
-
-
-                programeCountBenefitsTable = doc.add_table(rows=1,cols=2)
-                programeCountBenefitsTable.style = 'Table Grid' 
-                hdr_Cells = programeCountBenefitsTable.rows[0].cells
-                hdr_Cells[1].text = "عدد المستفيدين"
-                hdr_Cells[0].text = ''.join(final_text)
-                programeCountBenefitsTable.autofit = False
-
-                cell_xml_element = programeCountBenefitsTable.rows[0].cells[1]._tc
-                table_cell_properties = cell_xml_element.get_or_add_tcPr()
-                shade_obj = OxmlElement("w:shd")
-                shade_obj.set(qn2("w:fill"),"2ABCB5")
-                table_cell_properties.append(shade_obj)
-
-                widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
-                for row in programeCountBenefitsTable.rows:
-                    for idx, width in enumerate(widths):
-                        row.cells[idx].width = width            
-                for row in programeCountBenefitsTable.rows:
-                    for cell in row.cells:
-                        cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-                        paragraphs = cell.paragraphs
-                        for paragraph in paragraphs:
-                            for run in paragraph.runs:
-                                font = run.font
-                                font.size= docx.shared.Pt(14)
-
-            if self.countPic != 0:
-                paragraph = doc.add_paragraph()
-                paragraph.paragraph_format.space_before = docx.shared.Pt(2)
-                run = paragraph.add_run()
-                for i in range(len(self.pictersPaths)):
-                    if self.pictersPaths[i] !="":
-                            try:
-                                os.remove("imageWithBoarder.png")
-                            except:
-                                pass
-                            imgB = Image.open(self.pictersPaths[i])
-
-                            border_color_rgb = (128, 128, 128, 255)
-
-                            resize = imgB.resize((500,500),Image.LANCZOS)
-
-                            bordered_image = ImageOps.expand(resize, border=8, fill=border_color_rgb)
-                            
-                            bordered_image.save('imageWithBoarder.png')
-                            if len(self.label1Maye.text()) > 0 or len(self.label2Maye.text()) > 0:
-                                run.add_picture('imageWithBoarder.png',width=docx.shared.Inches(3.9),height=docx.shared.Inches(1.8))
-                            else:
-                                run.add_picture('imageWithBoarder.png',width=docx.shared.Inches(3.9),height=docx.shared.Inches(2.2))
-
-                            if i !=1:
-                                run.add_text("   ")
-                            if i==1:
-                                run.add_text("\n")
-                    paragraph.paragraph_format.space_after = docx.shared.Pt(0)
-
-            if len(self.label1Maye.text()) > 0 or len(self.label2Maye.text()) > 0:
-                addmins_table = doc.add_table(rows=1, cols=2)
-                for row in addmins_table.rows:
-                    for cell in row.cells:
-                        tc = cell._element.tcPr
-                        tc.left = None
-                        tc.top = None
-                        tc.right = None
-                        tc.bottom = None
-                        cell.vertical_alignment = docx.enum.table.WD_CELL_VERTICAL_ALIGNMENT.CENTER
-                        cell.paragraphs[0].alignment = docx.enum.table.WD_TABLE_ALIGNMENT.CENTER
-                        cell.paragraphs[0].size = docx.shared.Pt(8)
-                addmins_Cells = addmins_table.rows[0].cells
-
-                addmins_Cells[0].text = self.label1Maye.text()+"\n"+f"{self.consultName.text()}"
-
-                addmins_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.LEFT
-
-                addmins_Cells[1].text = self.label2Maye.text()+"\n"+f"{self.MangerName.text()}"
-
-                addmins_table.rows[0].cells[1].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-
-                paragraph12 =addmins_Cells[0].paragraphs[0]
-                run = paragraph12.runs
-                font = run[0].font
-                font.size= docx.shared.Pt(15)
-
-                paragraph13 =addmins_Cells[1].paragraphs[0]
-                run = paragraph13.runs
-                font = run[0].font
-                font.size= docx.shared.Pt(15)
-                heights = (docx.shared.Pt(16),docx.shared.Pt(16))
-                for idx,row in enumerate(addmins_table.rows):
-                    row.height = heights[idx]
-
-            doc.save("printFile.docx")
-            self.convertWordToHtml("printFile.docx","printFile.html")
-
-            os.remove("printFile.docx")
+            self.writePdf(fromWhere="printer")
             
+  
             try:
-                os.remove("pic1.png")
-                os.remove("pic2.png")
-                os.remove("pic3.png")
-                os.remove("pic4.png")
-                os.remove("secretThing.png")
-            except:
-                pass
-
-            try:
-                webbrowser.open("printFile.html", new=2)
+                webbrowser.open("printFile.pdf", new=2)
                 time.sleep(6)
                 pyautogui.hotkey("ctrl","p")
                     
@@ -2991,20 +2783,20 @@ if is_admin():
                 cr.execute("SELECT id FROM reports")
                 reports = cr.fetchall()
                 if reports:
-
                     self.eachValue = 100//len(reports)
                     self.progressBarWindow = Choices()
                     self.progressBarWindow.setFixedSize(250,30)
                     self.progressBar = QProgressBar(self.progressBarWindow)
                     self.progressBar.setGeometry(0,0,290,30)
-
-                    folder_path = QFileDialog.getExistingDirectory(self.windowSaved, "اختر مسارا", desktopPath)
+                    # choose desktop as dafault path
+                    folder_path = os.path.join(os.path.expanduser("~"), "Desktop")
+                    # folder_path = QFileDialog.getExistingDirectory(self.windowSaved,"اختر مسارا", desktopPath)
                     if(folder_path):
                         for i in reports:
                           for j in i:
                             self.completeExportAllSummaryReports(j,folder_path)
 
-                        d = QMessageBox(parent=self.windowCreating,text="تم تصدير الملفات بنجاح")
+                        d = QMessageBox(parent=self.windowCreating,text="تم تصدير الملفات على سطح المكتب بنجاح")
                         d.setWindowTitle("نجاح")
                         d.setIcon(QMessageBox.Icon.Information)
                         d.exec()
@@ -3097,9 +2889,8 @@ if is_admin():
                     secretThing.write(picLogo)
                 runCells.add_picture("secretThing.png",width=docx.shared.Inches(2.1),height=docx.shared.Inches(1))
                 runCells.add_text("\t")
-            else:
-                runCells.add_text("\t\t\t\t\t")
-                runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
+
+            runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
 
             for row in headers_table.rows:
                 for cell in row.cells:
@@ -3520,13 +3311,95 @@ if is_admin():
                 heights = (docx.shared.Pt(16),docx.shared.Pt(16))
                 for idx,row in enumerate(addmins_table.rows):
                     row.height = heights[idx]
- 
+
+            subFilesD = [f for f in os.listdir(folder_path) if f.endswith(".docx")]
             name = str(idFun)+".docx"
+            if name in subFilesD:
+                i = 1
+                while name in subFilesD:
+                    name = f"({i}) {name}"
+                    i+=1
+ 
+            
             doc.save(f"{folder_path}/{name}")
         
-        
 
-        def exportSummaryScreen(self,fromWhere="Word"):
+
+        def exportSummaryAsPdf(self):
+                try:
+                                
+                        FileNameSave = QFileDialog.getSaveFileName(self.windowCreating, "اختر مسارا", desktopPath)
+                        if len(FileNameSave[0]) > 0:
+                            folder = (str(FileNameSave[0]).split("/"))
+                            nameFile = folder[-1]
+                            folderFinle = "/".join(folder[:-1])
+                            cr.execute("SELECT name, executer, executeDate, benefits, countBenefits FROM reports")
+                            fetched_data = cr.fetchall()
+          
+                            header = [
+                            get_display(arabic_reshaper.reshape(' م ')),  # Number column header
+                            get_display(arabic_reshaper.reshape(' اسم البرنامج ')),  # Program name header
+                            get_display(arabic_reshaper.reshape(' المنفذ ')),  # Executer header
+                            get_display(arabic_reshaper.reshape(' تاريخ التنفيذ ')),  # Execution date header
+                            get_display(arabic_reshaper.reshape(' المستفيدون ')),  # Beneficiaries header
+                            get_display(arabic_reshaper.reshape(' عدد المستفيدين '))  # Count of beneficiaries header
+                            ]
+
+                            header.reverse()  # Reverse the header for RTL direction
+                            data = [header]  # Add header as the first row of the table
+                        
+                            for numberTemp, row in enumerate(fetched_data):
+                                reshaped_row = [                                
+                                get_display(arabic_reshaper.reshape(str(numberTemp + 1))),  # Number in Arabic format
+                                get_display(arabic_reshaper.reshape(str(row[0]))), #name
+                                get_display(arabic_reshaper.reshape(str(row[1]))),  # Executer
+                                get_display(arabic_reshaper.reshape(str(row[2]))),  # Execution Date
+                                get_display(arabic_reshaper.reshape(str(row[3]))),  # Beneficiaries
+                                get_display(arabic_reshaper.reshape(str(row[4]))),  # Count of beneficiaries
+                                 ]
+                                reshaped_row.reverse()
+                                data.append(reshaped_row)
+                                
+                  
+                            font_path = 'font/Amiri-Regular.ttf' 
+                            pdfmetrics.registerFont(TTFont('ArabicFont',font_path))  # Change to your font's TTF file
+                            pdf_file_path = f"{folderFinle}/{nameFile}.pdf"
+                            doc = SimpleDocTemplate(pdf_file_path, pagesize=landscape(A4))
+
+                            column_widths = [130,130,130,130,130,30]  # Adjust as needed
+                            row_heights = 35  # Set row height to make the table rows bigger
+
+                            table = Table(data, colWidths=column_widths, rowHeights=row_heights)
+                            table.setStyle(TableStyle([
+                             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                             ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
+                             ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
+                             ('SIZE', (0, 0), (-1, -1), 15),  # Font size
+                             ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                             ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
+                             ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
+                             ('TOPPADDING', (0, 0), (-1, -1), 10),  # Add top padding
+                             ('BOTTOMPADDING', (0, 0), (-1, -1), 20),  # Add bottom padding
+                             ]))
+
+                            elements = [table]
+                            doc.build(elements)
+
+                            d = QMessageBox(parent=self.windowCreating, text=f"تم التصدير بنجاح")
+                            d.setWindowTitle("نجاح")
+                            d.setIcon(QMessageBox.Icon.Information)
+                            d.exec()
+   
+                except Exception as e:
+                    d = QMessageBox(parent=self.windowCreating)  
+                    d.setWindowTitle("فشل")  
+                    d.setText("حدث خطأ حاول مرة أخرى")
+                    d.setIcon(QMessageBox.Icon.Warning)
+                    d.exec() 
+
+        
+        def exportSummaryAsWord(self):
             
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
             if len(FileNameSave[0])>0:
@@ -3587,38 +3460,11 @@ if is_admin():
                                 font = run.font
                                 font.size= docx.shared.Pt(17)
 
-                subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".docx")]
                 name = nameFile+".docx"
-                if name in subFilesD:
-                    i = 1
-                    while name in subFilesD:
-                        name = f"({i}) {name}"
-                        i+=1
                 doc.save(f"{folderFinle}/{name}")
+                
 
-                if fromWhere =="Pdf":
-                    htmlname = nameFile+".html"
-                    try:
-                        in_file = f"{folderFinle}/{name}"
-                        out_file = f"{folderFinle}/{htmlname}"
-                        self.convertWordToHtml(in_file,out_file)
-                        webbrowser.open(out_file, new=2)
-                        time.sleep(2)
-                        pyautogui.hotkey("ctrl","p")
-   
-                    except:
-                        d = QMessageBox(parent=self.windowCreating)  
-                        d.setWindowTitle("فشل")  
-                        d.setText("حدث خطأ حاول مرة أخرى")
-                        d.setIcon(QMessageBox.Icon.Warning)
-                        d.exec() 
 
-                    os.remove(f"{folderFinle}/{name}")
-
-                d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
-                d.setWindowTitle("نجاح")
-                d.setIcon(QMessageBox.Icon.Information)
-                d.exec()
                 
         def closeEvent(self, event):
             try:

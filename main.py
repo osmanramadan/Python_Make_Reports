@@ -1,39 +1,48 @@
-# Import Required libraries
-from PyQt6.QtWidgets import QGridLayout, QHBoxLayout, QApplication , QListWidgetItem, QListWidget,QSplitter,QWidget,QVBoxLayout,QPushButton,QLineEdit,QLabel,QMessageBox,QItemDelegate, \
-QTextEdit,QFrame,QFileDialog,QScrollArea,QMainWindow,QTableWidget,QTableWidgetItem,QRadioButton,QProgressBar,QLabel,QInputDialog
-from PyQt6.QtGui import QIcon,QFont,QPixmap
-from PyQt6 import uic
-from PyQt6.QtCore import Qt,pyqtSignal
+# Import Required Libraries
 
+## PyQt6 Imports
+from PyQt6.QtWidgets import (
+    QApplication, QGridLayout, QHBoxLayout, QVBoxLayout, 
+    QSplitter, QWidget, QPushButton, QLineEdit, QLabel, 
+    QMessageBox, QItemDelegate, QTextEdit, QFrame, 
+    QFileDialog, QScrollArea, QMainWindow, 
+    QTableWidget, QTableWidgetItem, QRadioButton, 
+    QProgressBar, QListWidget, QListWidgetItem
+)
+from PyQt6.QtGui import QIcon, QFont, QPixmap
+from PyQt6 import uic
+from PyQt6.QtCore import Qt, pyqtSignal
+## Standard Library Imports
 import sqlite3
 import sys
 import os
-from PIL import Image , ImageOps
+import webbrowser
+import shutil
+import ctypes
+import time
+## Third-Party Imports
+from PIL import Image, ImageOps
+import pyautogui
 import docx
+import convert_numbers
+import arabic_reshaper
+from bidi.algorithm import get_display
+## Docx Imports
 import docx.enum
 import docx.enum.section
 from docx.oxml.xmlchemy import OxmlElement
 from docx.oxml.shared import qn
 from docx.oxml.ns import qn as qn2
-import webbrowser
-import shutil
-import ctypes
-import pyautogui
-import time
-import convert_numbers
+## ReportLab Imports
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.lib.pagesizes import A4, landscape, letter
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-import arabic_reshaper
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph,Image as img
-from bidi.algorithm import get_display
-from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image as img
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT
-from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
 
 
 xForImpo = 900
@@ -248,7 +257,7 @@ if is_admin():
             layout_widget.setMaximumWidth(240)
 
 
-            # ******************* left top section ******************* ******************* left top section  *******************
+            # ******************* left top section ************************* left top section *******************
             
             layout = QVBoxLayout()                        
             layout_widget.setLayout(layout)                        
@@ -260,8 +269,8 @@ if is_admin():
             layout.addWidget(self.listWidget)    
             self.load_data()          
             
-            # Connect double-click event to open the report
-            self.listWidget.itemDoubleClicked.connect(self.onItemDoubleClicked)
+            # Connect click event to open the report
+            self.listWidget.clicked.connect(self.onItemClicked)
             self.listWidget.setCursor(Qt.CursorShape.PointingHandCursor)
             layout_widget.setMinimumWidth(380)
                                     
@@ -276,10 +285,8 @@ if is_admin():
             # Create a grid layout
             Gridlayout = QGridLayout()
             Gridlayout_widget.setLayout(Gridlayout)
-            # Add buttons to the layout at row 0, and columns 0, 1, and 2      
             Gridlayout.addWidget(self.scroll,0, 0)
-            Gridlayout.addWidget(button_list_widget,0, 1)
-            
+            Gridlayout.addWidget(button_list_widget,0, 1)            
             # Align the buttons to expand vertically (row stretch)
             Gridlayout.setRowStretch(0, 1)
             
@@ -290,16 +297,13 @@ if is_admin():
                     background-color: gray; 
                 }
             """)
-                        
             splitter.addWidget(layout_widget)
             splitter.addWidget(Gridlayout_widget)
             self.setCentralWidget(splitter) 
 
             
-
         def openwebSite(self):
             webbrowser.open('https://www.ersal-m.com', new=2)
-
 
         # export current database
         def exportDb(self):
@@ -324,7 +328,6 @@ if is_admin():
             try:
               # Copy the database file to the specified location with the new name
               shutil.copy2("app.db", destination_path) 
-
               # Create a custom message box with added space
               d = QMessageBox(parent=self.windowCreating,text=f"تم تصدير قاعدة البيانات '{database_name}' بنجاح")
               d.setWindowTitle("نجاح")
@@ -332,9 +335,9 @@ if is_admin():
               d.exec()
              
             except Exception as e:
-              QMessageBox.critical(self, "فشل الاضافه: {str(e)}")
+              QMessageBox.critical(self.windowCreating, "فشل الاضافه: {str(e)}")
 
-
+        # Import database (note:DB should be created first by developer)
         def importDb(self):
 
             d = QMessageBox(parent=self.windowCreating,text="هل انت متأكد من استرداد قاعدة بيانات؟")
@@ -375,7 +378,7 @@ if is_admin():
                     d.setIcon(QMessageBox.Icon.Critical)
                     d.exec()
 
-        #Functions To Get Saved Reports
+        # Functions To Get Saved Reports
         def savedReportsFun(self):
 
             self.windowSaved = Choices()
@@ -423,27 +426,38 @@ if is_admin():
             extractAllButton.setGeometry(320,460,160,30)
             self.windowSaved.show()
 
+        # Delete report from saved reports
         def deleteReport(self,row,fRom="Original"):
-            if fRom=="OutSide":
-                d = QMessageBox(parent=self.windowCreating,text=f"تأكيد حذف تقرير {self.TableSummary.item(row,8).text()}")
-            else:
-                d = QMessageBox(parent=self.windowCreating,text=f"تأكيد حذف تقرير {self.savedReports.item(row,3).text()}")
-            d.setIcon(QMessageBox.Icon.Information)
-            d.setWindowTitle(title)
-            d.setStandardButtons(QMessageBox.StandardButton.Cancel|QMessageBox.StandardButton.Ok)
-            important = d.exec()
-            if important == QMessageBox.StandardButton.Ok:
+            try:
                 if fRom=="OutSide":
-                    cr.execute(f"DELETE FROM reports WHERE id = '{self.TableSummary.item(row,8).text()}'")
+                  d = QMessageBox(parent=self.windowCreating,text=f"تأكيد حذف تقرير {self.TableSummary.item(row,6).text()}")
                 else:
-                    cr.execute(f"DELETE FROM reports WHERE id = '{self.savedReports.item(row,0).text()}'")
+                  d = QMessageBox(parent=self.windowCreating,text=f"تأكيد حذف تقرير {self.savedReports.item(row,3).text()}")
+                d.setIcon(QMessageBox.Icon.Information)
+                d.setWindowTitle(title)
+                d.setStandardButtons(QMessageBox.StandardButton.Cancel|QMessageBox.StandardButton.Ok)
+                important = d.exec()
 
-                con.commit()
-                if fRom=="OutSide":
-                    self.TableSummary.hideRow(row)
-                else:
-                    self.savedReports.hideRow(row)
-                self.load_data()
+                if important == QMessageBox.StandardButton.Ok:
+    
+                    if fRom=="OutSide":
+                      cr.execute(f"DELETE FROM reports WHERE id = '{self.TableSummary.item(row,6).text()}'")
+                    else:
+                      cr.execute(f"DELETE FROM reports WHERE id = '{self.savedReports.item(row,0).text()}'")
+
+                    con.commit()
+                    if fRom=="OutSide":
+                      self.TableSummary.hideRow(row)
+                    else:
+                      self.savedReports.hideRow(row)
+                    self.load_data()
+            except Exception as e:
+                print(e)
+                d = QMessageBox(parent=self.windowCreating)  
+                d.setWindowTitle("فشل")  
+                d.setText("حدث خطأ حاول مرة أخرى")
+                d.setIcon(QMessageBox.Icon.Warning)
+                d.exec() 
 
         # Function To Create New Report 
         def createReportFun(self):                    
@@ -472,6 +486,7 @@ if is_admin():
 
         #Function To Open Control Panel
         def controlPanel(self):
+
             self.windowControl = Choices()
             self.windowControl.setFixedSize(300,570)
             self.windowControl.setWindowTitle(title)
@@ -516,9 +531,10 @@ if is_admin():
             self.FrameMin.setLayout(self.layoutFrameLogo)
 
             picLabel = QLabel(self.FrameMin)
-            cr.execute("SELECT icon FROM start")
             
             try:
+                cr.execute("SELECT icon FROM start")
+
                 with open("images/logo.png","wb") as logoImpo:
                    logoImpo.write(cr.fetchone()[0])
                 img = Image.open("images/logo.png")
@@ -553,6 +569,7 @@ if is_admin():
             self.windowControl.show()
 
         def addPicLogo(self):
+
             responce = QFileDialog.getOpenFileName(self.windowControl,"اختر ملفا",desktopPath,filter="Image File (*.*)")
             if len(responce[0])!=0:
                 image = Image.open(responce[0])
@@ -574,8 +591,9 @@ if is_admin():
 
                 self.layoutFrameLogo.addWidget(picLabel)
                 os.remove("logo_image.png")
-
+        # Save control panal info
         def Save(self):
+
             if self.picBinaryMinLogo !="":
                 cr.execute(f"UPDATE start set line1='{self.lineone.text()}' ,line2='{self.linetwo.text()}' , line3='{self.linethree.text()}' , line4 = '{self.linefour.text()}',icon=?",([self.picBinaryMinLogo]))
             else:
@@ -586,8 +604,9 @@ if is_admin():
             d.setIcon(QMessageBox.Icon.Information)
             d.exec()
             self.windowControl.destroy()
-            
+        # Create new content
         def creating(self,fromW):
+
             try:
                 self.destroy()
                 self.close()
@@ -653,8 +672,6 @@ if is_admin():
             addButton("images/importDb.png", "إستيراد قاعدة البيانات", self.importDb)
             addButton("images/word.png", "word حفظ بصيغة", self.writeWord)
             addButton("images/pdfIcon.png", "pdf حفظ بصيغة", lambda: self.writePdf(fromWhere="convert"))
-
-            
             
             companyLogobutton = QPushButton()                
             companyLogobutton.setStyleSheet(f"font-size:14px;qproperty-icon:url('images/companyLogo.png');qproperty-iconSize:150px 100px;background-color:transparent;")   
@@ -685,10 +702,9 @@ if is_admin():
             
             logoLabel = QLabel(self.hiderFrameshow)
             logoLabel.move(350,10)
-
-            cr.execute("SELECT icon FROM start")
             
             try:
+                cr.execute("SELECT icon FROM start")
 
                 with open("images/logo.png","wb") as logoImpo:
                    logoImpo.write(cr.fetchone()[0])
@@ -788,7 +804,6 @@ if is_admin():
                         else:
                             self.programeDescriptionE.setText(str(listImportant[4]))
 
-
                     if listImportant[5]!="":
                         self.ableCreator = True
                         self.executer()
@@ -797,6 +812,7 @@ if is_admin():
                             self.programeCreatorE.setText(str(listImportant[5]).strip())
                         else:
                             self.programeCreatorE.setText(str(listImportant[5]))
+                            
                     if listImportant[6]!="":
                         self.ableDate = True
                         self.executeDate()
@@ -814,6 +830,7 @@ if is_admin():
                             self.programeBenefitsE.setText(str(listImportant[7]).strip())
                         else:
                             self.programeBenefitsE.setText(str(listImportant[7]))
+
                     if listImportant[8]!="":
                         self.ableCount = True
                         self.CountBenefits()
@@ -823,6 +840,7 @@ if is_admin():
                             self.CountBenefitsE.setText(str(listImportant[8]).strip())
                         else:
                             self.CountBenefitsE.setText(str(listImportant[8]))
+                            
                     if listImportant[9]!="":
                         numberOfPictures+=1
                     if listImportant[10]!="":
@@ -911,15 +929,17 @@ if is_admin():
                     self.CreatePic(self.windowCreate.manyPic.currentText())
                 self.addAdmins(self.cFrameshow)
             self.cFrameshow.setGeometry(0,145,900,1150)
+            
 
-            # ******************* left top section ******************* ******************* left top section  *******************
+            # ******************* left top section ******************* left top section  *******************
 
             layout_widget = QWidget(self.windowCreating)
             layout_widget.setMaximumWidth(330)
-            
+
             # Create a vertical layout to hold the header label and the list widget
             layout = QVBoxLayout()                        
-            layout_widget.setLayout(layout)                        
+            layout_widget.setLayout(layout)              
+
             # Create the header label
             header_label = QLabel("التقارير المحفوظة")
             header_label.setAlignment(Qt.AlignmentFlag.AlignCenter)             
@@ -930,7 +950,7 @@ if is_admin():
             self.listWidget = QListWidget(layout_widget)
             layout.addWidget(self.listWidget)    
             self.load_data()        
-            self.listWidget.itemDoubleClicked.connect(self.onItemDoubleClicked)
+            self.listWidget.clicked.connect(self.onItemClicked)
             self.listWidget.setCursor(Qt.CursorShape.PointingHandCursor)
 
             layout_widget.setMinimumWidth(380)
@@ -954,7 +974,7 @@ if is_admin():
             splitter.setHandleWidth(5)
             splitter.setStyleSheet("""
                 QSplitter::handle:horizontal {
-                    background-color: gray;  /* Set the handle color */
+                    background-color: gray;
                 }
             """)
             splitter.addWidget(layout_widget)
@@ -963,12 +983,13 @@ if is_admin():
             self.show()
             
                 
-        def onItemDoubleClicked(self, item):
+        def onItemClicked(self, item):
             """Handle double-click on the QListWidgetItem."""
             report_id = item.data(Qt.ItemDataRole.UserRole)       
             self.creating(str(report_id))
-
+        # Show single report
         def showReport(self, programeNameShow):
+
             self.windowshow = Choices() 
             self.windowshow.resize(920,1200)
             self.windowshow.setMinimumSize(920,1200)                                            
@@ -990,7 +1011,6 @@ if is_admin():
             # Set up the current design UI (existing code)
             hiderFrameshow = QFrame(right_frame)
             hiderFrameshow.setStyleSheet("background-color: white")        
-            # Existing UI setup code for `self.hiderFrame` ...
             hidderFramePicshow = QFrame(hiderFrameshow)
             hidderFramePicshow.setStyleSheet(f"background-color:#EBEAE9;")
             hidderFramePicshow.setGeometry(40, 5, 250, 130)
@@ -1040,7 +1060,6 @@ if is_admin():
             
             # Set the central widget and layout
             def createNamePrograme():
-
                 global yForImpo
                 programeName = QTextEdit(cFrameshow)
                 programeName.setText("اسم البرنامج")
@@ -1050,14 +1069,13 @@ if is_admin():
                 programeName.setDisabled(True)
                 programeName.move(700,yForImpo)
                 
-
                 programeNameE = QTextEdit(cFrameshow)
                 programeNameE.setGeometry(0,0,565,35)    
                 programeNameE.setAlignment(Qt.AlignmentFlag.AlignLeft)
                 programeNameE.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
                 programeNameE.setFont(QFont("Arial",14))
                 programeNameE.move(135,yForImpo)
-
+                
 
                 yForImpo +=35
                 if listImportant[2] == " ":
@@ -1149,7 +1167,8 @@ if is_admin():
                 if listImportant[6] == " ":
                     programeWhenDateE.setText(str(listImportant[6]).strip())
                 else:
-                    programeWhenDateE.setText(str(listImportant[6]))                
+                    programeWhenDateE.setText(str(listImportant[6]))         
+
             def Benefits():
                 global yForImpo
                 global xForImpo
@@ -1312,29 +1331,26 @@ if is_admin():
                 if listImportant[9]!="" and listImportant[9]!=" ":                    
                     with open(f"pic11.png","wb") as image1:
                         image1.write(listImportant[9])
-                    
                     putImage(0)
 
                 if listImportant[10]!="" and listImportant[10]!=" ":
-                    print("hi10")
                     with open(f"pic22.png","wb") as image2:
-                        image2.write(listImportant[10])
-                    
+                        image2.write(listImportant[10])                    
                     putImage(1)
+
                 if listImportant[11]!="" and listImportant[12]!=" ":
                     with open(f"pic33.png","wb") as image3:
                         image3.write(listImportant[11])
-                    
                     putImage(2)
+
                 if listImportant[12]!="" and listImportant[12]!=" ":
                     with open(f"pic44.png","wb") as image4:
                         image4.write(listImportant[12])
-                    
                     putImage(3)
+
                 if listImportant[13]!="":                                       
                     with open(f"secretThing1.png","wb") as image5:
-                        image5.write(listImportant[13])
-                                        
+                        image5.write(listImportant[13])                    
                     putImage(1000)
                     
                 label1Maye = QLineEdit(cFrameshow)
@@ -1382,13 +1398,12 @@ if is_admin():
             self.TableSummary.setColumnHidden(6,True)
             self.windowsummary.resizeEvent = self.resizeSummary
             self.TableSummary.setColumnWidth(0,200)
-
-            cr.execute("SELECT name,executer,executeDate,benefits,countBenefits From reports")
+            cr.execute("SELECT id,name,executer,executeDate,benefits,countBenefits From reports")
             result = cr.fetchall()
             for r,i in enumerate(result):
                 self.TableSummary.insertRow(self.TableSummary.rowCount())
                 i = list(i)
-                i.insert(8,"")
+                i.insert(6,"")
                 for col,c in enumerate(reversed(i)):
                     if col == 0:
                         button = QPushButton()
@@ -1399,6 +1414,7 @@ if is_admin():
                     else:
                         item = QTableWidgetItem(str(c))
                         self.TableSummary.setItem(r,col,item)
+                        
             delegate = LineEditDelegate()
             self.TableSummary.setItemDelegate(delegate)
             self.TableSummary.setGeometry(0,0,720,470)
@@ -1452,6 +1468,7 @@ if is_admin():
             self.TableSummary.show()
 
         def updateAReport(self):
+
             namePrograme = ""
             Goals = ""
             description = ""
@@ -1463,7 +1480,7 @@ if is_admin():
             pic2 = ""
             pic3 = ""
             pic4 = ""
-            
+
             if self.ablePrograme:
                 namePrograme = self.programeNameE.toPlainText() if len(self.programeNameE.toPlainText()) > 0 else " "
             if self.ableGoals:
@@ -1483,49 +1500,65 @@ if is_admin():
             if self.ableCount:
                 countBenefits = self.CountBenefitsE.toPlainText() if len(self.CountBenefitsE.toPlainText()) > 0 else " "
 
-            if self.countPic != 0:
-                if self.pictersPaths[0]!="":
-                    with open(self.pictersPaths[0],"rb") as binary_image:
-                        binaryCode = binary_image.read()
-                    pic1 = binaryCode
-                else:
-                    pic1 = " "
-                if self.pictersPaths[1]!="":
-                    with open(self.pictersPaths[1],"rb") as binary_image:
-                        binaryCode = binary_image.read()
-                    pic2 = binaryCode
-                else:
-                    pic2 = " "
-                if self.pictersPaths[2]!="":
-                    with open(self.pictersPaths[2],"rb") as binary_image:
-                        binaryCode = binary_image.read()
-                    pic3 = binaryCode
-                else:
-                    pic3 = " "
-                if self.pictersPaths[3]!="":
-                    with open(self.pictersPaths[3],"rb") as binary_image:
-                        binaryCode = binary_image.read()
-                    pic4 = binaryCode
-                else:
-                    pic4 = " "
-            picLogo = ""
-            if self.hidderlayoutPicshow.count() > 0:
-                picLogo = self.picLogoBinary
-            reportName = self.programeNameShow
-            if self.label1Maye:
-                label1Maybe = self.label1Maye.text()
-            if self.label2Maye:
-               label2Maybe = self.label2Maye.text()
-            manger = str(self.MangerName.text())
-            co_manger = str(self.consultName.text())
+
+            try:
+
+                if self.countPic != 0:
+
+                    if  self.pictersPaths[0]!="":
+                        with open(self.pictersPaths[0],"rb") as binary_image:
+                           binaryCode = binary_image.read()
+                        pic1 = binaryCode
+                    else:
+                        pic1 = " "
+
+                    if self.pictersPaths[1]!="":
+                        with open(self.pictersPaths[1],"rb") as binary_image:
+                           binaryCode = binary_image.read()
+                        pic2 = binaryCode
+                    else:
+                        pic2 = " "
+
+                    if self.pictersPaths[2]!="":
+                        with open(self.pictersPaths[2],"rb") as binary_image:
+                           binaryCode = binary_image.read()
+                        pic3 = binaryCode
+                    else:
+                        pic3 = " "
+
+                    if self.pictersPaths[3]!="":
+                        with open(self.pictersPaths[3],"rb") as binary_image:
+                           binaryCode = binary_image.read()
+                        pic4 = binaryCode
+                    else:
+                        pic4 = " "
+                
+                    picLogo = ""
+                    if self.hidderlayoutPicshow.count() > 0:
+                       picLogo = self.picLogoBinary
+                    reportName = self.programeNameShow
+
+                if self.label1Maye !="":
+                  label1Maybe = self.label1Maye.text()
+                if self.label2Maye  !="":
+                  label2Maybe = self.label2Maye.text()
+                if self.MangerName !="":
+                  manger = str(self.MangerName.text())
+                if self.consultName !="":
+                  co_manger = str(self.consultName.text())
+
+            except:
+                pass
+
             cr.execute(f"""UPDATE reports set name=?,Goals=?,description=?,executer=?,executeDate=?,benefits=?,countBenefits=?,pic1=?,pic2=?,pic3=?,pic4=?,picLogo=?,label1Maybe=?,label2Maybe=?,manger=?,co_manger=? WHERE id = ?""",(namePrograme,Goals,description,executer,executeDate,benefits,countBenefits,pic1,pic2,pic3,pic4,picLogo,label1Maybe,label2Maybe,manger,co_manger,reportName))
-            # it doesn't work just this way i have to use it to work
+
             d = QMessageBox(parent=self.windowCreating,text="تم الحفظ بنجاح")
             d.setWindowTitle("نجاح")
             d.setIcon(QMessageBox.Icon.Information)
             d.exec()
             con.commit()
 
+        # Delete images which used as temp images 
         def deleteImagesTemp(self,neNum):
 
             if neNum=="ReportCover":
@@ -1565,7 +1598,7 @@ if is_admin():
 
         # Save The Report As New File 
         def SavePrograme(self):
-            
+
             self.saveProgrameWindow = Choices()
             self.saveProgrameWindow.setFixedSize(200,200)
             self.saveProgrameWindow.setWindowTitle(title)
@@ -1577,6 +1610,7 @@ if is_admin():
             self.NameEntryProgrameFile.setFont(QFont("Arial",15))
             self.NameEntryProgrameFile.move(20,40)
             SaveButton = QPushButton("حفظ",self.saveProgrameWindow,clicked=self.saveReport)
+            SaveButton.setCursor(Qt.CursorShape.PointingHandCursor)
             SaveButton.setGeometry(0,0,150,40)
             SaveButton.setStyleSheet("background-color:green")
             SaveButton.setFont(QFont("Arial",15))
@@ -1626,12 +1660,14 @@ if is_admin():
                 DeleteButtonHidderInside.move(buttonx+tempvar.width()//2 - 35,buttony+tempvar.height())
                 if i<=1:
                     x+=360
-
+        # Put image in images container
         def putImage(self,ob,number=-1):
+            
             try:
                 os.remove("image.png")
             except:
                 pass
+
             if ob=="ReportCover":
                 responce = QFileDialog.getOpenFileName(self.windowCreating,"اختر ملفا",desktopPath,filter="Image File (*.*)")
                 if len(responce[0])!=0:
@@ -1645,7 +1681,7 @@ if is_admin():
                     picLabel = QLabel(self.hidderFramePicshow)
                     pix = QPixmap("reportheaderimage.png")
                     picLabel.setPixmap(pix)        
-                    # pix.setCursor(Qt.CursorShape.PointingHandCursor)
+
                     for i in reversed(range(self.hidderlayoutPicshow.count())): 
                         self.hidderlayoutPicshow.itemAt(i).widget().setParent(None)
 
@@ -1733,6 +1769,7 @@ if is_admin():
                     os.remove("image.png")
 
         def createNamePrograme(self):
+
             global yForImpo
             programeName = QTextEdit(self.cFrameshow)
             programeName.setText("اسم البرنامج")
@@ -1952,6 +1989,7 @@ if is_admin():
             self.CountBenefitsE.move(135,yForImpo)
 
         def saveReport(self):
+
             namePrograme = ""
             Goals = ""
             description = ""
@@ -2023,6 +2061,7 @@ if is_admin():
             con.commit()
             self.load_data()  
 
+        # Get Pdf for printer and converter
         def writePdf(self,fromWhere):
 
             content = [] 
@@ -2036,16 +2075,13 @@ if is_admin():
                FileNameSave = [file_path]
           
             if len(FileNameSave[0]) > 0:
-                
                 pdf_file_path = FileNameSave[0]
                 doc = SimpleDocTemplate(pdf_file_path, pagesize=letter)
-
                 # Register the Amiri font
                 font_path = 'font/Amiri-Regular.ttf' 
                 pdfmetrics.registerFont(TTFont('ArabicFont', font_path))
                 font_path_bold = 'font/Amiri-Bold.ttf'  
                 pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_path_bold))
-
                 # Set up styles
                 styles = getSampleStyleSheet()
                 custom_style = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=16, spaceAfter=30, alignment=1)
@@ -2176,7 +2212,7 @@ if is_admin():
                 ]))
                 content.append(table)
 
-                if self.countPic !=0: 
+                if self.countPic !=0:
                     images_data = []
                     max_images_per_row = 2 
                     current_row = []
@@ -2228,75 +2264,71 @@ if is_admin():
             # ]))
             # content.append(images_table)
 
+            # *Get Footer Content*
+            # Style for  (right column)
+            footer_right_style = ParagraphStyle(
+                name="rightContent",
+                alignment=TA_RIGHT,
+                textColor=colors.black,
+                fontSize=12,
+                spaceAfter=10
+            )
+            footer_right_style.fontName = 'ArabicFont-bold'  # Set the custom style font to ArabicFont
+             # Style for  (left column)
+            footer_left_style = ParagraphStyle(
+                name="leftContent",
+                alignment=TA_LEFT,
+                fontSize=12,
+                spaceAfter=10
+            )
+            footer_left_style.fontName = 'ArabicFont-bold' 
+            footer_data = [[[],[]],[[],[]]] 
 
+            if len(self.label2Maye.text()) > 0:
+                footer_data[0][0].append(get_display(arabic_reshaper.reshape(self.label2Maye.text())))
+            if len(self.consultName.text()) > 0:
+                footer_data[1][1].append(get_display(arabic_reshaper.reshape(self.consultName.text())))
+            if len(self.label1Maye.text()) > 0:
+                footer_data[0][1].append(get_display(arabic_reshaper.reshape(self.label1Maye.text())))
+            if len(self.MangerName.text()) > 0:
+                footer_data[1][0].append(get_display(arabic_reshaper.reshape(self.MangerName.text())))
 
-                    # *Get Footer Content*
-                    # Style for  (right column)
-                    footer_right_style = ParagraphStyle(
-                       name="rightContent",
-                       alignment=TA_RIGHT,
-                       textColor=colors.black,
-                       fontSize=12,
-                       spaceAfter=10
-                     )
-                    footer_right_style.fontName = 'ArabicFont-bold'  # Set the custom style font to ArabicFont
-                    # Style for  (left column)
-                    footer_left_style = ParagraphStyle(
-                      name="leftContent",
-                      alignment=TA_LEFT,
-                      fontSize=12,
-                      spaceAfter=10
-                     )
-            
-                    footer_left_style.fontName = 'ArabicFont-bold' 
-                    footer_data = [[[],[]],[[],[]]] 
+            footer_table_items = []
+            for first_list, second_list in footer_data:
+                    # Convert lists to strings before creating Paragraphs
+                    first = ' '.join(first_list) if first_list else ''
+                    second = ' '.join(second_list) if second_list else ''
+                    right_col = Paragraph(first, footer_right_style)
+                    left_col = Paragraph(second, footer_left_style)
+                    # Append the two-column row to table_data
+                    footer_table_items.append([left_col, right_col])
 
-                    if len(self.label2Maye.text()) > 0:
-                        footer_data[0][0].append(get_display(arabic_reshaper.reshape(self.label2Maye.text())))
-                    if len(self.consultName.text()) > 0:
-                        footer_data[1][1].append(get_display(arabic_reshaper.reshape(self.consultName.text())))
-                    if len(self.label1Maye.text()) > 0:
-                        footer_data[0][1].append(get_display(arabic_reshaper.reshape(self.label1Maye.text())))
-                    if len(self.MangerName.text()) > 0:
-                        footer_data[1][0].append(get_display(arabic_reshaper.reshape(self.MangerName.text())))
+                # Create the Table
+            table = Table(footer_table_items, colWidths=[3.7 * inch, 3.7 * inch])
 
+                # Add some basic styling to the table (optional)
+            table.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
+                ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
+                ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
+                ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
+                ('TOPPADDING', (0, 0), (-1, -1), 10),  # Add top padding
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  # Add bottom padding
+            ]))
+            content.append(table)
+            def add_border(canvas, doc):
+                # Draw a border around the page
+                width, height = letter  # Get the page dimensions
+                border_offset = 20  # Thickness of the border
+                canvas.setStrokeColor(colors.black)
+                canvas.setLineWidth(1)  # Border width
+                canvas.rect(border_offset, border_offset, width - 2 * border_offset, height - 2 * border_offset, stroke=1, fill=0)
 
-                    footer_table_items = []
-                    for first_list, second_list in footer_data:
-                       # Convert lists to strings before creating Paragraphs
-                       first = ' '.join(first_list) if first_list else ''
-                       second = ' '.join(second_list) if second_list else ''
-                       right_col = Paragraph(first, footer_right_style)
-                       left_col = Paragraph(second, footer_left_style)
-                       # Append the two-column row to table_data
-                       footer_table_items.append([left_col, right_col])
-
-                    # Create the Table
-                    table = Table(footer_table_items, colWidths=[3.7 * inch, 3.7 * inch])
-
-                    # Add some basic styling to the table (optional)
-                    table.setStyle(TableStyle([
-                      ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
-                      ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
-                      ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
-                      ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
-                      ('TOPPADDING', (0, 0), (-1, -1), 10),  # Add top padding
-                      ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  # Add bottom padding
-                    ]))
-                    content.append(table)
-                    def add_border(canvas, doc):
-                      # Draw a border around the page
-                      width, height = letter  # Get the page dimensions
-                      border_offset = 20  # Thickness of the border
-                      canvas.setStrokeColor(colors.black)
-                      canvas.setLineWidth(1)  # Border width
-                      canvas.rect(border_offset, border_offset, width - 2 * border_offset, height - 2 * border_offset, stroke=1, fill=0)
-
-                    # Build the PDF document
-                    doc.build(content, onFirstPage=add_border, onLaterPages=add_border) 
+            # Build the PDF document
+            doc.build(content, onFirstPage=add_border, onLaterPages=add_border) 
             
         
-
+        
         def writeWord(self):    
 
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
@@ -2748,33 +2780,31 @@ if is_admin():
                 d.setWindowTitle("نجاح")
                 d.setIcon(QMessageBox.Icon.Information)
                 d.exec()
-            try:
-                os.remove("pic1.png")
-                os.remove("pic2.png")
-                os.remove("pic3.png")
-                os.remove("pic4.png")
-                os.remove("secretThing.png")
-            except:
-                pass
+            # try:
+            #     os.remove("pic1.png")
+            #     os.remove("pic2.png")
+            #     os.remove("pic3.png")
+            #     os.remove("pic4.png")
+            #     os.remove("secretThing.png")
+            # except:
+            #     pass
 
-
+        # Send Pdf to printer after write it
         def printDoc(self):
             try:
                 os.remove("printFile.pdf")
             except:
                 pass
 
-        
-            self.writePdf(fromWhere="printer")
-            
   
             try:
+                self.writePdf(fromWhere="printer")
                 webbrowser.open("printFile.pdf", new=2)
                 time.sleep(6)
                 pyautogui.hotkey("ctrl","p")
-                    
             except:
                 pass
+
 
         # Function To Get Summary Of Exist Reports
         def exportAllSummaryReports(self):
@@ -2813,6 +2843,7 @@ if is_admin():
 
 
         def completeExportAllSummaryReports(self,idFun,folder_path):
+
             try:
                 os.remove("pic1.png")
                 os.remove("pic2.png")
@@ -2904,7 +2935,6 @@ if is_admin():
             GoodPrograme.paragraph_format.space_before = docx.shared.Pt(1)
 
 
-
             cr.execute(f"SELECT name FROM reports WHERE id={idFun}")  
             namePrograme = cr.fetchone()[0]
             if namePrograme!="":
@@ -2916,7 +2946,6 @@ if is_admin():
                         final_text.append(convert_numbers.english_to_hindi(i))
                     else:
                         final_text.append(i)
-
 
                 programeNameProgrameTable = doc.add_table(rows=1,cols=2)
                 programeNameProgrameTable.style = "Table Grid"
@@ -3319,7 +3348,7 @@ if is_admin():
                 while name in subFilesD:
                     name = f"({i}) {name}"
                     i+=1
- 
+
             
             doc.save(f"{folder_path}/{name}")
         
@@ -3359,7 +3388,6 @@ if is_admin():
                                  ]
                                 reshaped_row.reverse()
                                 data.append(reshaped_row)
-                                
                   
                             font_path = 'font/Amiri-Regular.ttf' 
                             pdfmetrics.registerFont(TTFont('ArabicFont',font_path))  # Change to your font's TTF file
@@ -3464,7 +3492,6 @@ if is_admin():
                 doc.save(f"{folderFinle}/{name}")
                 
 
-
                 
         def closeEvent(self, event):
             try:
@@ -3484,7 +3511,6 @@ if is_admin():
                 
                 bottonNo = reply.button(QMessageBox.StandardButton.Cancel)
                 bottonNo.setText("تم الحفظ")
-
                 x = reply.exec()
 
                 if x == QMessageBox.StandardButton.No or x == QMessageBox.StandardButton.Cancel:

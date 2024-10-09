@@ -10,36 +10,46 @@ pyqt6_hiddenimports = collect_submodules('PyQt6.QtWidgets') + \
                       collect_submodules('PyQt6.QtGui') + \
                       collect_submodules('PyQt6.QtCore')
 
-# Pillow (PIL): Only import necessary submodules
-pillow_hiddenimports = collect_submodules('PIL.Image') + \
-                       collect_submodules('PIL.ImageOps')
+# Pillow (PIL): Import necessary submodules
+pillow_hiddenimports = collect_submodules('PIL')
 
 # Docx: Import required submodules
 docx_hiddenimports = collect_submodules('docx') + \
                      collect_submodules('docx.enum') + \
-                     collect_submodules('docx.enum.section') + \
                      collect_submodules('docx.oxml.xmlchemy') + \
                      collect_submodules('docx.oxml.shared') + \
                      collect_submodules('docx.oxml.ns')
 
+# Arabic Reshaper: Import required modules
+arabic_reshaper_hiddenimports = collect_submodules('arabic_reshaper')
 
-# convert_numbers: Only import needed modules
-convert_numbers_hiddenimports = collect_submodules('convert_numbers')
+# ReportLab: Import only the required modules
+reportlab_hiddenimports = (
+    collect_submodules('reportlab.lib.colors') + 
+    collect_submodules('reportlab.lib.pagesizes') + 
+    collect_submodules('reportlab.lib.units') + 
+    collect_submodules('reportlab.platypus.SimpleDocTemplate') + 
+    collect_submodules('reportlab.platypus.Table') + 
+    collect_submodules('reportlab.platypus.TableStyle') + 
+    collect_submodules('reportlab.platypus.Paragraph') + 
+    collect_submodules('reportlab.platypus.Image') + 
+    collect_submodules('reportlab.pdfbase.pdfmetrics') + 
+    collect_submodules('reportlab.pdfbase.ttfonts')
+)
 
-# Mammoth: Import submodules for DOCX to HTML conversion
-mammoth_hiddenimports = collect_submodules('mammoth')
-
-# pyautogui: Import submodules for automation
+# Other libraries you may be using
 pyautogui_hiddenimports = collect_submodules('pyautogui')
+convert_numbers_hiddenimports = collect_submodules('convert_numbers')
 
 # Combine all hidden imports
 hidden_imports = (
     pyqt6_hiddenimports + 
     pillow_hiddenimports + 
     docx_hiddenimports + 
-    convert_numbers_hiddenimports + 
-    mammoth_hiddenimports +
-    pyautogui_hiddenimports
+    arabic_reshaper_hiddenimports + 
+    reportlab_hiddenimports + 
+    pyautogui_hiddenimports + 
+    convert_numbers_hiddenimports
 )
 
 # Exclude unused PyQt6 modules to reduce size

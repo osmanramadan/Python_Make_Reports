@@ -2076,7 +2076,8 @@ if is_admin():
           
             if len(FileNameSave[0]) > 0:
                 pdf_file_path = FileNameSave[0]
-                doc = SimpleDocTemplate(pdf_file_path, pagesize=letter)
+                doc = SimpleDocTemplate(pdf_file_path, pagesize=letter, rightMargin=0, leftMargin=0, topMargin=30, bottomMargin=5)
+
                 # Register the Amiri font
                 font_path = 'font/Amiri-Regular.ttf' 
                 pdfmetrics.registerFont(TTFont('ArabicFont', font_path))
@@ -2084,51 +2085,72 @@ if is_admin():
                 pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_path_bold))
                 # Set up styles
                 styles = getSampleStyleSheet()
-                custom_style = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=16, spaceAfter=30, alignment=1)
+                custom_style = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=16, spaceAfter=14, alignment=1)
                 custom_style.fontName = 'ArabicFont-bold'  
 
-                custom_style_header = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=14, spaceAfter=20, alignment=1)
+                custom_style_header = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=14, alignment=TA_RIGHT)
                 custom_style_header.fontName = 'ArabicFont'  
-
+                
                 # Prepare header data with text and placeholders for images
+                cr.execute("SELECT line1 FROM start")
+                line1=cr.fetchone()[0]
+                cr.execute("SELECT line2 FROM start")
+                line2=cr.fetchone()[0]
+                cr.execute("SELECT line3 FROM start")
+                line3=cr.fetchone()[0]
+                cr.execute("SELECT line4 FROM start")
+                line4=cr.fetchone()[0]
                 header_data = [[
                  "",  # Placeholder for the second column (image)
                  "",  # Placeholder for the third column (image)
                 Paragraph(f"""
-                          {get_display(arabic_reshaper.reshape("المملكة العربية السعودية"))}
+                          {
+                              get_display(arabic_reshaper.reshape(line1))
+                          }
                           <br/><br/>
-                          {get_display(arabic_reshaper.reshape("وزارة التعليم"))}
+                          {
+                              get_display(arabic_reshaper.reshape(line2))
+                           }
                           <br/><br/>
-                          {get_display(arabic_reshaper.reshape(" الادارة العامة للتعليم بالقصيم "))}
+                           {
+                              get_display(arabic_reshaper.reshape(line3))
+                           }
+                           <br/><br/>
+                          {
+                              get_display(arabic_reshaper.reshape(line4))
+                           }
                           """, 
                           custom_style_header
                           ), 
                  ]]
-
+       
                 
                 # Add images to the header
                 if os.path.exists("images/logo.png"):
-                  piclogo =img("images/logo.png", width=140, height=80) 
+                  piclogo =img("images/logo.png", width=160, height=80) 
                   header_data[0][1] = piclogo  # Assign the first image to the second column
 
                 if os.path.exists(self.secretLittleThing):
-                  logo2 = img(self.secretLittleThing, width=155, height=80)  # Adjust dimensions as needed
+                  logo2 = img(self.secretLittleThing, width=165, height=80)  # Adjust dimensions as needed
                   header_data[0][0] = logo2  # Assign the second image to the third column
                 else:
                   pass
           
                 # Calculate dynamic column widths
-                page_width = letter[0]  # The width of the letter page
-                image_width = 2 * inch  # Width allocated for each image column
-                max_text_width = page_width - (2 * image_width) - 1 * inch  # Remaining width for the first column
+                page_width = letter[0]    # The width of the letter page
+                image_width = 2.6 * inch  # Width allocated for each image column
+                max_text_width = page_width - (2.3 * image_width) - 1 * inch  # Remaining width for the first column
                 # Create the header table
                 header_table = Table(header_data, colWidths=[max_text_width,image_width,image_width])
                 header_table.setStyle(TableStyle([
                  ('SIZE', (0, 0), (-1, -1), 14), 
-                 ('VALIGN', (1, 0), (1, 0), 'MIDDLE'),
-                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                 ('VALIGN', (1, 0), (1, 0), 'RIGHT'),
+                #  ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                 ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),  # Align all content to the right
+                 ('RIGHTPADDING', (0, 0), (-1, -1), -25),  # Remove right padding for all cells
                  ('FONTNAME', (0, 0), (-1, 0),'ArabicFont'),
                  ('BOTTOMPADDING', (0, 0), (-1, 0), 16)
+                                 
                 ]))
 
                 content.append(header_table)
@@ -2143,13 +2165,15 @@ if is_admin():
                   alignment=TA_RIGHT,
                   textColor=colors.black,
                   fontSize=12,
-                  spaceAfter=10
+                  spaceAfter=10,
+                  leading=18
                 )
                 section_right_style.fontName = 'ArabicFont-bold'  # Set the custom style font to ArabicFont
                 # Style for the section content (left column)
                 section_left_style = ParagraphStyle(
                   name="leftContent",
                   alignment=TA_RIGHT,
+                      leading=15,  # Adjust this value to set the desired line spacing
                   fontSize=12,
                   spaceAfter=10
                 )
@@ -2161,13 +2185,19 @@ if is_admin():
                     ((get_display(arabic_reshaper.reshape("اسم البرنامج")), get_display(arabic_reshaper.reshape(self.programeNameE.toPlainText()))))
                    )
                 if self.ableGoals:
+                  goals_text = get_display(arabic_reshaper.reshape(self.programeGoalsE.toPlainText()))
+                  # Ensure line breaks are preserved
+                  goals_text = goals_text.replace('\n', '<br/>')  # Convert newline characters to <br/>
                   data.append(   
-                    (get_display(arabic_reshaper.reshape("ألاهداف")),get_display(arabic_reshaper.reshape(self.programeGoalsE.toPlainText())))
+                    (get_display(arabic_reshaper.reshape("الأهداف")),goals_text)
                   )
                 if self.ableDescription:
+                  description_text = get_display(arabic_reshaper.reshape(self.programeDescriptionE.toPlainText()))
+                  # Ensure line breaks are preserved
+                  description_text = description_text.replace('\n', '<br/>')  # Convert newline characters to <br/>
                   data.append(   
-                    (get_display(arabic_reshaper.reshape("الوصف")),get_display(arabic_reshaper.reshape(self.programeDescriptionE.toPlainText())))
-                    )
+                    (get_display(arabic_reshaper.reshape("الوصف")),description_text)
+                  )
                 if self.ableCreator:
                   data.append(   
                    (get_display(arabic_reshaper.reshape("المنفذ")),get_display(arabic_reshaper.reshape(self.programeCreatorE.toPlainText())))
@@ -2194,7 +2224,7 @@ if is_admin():
                     left_col = Paragraph(section_content,section_left_style)
                     # Append the two-column row to table_data
                     table_items.append([left_col, right_col])
-                table = Table(table_items, colWidths=[3.7 * inch, 3.7 * inch])
+                table = Table(table_items, colWidths=[6.6 * inch, 1.3 * inch])
 
                 # Add some basic styling to the table (optional)
                 table.setStyle(TableStyle([
@@ -2205,64 +2235,107 @@ if is_admin():
                   ('BOX', (0, 0), (-1, -1), 0.1, colors.black),
                   ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
                   ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
-                  ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
-                  ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
-                  ('TOPPADDING', (0, 0), (-1, -1), 5),  # Add top padding
-                  ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  # Add bottom padding
+                #   ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
+                #   ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
+                  ('TOPPADDING', (0, 0), (-1, -1), 3) # Add top padding
                 ]))
+
                 content.append(table)
 
-                if self.countPic !=0:
-                    images_data = []
-                    max_images_per_row = 2 
-                    current_row = []
+            if self.countPic != 0:
+                images_data = []
+                max_images_per_row = 2 
+                current_row = []
+
+                for i in range(len(self.pictersPaths)):
+                    if self.pictersPaths[i] != "":
+                        # Calculate dynamic width for images
+                        page_width, _ = letter  # Get the width of the page
+                        image_width = (page_width / max_images_per_row) * 0.8  # Set image width to 80% of the divided space
+                        image = img(self.pictersPaths[i], width=275, height=135)  # Adjust dimensions as needed
+                        current_row.append(image)
+
+                        if len(current_row) == max_images_per_row:
+                          images_data.append(current_row)  # Add the current row without empty cells
+                          current_row = []  # Reset for the next row
+
+                if current_row:
+                  images_data.append(current_row)  # Add any remaining images in the last row
+
+                if images_data:
+                    # Calculate the total number of columns
+                #   total_columns = max_images_per_row  # Total number of images in the row
+                #   total_width = letter[0]  # Full page width
+                #   col_widths = [total_width / total_columns] * total_columns  # Distribute width equally
+                #   col_widths = [total_width / total_columns * 0.8] * total_columns  # Reduce column width by 20%
+
+                  images_table = Table(images_data, colWidths=[4 * inch, 4 * inch])
+                  images_table.setStyle(TableStyle([
+                   ('SIZE', (0, 0), (-1, -1), 30),
+                   ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),
+                #    ('VALIGN', (0, 0), (-1, -1), 'TOP'),  # Align to the top
+                #    ('LEFTPADDING', (0, 0), (-1, -1), 0),  # No left padding
+                #    ('LETPADDING', (0, 0), (-1, -1), 100),  # No right padding
+                   ('TOPPADDING', (0, 0), (-1, -1), 2),  # No top padding
+                   ('BOTTOMPADDING', (0, 0), (-1, -1), 0),  # No bottom padding
+                   ]))
+
+                  content.append(images_table)
+
+                # if self.countPic !=0:
+                #     images_data = []
+                #     max_images_per_row = 2 
+                #     current_row = []
  
-                    for i in range(len(self.pictersPaths)):
+                #     for i in range(len(self.pictersPaths)):
 
-                        if self.pictersPaths[i] != "":
-                            # Calculate dynamic width for images
-                            page_width, _ = letter  # Get the width of the page
-                            image_width = page_width / 2 - 80  # Set image width to half the page width, minus some padding
-                            image = img(self.pictersPaths[i],width=image_width,height=150)  # Adjust dimensions as needed
-                            current_row.append(image)
+                #         if self.pictersPaths[i] != "":
+                #             # Calculate dynamic width for images
+                #             page_width, _ = letter  # Get the width of the page
+                #             image_width = page_width / 2 - 80  # Set image width to half the page width, minus some padding
+                #             image = img(self.pictersPaths[i],width=image_width,height=150)  # Adjust dimensions as needed
+                #             current_row.append(image)
 
-                            if len(current_row) == max_images_per_row:
-                              images_data.append([""] + current_row + [""])  # Empty cells on either side
-                              current_row = []  # Reset for the next row
+                #             if len(current_row) == max_images_per_row:
+                #               images_data.append([""] + current_row + [""])  # Empty cells on either side
+                #               current_row = []  # Reset for the next row
 
-                    if current_row:
-                        images_data.append([""] + current_row + [""])
+                #     if current_row:
+                #         images_data.append([""] + current_row + [""])
 
-                    if images_data:
-                        images_table = Table(images_data, colWidths=[max_text_width] + [image_width] * len(current_row) + [max_text_width])
-                        images_table.setStyle(TableStyle([
-                            ('SIZE', (0, 0), (-1, -1), 14),              
-                            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),       
-                            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),         
-                            ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),  
-                            ('TOPPADDING', (0, 0), (-1, -1), 20),     
-                            ('RIGHTPADDING', (0, 0), (-1, -1), 20),       
-                            ]))
+                #     if images_data:
+                #         # Calculate the total number of columns
+                #         total_columns = 1 + len(current_row) + 1  # 1 for the first and last empty column
+                #         total_width = letter[0]  # Full page width
+                #         col_widths = [total_width / total_columns] * total_columns
+                #         images_table = Table(images_data, colWidths=col_widths)
+                #         images_table.setStyle(TableStyle([
+                #             ('SIZE', (0, 0), (-1, -1), 30),              
+                #             # ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),       
+                #             # ('ALIGN', (0, 0), (-1, -1), 'CENTER'),         
+                #             ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont') 
+                #             ]))
 
-                        content.append(images_table)
+                #         content.append(images_table)
 
-            # * For One Image In Every Row * #
-            # images_data = []
-            # if self.countPic != 0:
-            #     for i in range(len(self.pictersPaths)):
-            #        if self.pictersPaths[i] != "":
-            #           image = img(self.pictersPaths[i], width=450, height=150)  
-            #           images_data.append(["",image, ""])
-            # images_table = Table(images_data, colWidths=[max_text_width, image_width, max_text_width])
-            # images_table.setStyle(TableStyle([
-            #    ('SIZE', (0, 0), (-1, -1), 14),              
-            #    ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),       
-            #    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),         
-            #   ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),  
-            #   ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  
-            #   ('TOPPADDING', (0, 0), (-1, -1), 20),       
-            # ]))
-            # content.append(images_table)
+                # * For One Image In Every Row * #
+                # images_data = []
+                # if self.countPic != 0:
+                #    for i in range(len(self.pictersPaths)):
+                #       if self.pictersPaths[i] != "":
+                #         image = img(self.pictersPaths[i], width=500, height=160)  
+                #         images_data.append(["",image, ""])
+                # images_table = Table(images_data, colWidths=[max_text_width, image_width, max_text_width])
+                # images_table.setStyle(TableStyle([
+                #  ('SIZE', (0, 0), (-1, -1), 14),              
+                #  ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),       
+                #  ('ALIGN', (0, 0), (-1, -1), 'CENTER'),         
+                #  ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),  
+                # #  ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  
+                #  ('TOPPADDING', (0, 0), (-1, -1), 9),      
+                #  ('LEFTPADDING', (0, 0), (-1, -1), 10)  
+                #  ]))
+                # content.append(images_table)
 
             # *Get Footer Content*
             # Style for  (right column)
@@ -2795,12 +2868,11 @@ if is_admin():
                 os.remove("printFile.pdf")
             except:
                 pass
-
   
             try:
                 self.writePdf(fromWhere="printer")
                 webbrowser.open("printFile.pdf", new=2)
-                time.sleep(6)
+                time.sleep(3)
                 pyautogui.hotkey("ctrl","p")
             except:
                 pass

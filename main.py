@@ -1,5 +1,4 @@
 # Import Required Libraries
-
 ## PyQt6 Imports
 from PyQt6.QtWidgets import (
     QApplication, QGridLayout, QHBoxLayout, QVBoxLayout, 
@@ -39,7 +38,7 @@ from reportlab.lib.pagesizes import A4, landscape, letter
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Image as img
+from reportlab.platypus import SimpleDocTemplate, Table,TableStyle, Paragraph, Image as img
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
@@ -428,6 +427,7 @@ if is_admin():
 
         # Delete report from saved reports
         def deleteReport(self,row,fRom="Original"):
+
             try:
                 if fRom=="OutSide":
                   d = QMessageBox(parent=self.windowCreating,text=f"تأكيد حذف تقرير {self.TableSummary.item(row,6).text()}")
@@ -460,7 +460,8 @@ if is_admin():
                 d.exec() 
 
         # Function To Create New Report 
-        def createReportFun(self):                    
+        def createReportFun(self):                   
+
             self.windowCreate = Choices()
             uic.loadUi("design/Create.ui",self.windowCreate)
             self.windowCreate.setFixedSize(359,370)
@@ -591,6 +592,7 @@ if is_admin():
 
                 self.layoutFrameLogo.addWidget(picLabel)
                 os.remove("logo_image.png")
+
         # Save control panal info
         def Save(self):
 
@@ -604,6 +606,7 @@ if is_admin():
             d.setIcon(QMessageBox.Icon.Information)
             d.exec()
             self.windowControl.destroy()
+            
         # Create new content
         def creating(self,fromW):
 
@@ -2068,9 +2071,6 @@ if is_admin():
             if fromWhere=="convert":
                FileNameSave = QFileDialog.getSaveFileName(self.windowCreating, "اختر مسارا", desktopPath, "PDF Documents (*.pdf);;All Files (*)")
             else:
-                # Get the directory of the running script
-                # script_directory = os.path.dirname(os.path.abspath(sys.argv[0]))
-                # file_path = os.path.join(script_directory, "printFile.pdf")
                file_path = "printFile.pdf"
                FileNameSave = [file_path]
           
@@ -2235,8 +2235,6 @@ if is_admin():
                   ('BOX', (0, 0), (-1, -1), 0.1, colors.black),
                   ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
                   ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
-                #   ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
-                #   ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
                   ('TOPPADDING', (0, 0), (-1, -1), 3) # Add top padding
                 ]))
 
@@ -2252,7 +2250,8 @@ if is_admin():
                         # Calculate dynamic width for images
                         page_width, _ = letter  # Get the width of the page
                         image_width = (page_width / max_images_per_row) * 0.8  # Set image width to 80% of the divided space
-                        image = img(self.pictersPaths[i], width=275, height=135)  # Adjust dimensions as needed
+                        image = img(self.pictersPaths[i], width=282.5, height=135)  # Adjust dimensions as needed
+
                         current_row.append(image)
 
                         if len(current_row) == max_images_per_row:
@@ -2263,79 +2262,17 @@ if is_admin():
                   images_data.append(current_row)  # Add any remaining images in the last row
 
                 if images_data:
-                    # Calculate the total number of columns
-                #   total_columns = max_images_per_row  # Total number of images in the row
-                #   total_width = letter[0]  # Full page width
-                #   col_widths = [total_width / total_columns] * total_columns  # Distribute width equally
-                #   col_widths = [total_width / total_columns * 0.8] * total_columns  # Reduce column width by 20%
-
+                  # Calculate the total number of columns
                   images_table = Table(images_data, colWidths=[4 * inch, 4 * inch])
                   images_table.setStyle(TableStyle([
                    ('SIZE', (0, 0), (-1, -1), 30),
                    ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),
-                #    ('VALIGN', (0, 0), (-1, -1), 'TOP'),  # Align to the top
-                #    ('LEFTPADDING', (0, 0), (-1, -1), 0),  # No left padding
-                #    ('LETPADDING', (0, 0), (-1, -1), 100),  # No right padding
-                   ('TOPPADDING', (0, 0), (-1, -1), 2),  # No top padding
-                   ('BOTTOMPADDING', (0, 0), (-1, -1), 0),  # No bottom padding
+                   ('TOPPADDING', (0, 0), (-1, -1), 2.5),  
+                   ('BOTTOMPADDING', (0, 0), (-1, -1), 0),  
+                   ('LEFTPADDING', (0, 0), (-1, -1), 3.6  ) 
                    ]))
 
                   content.append(images_table)
-
-                # if self.countPic !=0:
-                #     images_data = []
-                #     max_images_per_row = 2 
-                #     current_row = []
- 
-                #     for i in range(len(self.pictersPaths)):
-
-                #         if self.pictersPaths[i] != "":
-                #             # Calculate dynamic width for images
-                #             page_width, _ = letter  # Get the width of the page
-                #             image_width = page_width / 2 - 80  # Set image width to half the page width, minus some padding
-                #             image = img(self.pictersPaths[i],width=image_width,height=150)  # Adjust dimensions as needed
-                #             current_row.append(image)
-
-                #             if len(current_row) == max_images_per_row:
-                #               images_data.append([""] + current_row + [""])  # Empty cells on either side
-                #               current_row = []  # Reset for the next row
-
-                #     if current_row:
-                #         images_data.append([""] + current_row + [""])
-
-                #     if images_data:
-                #         # Calculate the total number of columns
-                #         total_columns = 1 + len(current_row) + 1  # 1 for the first and last empty column
-                #         total_width = letter[0]  # Full page width
-                #         col_widths = [total_width / total_columns] * total_columns
-                #         images_table = Table(images_data, colWidths=col_widths)
-                #         images_table.setStyle(TableStyle([
-                #             ('SIZE', (0, 0), (-1, -1), 30),              
-                #             # ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),       
-                #             # ('ALIGN', (0, 0), (-1, -1), 'CENTER'),         
-                #             ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont') 
-                #             ]))
-
-                #         content.append(images_table)
-
-                # * For One Image In Every Row * #
-                # images_data = []
-                # if self.countPic != 0:
-                #    for i in range(len(self.pictersPaths)):
-                #       if self.pictersPaths[i] != "":
-                #         image = img(self.pictersPaths[i], width=500, height=160)  
-                #         images_data.append(["",image, ""])
-                # images_table = Table(images_data, colWidths=[max_text_width, image_width, max_text_width])
-                # images_table.setStyle(TableStyle([
-                #  ('SIZE', (0, 0), (-1, -1), 14),              
-                #  ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),       
-                #  ('ALIGN', (0, 0), (-1, -1), 'CENTER'),         
-                #  ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),  
-                # #  ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  
-                #  ('TOPPADDING', (0, 0), (-1, -1), 9),      
-                #  ('LEFTPADDING', (0, 0), (-1, -1), 10)  
-                #  ]))
-                # content.append(images_table)
 
             # *Get Footer Content*
             # Style for  (right column)
@@ -2399,6 +2336,13 @@ if is_admin():
 
             # Build the PDF document
             doc.build(content, onFirstPage=add_border, onLaterPages=add_border) 
+            if fromWhere == "convert":
+              d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
+              d.setWindowTitle("نجاح")
+              d.setIcon(QMessageBox.Icon.Information)
+              d.exec()
+            else:
+                pass
             
         
         
@@ -3562,6 +3506,11 @@ if is_admin():
 
                 name = nameFile+".docx"
                 doc.save(f"{folderFinle}/{name}")
+                d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
+                d.setWindowTitle("نجاح")
+                d.setIcon(QMessageBox.Icon.Information)
+                d.exec()
+                
                 
 
                 

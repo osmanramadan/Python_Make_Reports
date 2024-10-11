@@ -16,6 +16,7 @@ pillow_hiddenimports = collect_submodules('PIL')
 # Docx: Import required submodules
 docx_hiddenimports = collect_submodules('docx') + \
                      collect_submodules('docx.enum') + \
+                     collect_submodules('docx.enum.section') + \
                      collect_submodules('docx.oxml.xmlchemy') + \
                      collect_submodules('docx.oxml.shared') + \
                      collect_submodules('docx.oxml.ns')
@@ -34,12 +35,15 @@ reportlab_hiddenimports = (
     collect_submodules('reportlab.platypus.Paragraph') + 
     collect_submodules('reportlab.platypus.Image') + 
     collect_submodules('reportlab.pdfbase.pdfmetrics') + 
-    collect_submodules('reportlab.pdfbase.ttfonts')
+    collect_submodules('reportlab.pdfbase.ttfonts') + 
+    collect_submodules('reportlab.lib.enums') + 
+    collect_submodules('reportlab.lib.styles')
 )
 
 # Other libraries you may be using
 pyautogui_hiddenimports = collect_submodules('pyautogui')
 convert_numbers_hiddenimports = collect_submodules('convert_numbers')
+bidi_hiddenimports = collect_submodules('bidi')
 
 # Combine all hidden imports
 hidden_imports = (
@@ -49,7 +53,8 @@ hidden_imports = (
     arabic_reshaper_hiddenimports + 
     reportlab_hiddenimports + 
     pyautogui_hiddenimports + 
-    convert_numbers_hiddenimports
+    convert_numbers_hiddenimports + 
+    bidi_hiddenimports
 )
 
 # Exclude unused PyQt6 modules to reduce size

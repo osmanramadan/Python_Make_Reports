@@ -895,6 +895,9 @@ if is_admin():
                     except:
                         pass
 
+                    # self.addAdmins(self.cFrameshow)
+                    
+
                     if listImportant[14]!="":
                         self.label1Maye.setText(listImportant[14])
                     if listImportant[15]!="":
@@ -1471,7 +1474,6 @@ if is_admin():
             self.TableSummary.show()
 
         def updateAReport(self):
-
             namePrograme = ""
             Goals = ""
             description = ""
@@ -1483,7 +1485,6 @@ if is_admin():
             pic2 = ""
             pic3 = ""
             pic4 = ""
-
             if self.ablePrograme:
                 namePrograme = self.programeNameE.toPlainText() if len(self.programeNameE.toPlainText()) > 0 else " "
             if self.ableGoals:
@@ -1503,63 +1504,151 @@ if is_admin():
             if self.ableCount:
                 countBenefits = self.CountBenefitsE.toPlainText() if len(self.CountBenefitsE.toPlainText()) > 0 else " "
 
-
+            if self.countPic != 0:
+                if self.pictersPaths[0]!="":
+                    with open(self.pictersPaths[0],"rb") as binary_image:
+                        binaryCode = binary_image.read()
+                    pic1 = binaryCode
+                else:
+                    pic1 = " "
+                if self.pictersPaths[1]!="":
+                    with open(self.pictersPaths[1],"rb") as binary_image:
+                        binaryCode = binary_image.read()
+                    pic2 = binaryCode
+                else:
+                    pic2 = " "
+                if self.pictersPaths[2]!="":
+                    with open(self.pictersPaths[2],"rb") as binary_image:
+                        binaryCode = binary_image.read()
+                    pic3 = binaryCode
+                else:
+                    pic3 = " "
+                if self.pictersPaths[3]!="":
+                    with open(self.pictersPaths[3],"rb") as binary_image:
+                        binaryCode = binary_image.read()
+                    pic4 = binaryCode
+                else:
+                    pic4 = " "
+            picLogo = ""
+            if self.hidderlayoutPicshow.count() > 0:
+                picLogo = self.picLogoBinary
+            reportName = self.programeNameShow
             try:
-
-                if self.countPic != 0:
-
-                    if  self.pictersPaths[0]!="":
-                        with open(self.pictersPaths[0],"rb") as binary_image:
-                           binaryCode = binary_image.read()
-                        pic1 = binaryCode
-                    else:
-                        pic1 = " "
-
-                    if self.pictersPaths[1]!="":
-                        with open(self.pictersPaths[1],"rb") as binary_image:
-                           binaryCode = binary_image.read()
-                        pic2 = binaryCode
-                    else:
-                        pic2 = " "
-
-                    if self.pictersPaths[2]!="":
-                        with open(self.pictersPaths[2],"rb") as binary_image:
-                           binaryCode = binary_image.read()
-                        pic3 = binaryCode
-                    else:
-                        pic3 = " "
-
-                    if self.pictersPaths[3]!="":
-                        with open(self.pictersPaths[3],"rb") as binary_image:
-                           binaryCode = binary_image.read()
-                        pic4 = binaryCode
-                    else:
-                        pic4 = " "
-                
-                    picLogo = ""
-                    if self.hidderlayoutPicshow.count() > 0:
-                       picLogo = self.picLogoBinary
-                    reportName = self.programeNameShow
-
-                if self.label1Maye !="":
-                  label1Maybe = self.label1Maye.text()
-                if self.label2Maye  !="":
-                  label2Maybe = self.label2Maye.text()
-                if self.MangerName !="":
-                  manger = str(self.MangerName.text())
-                if self.consultName !="":
-                  co_manger = str(self.consultName.text())
-
+                label1Maybe = self.label1Maye.text()
             except:
-                pass
-
+                label1Maybe=""
+            try:          
+               label2Maybe = self.label2Maye.text()
+            except:
+               label2Maybe=""
+            
+            try:
+                manger = str(self.MangerName.text())
+            except:
+                manger=""
+            
+            try:
+               co_manger = str(self.consultName.text())
+            except:
+               co_manger=""
+               
             cr.execute(f"""UPDATE reports set name=?,Goals=?,description=?,executer=?,executeDate=?,benefits=?,countBenefits=?,pic1=?,pic2=?,pic3=?,pic4=?,picLogo=?,label1Maybe=?,label2Maybe=?,manger=?,co_manger=? WHERE id = ?""",(namePrograme,Goals,description,executer,executeDate,benefits,countBenefits,pic1,pic2,pic3,pic4,picLogo,label1Maybe,label2Maybe,manger,co_manger,reportName))
-
+            # it doesn't work just this way i have to use it to work
             d = QMessageBox(parent=self.windowCreating,text="تم الحفظ بنجاح")
             d.setWindowTitle("نجاح")
             d.setIcon(QMessageBox.Icon.Information)
-            d.exec()
+            ret = d.exec()
             con.commit()
+        # def updateAReport(self):
+
+        #     namePrograme = ""
+        #     Goals = ""
+        #     description = ""
+        #     executer = ""
+        #     executeDate = ""
+        #     benefits = ""
+        #     countBenefits = ""
+        #     pic1 = ""
+        #     pic2 = ""
+        #     pic3 = ""
+        #     pic4 = ""
+
+        #     if self.ablePrograme:
+        #         namePrograme = self.programeNameE.toPlainText() if len(self.programeNameE.toPlainText()) > 0 else " "
+        #     if self.ableGoals:
+        #         Goals = self.programeGoalsE.toPlainText() if len(self.programeGoalsE.toPlainText()) > 0 else " "
+        #     if self.ableDescription:
+        #         description = self.programeDescriptionE.toPlainText() if len(self.programeDescriptionE.toPlainText()) > 0 else " "
+
+        #     if self.ableCreator:
+        #         executer = self.programeCreatorE.toPlainText() if len(self.programeCreatorE.toPlainText()) > 0 else " "
+
+        #     if self.ableDate:
+        #         executeDate = self.programeWhenDateE.toPlainText() if len(self.programeWhenDateE.toPlainText()) > 0 else " "
+
+        #     if self.ableBenefits:
+        #         benefits = self.programeBenefitsE.toPlainText() if len(self.programeBenefitsE.toPlainText()) > 0 else " "
+
+        #     if self.ableCount:
+        #         countBenefits = self.CountBenefitsE.toPlainText() if len(self.CountBenefitsE.toPlainText()) > 0 else " "
+
+
+        #     try:
+
+        #         if self.countPic != 0:
+
+        #             if  self.pictersPaths[0]!="":
+        #                 with open(self.pictersPaths[0],"rb") as binary_image:
+        #                    binaryCode = binary_image.read()
+        #                 pic1 = binaryCode
+        #             else:
+        #                 pic1 = " "
+
+        #             if self.pictersPaths[1]!="":
+        #                 with open(self.pictersPaths[1],"rb") as binary_image:
+        #                    binaryCode = binary_image.read()
+        #                 pic2 = binaryCode
+        #             else:
+        #                 pic2 = " "
+
+        #             if self.pictersPaths[2]!="":
+        #                 with open(self.pictersPaths[2],"rb") as binary_image:
+        #                    binaryCode = binary_image.read()
+        #                 pic3 = binaryCode
+        #             else:
+        #                 pic3 = " "
+
+        #             if self.pictersPaths[3]!="":
+        #                 with open(self.pictersPaths[3],"rb") as binary_image:
+        #                    binaryCode = binary_image.read()
+        #                 pic4 = binaryCode
+        #             else:
+        #                 pic4 = " "
+                
+        #             picLogo = ""
+        #             if self.hidderlayoutPicshow.count() > 0:
+        #                picLogo = self.picLogoBinary
+        #             reportName = self.programeNameShow
+
+        #         if self.label1Maye !="":
+        #           label1Maybe = self.label1Maye.text()
+        #         if self.label2Maye  !="":
+        #           label2Maybe = self.label2Maye.text()
+        #         if self.MangerName !="":
+        #           manger = str(self.MangerName.text())
+        #         if self.consultName !="":
+        #           co_manger = str(self.consultName.text())
+
+        #     except:
+        #         pass
+
+        #     cr.execute(f"""UPDATE reports set name=?,Goals=?,description=?,executer=?,executeDate=?,benefits=?,countBenefits=?,pic1=?,pic2=?,pic3=?,pic4=?,picLogo=?,label1Maybe=?,label2Maybe=?,manger=?,co_manger=? WHERE id = ?""",(namePrograme,Goals,description,executer,executeDate,benefits,countBenefits,pic1,pic2,pic3,pic4,picLogo,label1Maybe,label2Maybe,manger,co_manger,reportName))
+
+        #     d = QMessageBox(parent=self.windowCreating,text="تم الحفظ بنجاح")
+        #     d.setWindowTitle("نجاح")
+        #     d.setIcon(QMessageBox.Icon.Information)
+        #     d.exec()
+        #     con.commit()
 
         # Delete images which used as temp images 
         def deleteImagesTemp(self,neNum):
@@ -2051,10 +2140,26 @@ if is_admin():
             if self.hidderlayoutPicshow.count() > 0:
                 picLogo = self.picLogoBinary
             reportName = str(self.NameEntryProgrameFile.text())
-            label1Maybe = self.label1Maye.text()
-            label2Maybe = self.label2Maye.text()
-            manger = str(self.MangerName.text())
-            co_manger = str(self.consultName.text())
+            try:
+                label1Maybe = self.label1Maye.text()
+            except:
+                label1Maybe=''
+            
+            try:
+                label2Maybe = self.label2Maye.text()
+            except:
+                label2Maybe=''
+
+            try:
+                manger = str(self.MangerName.text())
+            except:
+                manger=''
+
+            try:
+                co_manger = str(self.consultName.text())
+            except:
+                co_manger=''
+
             cr.execute(f"""Insert INTO reports (reportName,name,Goals,description,executer,executeDate,benefits,countBenefits,pic1,pic2,pic3,pic4,picLogo,label1Maybe,label2Maybe,manger,co_manger) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",(reportName,namePrograme,Goals,description,executer,executeDate,benefits,countBenefits,pic1,pic2,pic3,pic4,picLogo,label1Maybe,label2Maybe,manger,co_manger))
             d = QMessageBox(parent=self.windowCreating,text="تم الحفظ بنجاح")
             d.setWindowTitle("نجاح")
@@ -2066,7 +2171,7 @@ if is_admin():
 
         # Get Pdf for printer and converter
         def writePdf(self,fromWhere):
-
+            self.addAdmins(self.cFrameshow)
             content = [] 
             if fromWhere=="convert":
                FileNameSave = QFileDialog.getSaveFileName(self.windowCreating, "اختر مسارا", desktopPath, "PDF Documents (*.pdf);;All Files (*)")
@@ -2212,7 +2317,7 @@ if is_admin():
                    ) 
                 if self.ableCount:
                    data.append(   
-                   (get_display(arabic_reshaper.reshape("عدد المستفيدون")),get_display(arabic_reshaper.reshape(self.CountBenefitsE.toPlainText())))
+                   (get_display(arabic_reshaper.reshape("عدد المستفيدين")),get_display(arabic_reshaper.reshape(self.CountBenefitsE.toPlainText())))
                    )
         
                 # Create the table data by formatting each section name and content
@@ -2250,7 +2355,7 @@ if is_admin():
                         # Calculate dynamic width for images
                         page_width, _ = letter  # Get the width of the page
                         image_width = (page_width / max_images_per_row) * 0.8  # Set image width to 80% of the divided space
-                        image = img(self.pictersPaths[i], width=282.5, height=135)  # Adjust dimensions as needed
+                        image = img(self.pictersPaths[i], width=281, height=135)  # Adjust dimensions as needed
 
                         current_row.append(image)
 
@@ -2269,7 +2374,7 @@ if is_admin():
                    ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),
                    ('TOPPADDING', (0, 0), (-1, -1), 2.5),  
                    ('BOTTOMPADDING', (0, 0), (-1, -1), 0),  
-                   ('LEFTPADDING', (0, 0), (-1, -1), 3.6  ) 
+                   ('LEFTPADDING', (0, 0), (-1, -1), 3.9  ) 
                    ]))
 
                   content.append(images_table)
@@ -2293,18 +2398,18 @@ if is_admin():
             )
             footer_left_style.fontName = 'ArabicFont-bold' 
             footer_data = [[[],[]],[[],[]]] 
+            try:
+                if len(self.label2Maye.text()) > 0:
+                   footer_data[0][0].append(get_display(arabic_reshaper.reshape(self.label2Maye.text())))
+                if len(self.consultName.text()) > 0:
+                   footer_data[1][1].append(get_display(arabic_reshaper.reshape(self.consultName.text())))
+                if len(self.label1Maye.text()) > 0:
+                   footer_data[0][1].append(get_display(arabic_reshaper.reshape(self.label1Maye.text())))
+                if len(self.MangerName.text()) > 0:
+                   footer_data[1][0].append(get_display(arabic_reshaper.reshape(self.MangerName.text())))
 
-            if len(self.label2Maye.text()) > 0:
-                footer_data[0][0].append(get_display(arabic_reshaper.reshape(self.label2Maye.text())))
-            if len(self.consultName.text()) > 0:
-                footer_data[1][1].append(get_display(arabic_reshaper.reshape(self.consultName.text())))
-            if len(self.label1Maye.text()) > 0:
-                footer_data[0][1].append(get_display(arabic_reshaper.reshape(self.label1Maye.text())))
-            if len(self.MangerName.text()) > 0:
-                footer_data[1][0].append(get_display(arabic_reshaper.reshape(self.MangerName.text())))
-
-            footer_table_items = []
-            for first_list, second_list in footer_data:
+                footer_table_items = []
+                for first_list, second_list in footer_data:
                     # Convert lists to strings before creating Paragraphs
                     first = ' '.join(first_list) if first_list else ''
                     second = ' '.join(second_list) if second_list else ''
@@ -2314,18 +2419,21 @@ if is_admin():
                     footer_table_items.append([left_col, right_col])
 
                 # Create the Table
-            table = Table(footer_table_items, colWidths=[3.7 * inch, 3.7 * inch])
+                table = Table(footer_table_items, colWidths=[3.7 * inch, 3.7 * inch])
 
                 # Add some basic styling to the table (optional)
-            table.setStyle(TableStyle([
-                ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
-                ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
-                ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
-                ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
-                ('TOPPADDING', (0, 0), (-1, -1), 10),  # Add top padding
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  # Add bottom padding
-            ]))
-            content.append(table)
+                table.setStyle(TableStyle([
+                  ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
+                  ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
+                  ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
+                   ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
+                   ('TOPPADDING', (0, 0), (-1, -1), 10),  # Add top padding
+                  ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  # Add bottom padding
+                ]))
+
+                content.append(table)
+            except:
+                pass
             def add_border(canvas, doc):
                 # Draw a border around the page
                 width, height = letter  # Get the page dimensions
@@ -2344,16 +2452,12 @@ if is_admin():
             else:
                 pass
             
-        
-        
-        def writeWord(self):    
-
-            FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
+        def writeWord(self):            
+            FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"Select File",desktopPath)
             if len(FileNameSave[0])>0:
                 folder = (str(FileNameSave[0]).split(f"/"))
                 nameFile = folder[-1]
                 folderFinle = "/".join(folder[:-1])
-                
                 doc = docx.Document()
                 sections = doc.sections
                 for section in sections:
@@ -2388,6 +2492,7 @@ if is_admin():
                         cell.paragraphs[0].size = docx.shared.Pt(15)
 
                 hdr_Cells = headers_table.rows[0].cells
+
                 cr.execute("SELECT line1 FROM start")
                 hdr_Cells[1].text = cr.fetchone()[0]
                 cr.execute("SELECT line2 FROM start")
@@ -2396,13 +2501,7 @@ if is_admin():
                 hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
                 cr.execute("SELECT line4 FROM start")
                 hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
-                
-                logoLabel = QLabel(self.hiderFrameshow)
-                logoLabel.move(350,10)
 
-                pix = QPixmap("images/logo.png")
-                logoLabel.setPixmap(pix)
-                
                 widths = (docx.shared.Inches(5.8),docx.shared.Inches(3))
                 for row in headers_table.rows:
                     for idx, width in enumerate(widths):
@@ -2423,16 +2522,15 @@ if is_admin():
                     runCells.add_picture(self.secretLittleThing,width=docx.shared.Inches(2.1),height=docx.shared.Inches(1))
                 if self.hidderlayoutPicshow.count() <= 0:
                     runCells.add_text("\t\t\t\t\t")
-                    # runCells.add_text("\t")
-                    # runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
                 else:
                     runCells.add_text("\t")
-                    runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
+                xsaw = runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
 
                 for row in headers_table.rows:
                     for cell in row.cells:
                         cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
                 headers_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+
 
                 """
                 if self.windowCreate.BenefitsCount.isChecked():
@@ -2455,6 +2553,7 @@ if is_admin():
                             final_text.append(i)
 
                     programeNameProgrameTable = doc.add_table(rows=1,cols=2)
+
                     programeNameProgrameTable.style = "Table Grid"
                     hdr_Cells = programeNameProgrameTable.rows[0].cells
                     hdr_Cells[1].text = "اسم البرنامج"
@@ -2468,6 +2567,7 @@ if is_admin():
                     table_cell_properties.append(shade_obj)
 
                     widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
+
                     for row in programeNameProgrameTable.rows:
                         for idx, width in enumerate(widths):
                             row.cells[idx].width = width
@@ -2621,6 +2721,7 @@ if is_admin():
                             final_text.append(i)
 
                     programeWhenDateTable = doc.add_table(rows=1,cols=2)
+
                     programeWhenDateTable.style = "Table Grid"
                     hdr_Cells = programeWhenDateTable.rows[0].cells
                     hdr_Cells[1].text = "تاريخ التنفيذ"
@@ -2683,7 +2784,7 @@ if is_admin():
                                     font = run.font
                                     font.size= docx.shared.Pt(15)
                 if self.ableCount:
-                    text = self.CountBenefitsE.toPlainText()
+                    text = self.programeNameE.toPlainText()
                     listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
                     final_text = []
                     for i in text:
@@ -2731,80 +2832,593 @@ if is_admin():
                                 imgB = Image.open(self.pictersPaths[i])
 
                                 border_color_rgb = (128, 128, 128, 255)
+                                # border_color_rgb = (128, 128, 128)
 
                                 resize = imgB.resize((500,500),Image.LANCZOS)
 
-                                bordered_image = ImageOps.expand(resize, border=8, fill=border_color_rgb)
+                                bordered_image = ImageOps.expand(resize, border=8)
+                                # bordered_image = ImageOps.expand(resize, border=8, fill=border_color_rgb)
                                 
                                 bordered_image.save('imageWithBoarder.png')
-                                if len(self.label1Maye.text()) > 0 or len(self.label2Maye.text()) > 0:
-                                    run.add_picture('imageWithBoarder.png',width=docx.shared.Inches(3.9),height=docx.shared.Inches(1.8))
-                                else:
-                                    run.add_picture('imageWithBoarder.png',width=docx.shared.Inches(3.9),height=docx.shared.Inches(2.2))
-
+                                try:
+                                    if len(self.label1Maye.text()) > 0 or len(self.label2Maye.text()) > 0:
+                                       run.add_picture('imageWithBoarder.png',width=docx.shared.Inches(3.9),height=docx.shared.Inches(1.8))
+                                    else:
+                                       run.add_picture('imageWithBoarder.png',width=docx.shared.Inches(3.9),height=docx.shared.Inches(2.2))
+                                except:
+                                    pass
+                        
                                 if i !=1:
                                     run.add_text("   ")
                                 if i==1:
                                     run.add_text("\n")
                         paragraph.paragraph_format.space_after = docx.shared.Pt(0)
 
-                if len(self.label1Maye.text()) > 0 or len(self.label2Maye.text()) > 0:
-                    addmins_table = doc.add_table(rows=1, cols=2)
-                    for row in addmins_table.rows:
-                        for cell in row.cells:
-                            tc = cell._element.tcPr
-                            tc.left = None
-                            tc.top = None
-                            tc.right = None
-                            tc.bottom = None
-                            cell.vertical_alignment = docx.enum.table.WD_CELL_VERTICAL_ALIGNMENT.CENTER
-                            cell.paragraphs[0].alignment = docx.enum.table.WD_TABLE_ALIGNMENT.CENTER
-                            cell.paragraphs[0].size = docx.shared.Pt(8)
-
-                    addmins_Cells = addmins_table.rows[0].cells
-
-                    addmins_Cells[0].text = self.label1Maye.text()+"\n"+f"{self.consultName.text()}"
-
-                    addmins_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.LEFT
-
-                    addmins_Cells[1].text = self.label2Maye.text()+"\n"+f"{self.MangerName.text()}"
-
-                    addmins_table.rows[0].cells[1].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
-
-                    paragraph12 =addmins_Cells[0].paragraphs[0]
-                    run = paragraph12.runs
-                    font = run[0].font
-                    font.size= docx.shared.Pt(15)
-
-                    paragraph13 =addmins_Cells[1].paragraphs[0]
-                    run = paragraph13.runs
-                    font = run[0].font
-                    font.size= docx.shared.Pt(15)
-                    heights = (docx.shared.Pt(16),docx.shared.Pt(16))
-                    for idx,row in enumerate(addmins_table.rows):
-                        row.height = heights[idx]
-                subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".docx")]
-                docxname = nameFile+".docx"
-                if docxname in subFilesD:
-                    i = 1
-                    while docxname in subFilesD:
-                        docxname = f"({i}) {docxname}"
-                        i+=1
                 
-                doc.save(f"{folderFinle}/{docxname}")
-                    
-                d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
+                try:
+                    if len(self.label1Maye.text()) > 0 or len(self.label2Maye.text()) > 0:
+                        addmins_table = doc.add_table(rows=1, cols=2)
+                        for row in addmins_table.rows:
+                           for cell in row.cells:
+                              tc = cell._element.tcPr
+                              tc.left = None
+                              tc.top = None
+                              tc.right = None
+                              tc.bottom = None
+                              cell.vertical_alignment = docx.enum.table.WD_CELL_VERTICAL_ALIGNMENT.CENTER
+                              cell.paragraphs[0].alignment = docx.enum.table.WD_TABLE_ALIGNMENT.CENTER
+                              cell.paragraphs[0].size = docx.shared.Pt(8)
+                        addmins_Cells = addmins_table.rows[0].cells
+
+                        addmins_Cells[0].text = self.label1Maye.text()+"\n"+f"{self.consultName.text()}"
+
+                        addmins_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.LEFT
+
+                        addmins_Cells[1].text = self.label2Maye.text()+"\n"+f"{self.MangerName.text()}"
+
+                        addmins_table.rows[0].cells[1].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+
+                        paragraph12 =addmins_Cells[0].paragraphs[0]
+                        run = paragraph12.runs
+                        font = run[0].font
+                        font.size= docx.shared.Pt(15)
+
+                        paragraph13 =addmins_Cells[1].paragraphs[0]
+                        run = paragraph13.runs
+                        font = run[0].font
+                        font.size= docx.shared.Pt(15)
+                        heights = (docx.shared.Pt(16),docx.shared.Pt(16))
+                        for idx,row in enumerate(addmins_table.rows):
+                           row.height = heights[idx]
+
+                except: 
+                    pass
+
+                subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".docx")]
+                name2 = nameFile+".docx"
+                if name2 in subFilesD:
+                    i = 1
+                    while name2 in subFilesD:
+                       name2 = f"({i}) {name2}"
+                       i+=1
+
+                # if len(self.label1Maye.text()) > 0 or len(self.label2Maye.text()) > 0:
+                #     addmins_table = doc.add_table(rows=1, cols=2)
+                #     for row in addmins_table.rows:
+                #         for cell in row.cells:
+                #             tc = cell._element.tcPr
+                #             tc.left = None
+                #             tc.top = None
+                #             tc.right = None
+                #             tc.bottom = None
+                #             cell.vertical_alignment = docx.enum.table.WD_CELL_VERTICAL_ALIGNMENT.CENTER
+                #             cell.paragraphs[0].alignment = docx.enum.table.WD_TABLE_ALIGNMENT.CENTER
+                #             cell.paragraphs[0].size = docx.shared.Pt(8)
+
+                #     addmins_Cells = addmins_table.rows[0].cells
+
+                #     addmins_Cells[0].text = self.label1Maye.text()+"\n"+f"{self.consultName.text()}"
+
+                #     addmins_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.LEFT
+
+                #     addmins_Cells[1].text = self.label2Maye.text()+"\n"+f"{self.MangerName.text()}"
+
+                #     addmins_table.rows[0].cells[1].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+
+                #     paragraph12 =addmins_Cells[0].paragraphs[0]
+                #     run = paragraph12.runs
+                #     font = run[0].font
+                #     font.size= docx.shared.Pt(15)
+
+                #     paragraph13 =addmins_Cells[1].paragraphs[0]
+                #     run = paragraph13.runs
+                #     font = run[0].font
+                #     font.size= docx.shared.Pt(15)
+                #     heights = (docx.shared.Pt(16),docx.shared.Pt(16))
+                #     for idx,row in enumerate(addmins_table.rows):
+                #         row.height = heights[idx]
+                # subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".docx")]
+                # name2 = nameFile+".docx"
+                # if name2 in subFilesD:
+                #     i = 1
+                #     while name2 in subFilesD:
+                #         name2 = f"({i}) {name2}"
+                #         i+=1
+                
+                doc.save(f"{folderFinle}/{name2}")
+
+                d = QMessageBox(parent=self.windowCreating,text=f"تم بنجاح")
                 d.setWindowTitle("نجاح")
                 d.setIcon(QMessageBox.Icon.Information)
-                d.exec()
-            # try:
-            #     os.remove("pic1.png")
-            #     os.remove("pic2.png")
-            #     os.remove("pic3.png")
-            #     os.remove("pic4.png")
-            #     os.remove("secretThing.png")
-            # except:
-            #     pass
+                ret = d.exec()
+            try:
+                os.remove("pic1")
+                os.remove("pic2")
+                os.remove("pic4")
+                os.remove("pic4")
+                os.remove("secretThing.png")
+            except:
+                pass        
+        
+        # def writeWord(self):    
+
+        #     FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"اختر مسارا",desktopPath)
+        #     if len(FileNameSave[0])>0:
+        #         folder = (str(FileNameSave[0]).split(f"/"))
+        #         nameFile = folder[-1]
+        #         folderFinle = "/".join(folder[:-1])
+                
+        #         doc = docx.Document()
+        #         sections = doc.sections
+        #         for section in sections:
+        #             section.top_margin = docx.shared.Cm(0.7)
+        #             section.bottom_margin = docx.shared.Cm(0.7)
+        #             section.left_margin = docx.shared.Cm(0.7)
+        #             section.right_margin = docx.shared.Cm(0.7)
+        #         sec_pr = doc.sections[0]._sectPr # get the section properties el
+        #         # create new borders el
+        #         pg_borders = OxmlElement('w:pgBorders')
+        #         # specifies how the relative positioning of the borders should be calculated
+        #         pg_borders.set(qn('w:offsetFrom'), 'page')
+        #         for border_name in ('top', 'left', 'bottom', 'right',): # set all borders
+        #             border_el = OxmlElement(f'w:{border_name}')
+        #             border_el.set(qn('w:val'), 'triple') # a single line
+        #             border_el.set(qn('w:sz'), '4') # for meaning of  remaining attrs please look docs
+        #             border_el.set(qn('w:space'), '10')
+        #             border_el.set(qn('w:color'), 'black')
+        #             pg_borders.append(border_el) # register single border to border el
+        #         sec_pr.append(pg_borders) # apply border changes to section
+
+        #         headers_table = doc.add_table(rows=1, cols=2)
+        #         for row in headers_table.rows:
+        #             for cell in row.cells:
+        #                 tc = cell._element.tcPr
+        #                 tc.left = None
+        #                 tc.top = None
+        #                 tc.right = None
+        #                 tc.bottom = None
+        #                 cell.vertical_alignment = docx.enum.table.WD_CELL_VERTICAL_ALIGNMENT.CENTER
+        #                 cell.paragraphs[0].alignment = docx.enum.table.WD_TABLE_ALIGNMENT.CENTER
+        #                 cell.paragraphs[0].size = docx.shared.Pt(15)
+
+        #         hdr_Cells = headers_table.rows[0].cells
+        #         cr.execute("SELECT line1 FROM start")
+        #         hdr_Cells[1].text = cr.fetchone()[0]
+        #         cr.execute("SELECT line2 FROM start")
+        #         hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]+"\t"
+        #         cr.execute("SELECT line3 FROM start")
+        #         hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
+        #         cr.execute("SELECT line4 FROM start")
+        #         hdr_Cells[1].text = hdr_Cells[1].text+"\n"+cr.fetchone()[0]
+                
+        #         logoLabel = QLabel(self.hiderFrameshow)
+        #         logoLabel.move(350,10)
+
+        #         pix = QPixmap("images/logo.png")
+        #         logoLabel.setPixmap(pix)
+                
+        #         widths = (docx.shared.Inches(5.8),docx.shared.Inches(3))
+        #         for row in headers_table.rows:
+        #             for idx, width in enumerate(widths):
+        #                 row.cells[idx].width = width
+
+        #         heights = (docx.shared.Inches(1.1),docx.shared.Inches(1.1))
+        #         for idx,row in enumerate(headers_table.rows):
+        #             row.height = heights[idx]
+
+        #         paragraph12322 =hdr_Cells[1].paragraphs[0]
+        #         run = paragraph12322.runs
+        #         font = run[0].font
+        #         font.size= docx.shared.Pt(15)
+
+        #         cells = headers_table.rows[0].cells[0].paragraphs[0]
+        #         runCells = cells.add_run()
+        #         if self.secretLittleThing !="":
+        #             runCells.add_picture(self.secretLittleThing,width=docx.shared.Inches(2.1),height=docx.shared.Inches(1))
+        #         if self.hidderlayoutPicshow.count() <= 0:
+        #             runCells.add_text("\t\t\t\t\t")
+        #             # runCells.add_text("\t")
+        #             # runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
+        #         else:
+        #             runCells.add_text("\t")
+        #             runCells.add_picture("images/logo.png",width=docx.shared.Inches(2.5),height=docx.shared.Inches(1))
+
+        #         for row in headers_table.rows:
+        #             for cell in row.cells:
+        #                 cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+        #         headers_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+
+        #         """
+        #         if self.windowCreate.BenefitsCount.isChecked():
+        #             self.CountBenefits()
+        #         """
+
+        #         GoodPrograme = doc.add_paragraph("\t\t\t\t\t\t\tتوثيق برنامج")
+        #         GoodPrograme.runs[0].font.size = docx.shared.Pt(20)
+        #         GoodPrograme.paragraph_format.space_after = docx.shared.Pt(0.1)
+        #         GoodPrograme.paragraph_format.space_before = docx.shared.Pt(1)
+
+        #         if self.ablePrograme:
+        #             text = self.programeNameE.toPlainText()
+        #             listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
+        #             final_text = []
+        #             for i in text:
+        #                 if i in listNubmers:
+        #                     final_text.append(convert_numbers.english_to_hindi(i))
+        #                 else:
+        #                     final_text.append(i)
+
+        #             programeNameProgrameTable = doc.add_table(rows=1,cols=2)
+        #             programeNameProgrameTable.style = "Table Grid"
+        #             hdr_Cells = programeNameProgrameTable.rows[0].cells
+        #             hdr_Cells[1].text = "اسم البرنامج"
+        #             hdr_Cells[0].text = "".join(final_text)
+        #             programeNameProgrameTable.autofit = False
+
+        #             cell_xml_element = programeNameProgrameTable.rows[0].cells[1]._tc
+        #             table_cell_properties = cell_xml_element.get_or_add_tcPr()
+        #             shade_obj = OxmlElement("w:shd")
+        #             shade_obj.set(qn2("w:fill"),"2ABCB5")
+        #             table_cell_properties.append(shade_obj)
+
+        #             widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
+        #             for row in programeNameProgrameTable.rows:
+        #                 for idx, width in enumerate(widths):
+        #                     row.cells[idx].width = width
+                    
+        #             for row in programeNameProgrameTable.rows:
+        #                 for cell in row.cells:
+        #                     cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+        #                     paragraphs = cell.paragraphs
+        #                     for paragraph in paragraphs:
+        #                         for run in paragraph.runs:
+        #                             font = run.font
+        #                             font.size= docx.shared.Pt(17)
+        #             heights = (docx.shared.Inches(.35), docx.shared.Inches(.35))
+        #             for idx,row in enumerate(programeNameProgrameTable.rows):
+        #                     row.height = heights[idx]
+        #         if self.ableGoals:
+        #             text = self.programeGoalsE.toPlainText()
+        #             listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
+        #             final_text = []
+        #             for i in text:
+        #                 if i in listNubmers:
+        #                     final_text.append(convert_numbers.english_to_hindi(i))
+        #                 else:
+        #                     final_text.append(i)
+
+        #             programeGolasTable = doc.add_table(rows=1,cols=2)
+
+        #             programeGolasTable.style = "Table Grid"
+        #             hdr_Cells = programeGolasTable.rows[0].cells
+        #             hdr_Cells[1].text = "\t\tالأهداف"
+        #             hdr_Cells[0].text = "".join(final_text)
+        #             programeGolasTable.autofit = False
+
+        #             cell_xml_element = programeGolasTable.rows[0].cells[1]._tc
+        #             table_cell_properties = cell_xml_element.get_or_add_tcPr()
+        #             shade_obj = OxmlElement("w:shd")
+        #             shade_obj.set(qn2("w:fill"),"2ABCB5")
+        #             table_cell_properties.append(shade_obj)
+
+        #             widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
+        #             heights = (docx.shared.Inches(1.4), docx.shared.Inches(1.4))
+        #             for row in programeGolasTable.rows:
+        #                 for idx, width in enumerate(widths):
+        #                     row.cells[idx].width = width
+        #             for idx,row in enumerate(programeGolasTable.rows):
+        #                 row.height = heights[idx]
+                    
+
+        #             for row in programeGolasTable.rows:
+        #                 for cell in row.cells:
+        #                     cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+        #                     paragraphs = cell.paragraphs
+        #                     for paragraph in paragraphs:
+        #                         for run in paragraph.runs:
+        #                             font = run.font
+        #                             font.size= docx.shared.Pt(18)
+
+
+        #         if self.ableDescription:
+        #             text = self.programeDescriptionE.toPlainText()
+        #             listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
+        #             final_text = []
+        #             for i in text:
+        #                 if i in listNubmers:
+        #                     final_text.append(convert_numbers.english_to_hindi(i))
+        #                 else:
+        #                     final_text.append(i)
+
+        #             programeDescriptionTable = doc.add_table(rows=1,cols=2)
+
+        #             programeDescriptionTable.style = "Table Grid"
+        #             hdr_Cells = programeDescriptionTable.rows[0].cells
+        #             hdr_Cells[1].text = "\t\tالوصف"
+        #             hdr_Cells[0].text = "".join(final_text)
+        #             programeDescriptionTable.autofit = False
+
+        #             cell_xml_element = programeDescriptionTable.rows[0].cells[1]._tc
+        #             table_cell_properties = cell_xml_element.get_or_add_tcPr()
+        #             shade_obj = OxmlElement("w:shd")
+        #             shade_obj.set(qn2("w:fill"),"2ABCB5")
+        #             table_cell_properties.append(shade_obj)
+
+        #             widths = (docx.shared.Inches(7), docx.shared.Inches(0.9))
+        #             heights = (docx.shared.Inches(1.4), docx.shared.Inches(1.4))
+
+        #             for row in programeDescriptionTable.rows:
+        #                 for idx, width in enumerate(widths):
+        #                     row.cells[idx].width = width
+
+        #             for idx,row in enumerate(programeDescriptionTable.rows):
+        #                     row.height = heights[idx]
+
+        #             for row in programeDescriptionTable.rows:
+        #                 for cell in row.cells:
+        #                     cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+        #                     paragraphs = cell.paragraphs
+        #                     for paragraph in paragraphs:
+        #                         for run in paragraph.runs:
+        #                             font = run.font
+        #                             font.size= docx.shared.Pt(18)
+
+        #         if self.ableCreator:
+        #             text = self.programeCreatorE.toPlainText()
+        #             listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
+        #             final_text = []
+        #             for i in text:
+        #                 if i in listNubmers:
+        #                     final_text.append(convert_numbers.english_to_hindi(i))
+        #                 else:
+        #                     final_text.append(i)
+
+        #             programeCreatorTable = doc.add_table(rows=1,cols=2)
+
+        #             programeCreatorTable.style = "Table Grid"
+        #             hdr_Cells = programeCreatorTable.rows[0].cells
+
+        #             hdr_Cells[0].text = "".join(final_text)
+        #             hdr_Cells[1].text = "المنفذ"
+        #             programeCreatorTable.autofit = False
+
+
+        #             cell_xml_element = programeCreatorTable.rows[0].cells[1]._tc
+        #             table_cell_properties = cell_xml_element.get_or_add_tcPr()
+        #             shade_obj = OxmlElement("w:shd")
+        #             shade_obj.set(qn2("w:fill"),"2ABCB5")
+        #             table_cell_properties.append(shade_obj)
+
+        #             widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
+        #             for row in programeCreatorTable.rows:
+        #                 for idx, width in enumerate(widths):
+        #                     row.cells[idx].width = width
+
+        #             for row in programeCreatorTable.rows:
+        #                 for cell in row.cells:
+        #                     cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+        #                     paragraphs = cell.paragraphs
+        #                     for paragraph in paragraphs:
+        #                         for run in paragraph.runs:
+        #                             font = run.font
+        #                             font.size= docx.shared.Pt(18)
+
+            
+        #         if self.ableDate:
+        #             text = self.programeWhenDateE.toPlainText()
+        #             listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
+        #             final_text = []
+        #             for i in text:
+        #                 if i in listNubmers:
+        #                     final_text.append(convert_numbers.english_to_hindi(i))
+        #                 else:
+        #                     final_text.append(i)
+
+        #             programeWhenDateTable = doc.add_table(rows=1,cols=2)
+        #             programeWhenDateTable.style = "Table Grid"
+        #             hdr_Cells = programeWhenDateTable.rows[0].cells
+        #             hdr_Cells[1].text = "تاريخ التنفيذ"
+        #             hdr_Cells[0].text = "".join(final_text)
+        #             programeWhenDateTable.autofit = False
+
+        #             cell_xml_element = programeWhenDateTable.rows[0].cells[1]._tc
+        #             table_cell_properties = cell_xml_element.get_or_add_tcPr()
+        #             shade_obj = OxmlElement("w:shd")
+        #             shade_obj.set(qn2("w:fill"),"2ABCB5")
+        #             table_cell_properties.append(shade_obj)
+
+        #             widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
+        #             for row in programeWhenDateTable.rows:
+        #                 for idx, width in enumerate(widths):
+        #                     row.cells[idx].width = width
+                    
+        #             for row in programeWhenDateTable.rows:
+        #                 for cell in row.cells:
+        #                     cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+        #                     paragraphs = cell.paragraphs
+        #                     for paragraph in paragraphs:
+        #                         for run in paragraph.runs:
+        #                             font = run.font
+        #                             font.size= docx.shared.Pt(17)
+        #         if self.ableBenefits:
+        #             text = self.programeBenefitsE.toPlainText()
+        #             listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
+        #             final_text = []
+        #             for i in text:
+        #                 if i in listNubmers:
+        #                     final_text.append(convert_numbers.english_to_hindi(i))
+        #                 else:
+        #                     final_text.append(i)
+                            
+        #             programeBenefitsTable = doc.add_table(rows=1,cols=2)
+        #             programeBenefitsTable.style = 'Table Grid' #single lines in all cells
+        #             hdr_Cells = programeBenefitsTable.rows[0].cells
+        #             hdr_Cells[1].text = "المستفيدون"
+        #             hdr_Cells[0].text = "".join(final_text)
+        #             programeBenefitsTable.autofit = False
+
+
+        #             cell_xml_element = programeBenefitsTable.rows[0].cells[1]._tc
+        #             table_cell_properties = cell_xml_element.get_or_add_tcPr()
+        #             shade_obj = OxmlElement("w:shd")
+        #             shade_obj.set(qn2("w:fill"),"2ABCB5")
+        #             table_cell_properties.append(shade_obj)
+
+        #             widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
+        #             for row in programeBenefitsTable.rows:
+        #                 for idx, width in enumerate(widths):
+        #                     row.cells[idx].width = width            
+        #             for row in programeBenefitsTable.rows:
+        #                 for cell in row.cells:
+        #                     cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+        #                     paragraphs = cell.paragraphs
+        #                     for paragraph in paragraphs:
+        #                         for run in paragraph.runs:
+        #                             font = run.font
+        #                             font.size= docx.shared.Pt(15)
+        #         if self.ableCount:
+        #             text = self.CountBenefitsE.toPlainText()
+        #             listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
+        #             final_text = []
+        #             for i in text:
+        #                 if i in listNubmers:
+        #                     final_text.append(convert_numbers.english_to_hindi(i))
+        #                 else:
+        #                     final_text.append(i)
+
+        #             programeCountBenefitsTable = doc.add_table(rows=1,cols=2)
+        #             programeCountBenefitsTable.style = 'Table Grid' 
+        #             hdr_Cells = programeCountBenefitsTable.rows[0].cells
+        #             hdr_Cells[1].text = "عدد المستفيدين"
+        #             hdr_Cells[0].text = "".join(final_text)
+        #             programeCountBenefitsTable.autofit = False
+
+        #             cell_xml_element = programeCountBenefitsTable.rows[0].cells[1]._tc
+        #             table_cell_properties = cell_xml_element.get_or_add_tcPr()
+        #             shade_obj = OxmlElement("w:shd")
+        #             shade_obj.set(qn2("w:fill"),"2ABCB5")
+        #             table_cell_properties.append(shade_obj)
+
+        #             widths = (docx.shared.Inches(7), docx.shared.Inches(1.1))
+        #             for row in programeCountBenefitsTable.rows:
+        #                 for idx, width in enumerate(widths):
+        #                     row.cells[idx].width = width            
+        #             for row in programeCountBenefitsTable.rows:
+        #                 for cell in row.cells:
+        #                     cell.paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+        #                     paragraphs = cell.paragraphs
+        #                     for paragraph in paragraphs:
+        #                         for run in paragraph.runs:
+        #                             font = run.font
+        #                             font.size= docx.shared.Pt(14)
+
+        #         if self.countPic != 0:
+        #             paragraph = doc.add_paragraph()
+        #             paragraph.paragraph_format.space_before = docx.shared.Pt(2)
+        #             run = paragraph.add_run()
+        #             for i in range(len(self.pictersPaths)):
+        #                 if self.pictersPaths[i] !="":
+        #                         try:
+        #                             os.remove("imageWithBoarder.png")
+        #                         except:
+        #                             pass
+        #                         imgB = Image.open(self.pictersPaths[i])
+
+        #                         border_color_rgb = (128, 128, 128, 255)
+
+        #                         resize = imgB.resize((500,500),Image.LANCZOS)
+
+        #                         bordered_image = ImageOps.expand(resize, border=8, fill=border_color_rgb)
+                                
+        #                         bordered_image.save('imageWithBoarder.png')
+        #                         if len(self.label1Maye.text()) > 0 or len(self.label2Maye.text()) > 0:
+        #                             run.add_picture('imageWithBoarder.png',width=docx.shared.Inches(3.9),height=docx.shared.Inches(1.8))
+        #                         else:
+        #                             run.add_picture('imageWithBoarder.png',width=docx.shared.Inches(3.9),height=docx.shared.Inches(2.2))
+
+        #                         if i !=1:
+        #                             run.add_text("   ")
+        #                         if i==1:
+        #                             run.add_text("\n")
+        #                 paragraph.paragraph_format.space_after = docx.shared.Pt(0)
+
+        #         if len(self.label1Maye.text()) > 0 or len(self.label2Maye.text()) > 0:
+        #             addmins_table = doc.add_table(rows=1, cols=2)
+        #             for row in addmins_table.rows:
+        #                 for cell in row.cells:
+        #                     tc = cell._element.tcPr
+        #                     tc.left = None
+        #                     tc.top = None
+        #                     tc.right = None
+        #                     tc.bottom = None
+        #                     cell.vertical_alignment = docx.enum.table.WD_CELL_VERTICAL_ALIGNMENT.CENTER
+        #                     cell.paragraphs[0].alignment = docx.enum.table.WD_TABLE_ALIGNMENT.CENTER
+        #                     cell.paragraphs[0].size = docx.shared.Pt(8)
+
+        #             addmins_Cells = addmins_table.rows[0].cells
+
+        #             addmins_Cells[0].text = self.label1Maye.text()+"\n"+f"{self.consultName.text()}"
+
+        #             addmins_table.rows[0].cells[0].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.LEFT
+
+        #             addmins_Cells[1].text = self.label2Maye.text()+"\n"+f"{self.MangerName.text()}"
+
+        #             addmins_table.rows[0].cells[1].paragraphs[0].alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
+
+        #             paragraph12 =addmins_Cells[0].paragraphs[0]
+        #             run = paragraph12.runs
+        #             font = run[0].font
+        #             font.size= docx.shared.Pt(15)
+
+        #             paragraph13 =addmins_Cells[1].paragraphs[0]
+        #             run = paragraph13.runs
+        #             font = run[0].font
+        #             font.size= docx.shared.Pt(15)
+        #             heights = (docx.shared.Pt(16),docx.shared.Pt(16))
+        #             for idx,row in enumerate(addmins_table.rows):
+        #                 row.height = heights[idx]
+        #         subFilesD = [f for f in os.listdir(folderFinle) if f.endswith(".docx")]
+        #         docxname = nameFile+".docx"
+        #         if docxname in subFilesD:
+        #             i = 1
+        #             while docxname in subFilesD:
+        #                 docxname = f"({i}) {docxname}"
+        #                 i+=1
+                
+        #         doc.save(f"{folderFinle}/{docxname}")
+                    
+        #         d = QMessageBox(parent=self.windowCreating,text=f"تم التصدير بنجاح")
+        #         d.setWindowTitle("نجاح")
+        #         d.setIcon(QMessageBox.Icon.Information)
+        #         d.exec()
+        #     try:
+        #         os.remove("pic1.png")
+        #         os.remove("pic2.png")
+        #         os.remove("pic3.png")
+        #         os.remove("pic4.png")
+        #         os.remove("secretThing.png")
+        #     except:
+        #         pass
 
         # Send Pdf to printer after write it
         def printDoc(self):
@@ -3290,7 +3904,8 @@ if is_admin():
 
                     resize = imgB.resize((500,500),Image.LANCZOS)
 
-                    bordered_image = ImageOps.expand(resize, border=8, fill=border_color_rgb)
+                    # bordered_image = ImageOps.expand(resize, border=8, fill=border_color_rgb)
+                    bordered_image = ImageOps.expand(resize, border=8)
                     
                     bordered_image.save('imageWithBoarder.png')
 

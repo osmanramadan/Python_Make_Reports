@@ -10,8 +10,9 @@ pyqt6_hiddenimports = collect_submodules('PyQt6.QtWidgets') + \
                       collect_submodules('PyQt6.QtGui') + \
                       collect_submodules('PyQt6.QtCore')
 
-# Pillow (PIL): Import necessary submodules
-pillow_hiddenimports = collect_submodules('PIL')
+# Pillow (PIL): Only import necessary submodules
+pillow_hiddenimports = collect_submodules('PIL.Image') + \
+                       collect_submodules('PIL.ImageOps')
 
 # Docx: Import required submodules
 docx_hiddenimports = collect_submodules('docx') + \
@@ -21,40 +22,35 @@ docx_hiddenimports = collect_submodules('docx') + \
                      collect_submodules('docx.oxml.shared') + \
                      collect_submodules('docx.oxml.ns')
 
-# Arabic Reshaper: Import required modules
+# Convert_numbers: Only import needed modules
+convert_numbers_hiddenimports = collect_submodules('convert_numbers')
+
+# Pyautogui: Import submodules for automation
+pyautogui_hiddenimports = collect_submodules('pyautogui')
+
+# Arabic Reshaper: Import required module
 arabic_reshaper_hiddenimports = collect_submodules('arabic_reshaper')
 
-# ReportLab: Import only the required modules
-reportlab_hiddenimports = (
-    collect_submodules('reportlab.lib.colors') + 
-    collect_submodules('reportlab.lib.pagesizes') + 
-    collect_submodules('reportlab.lib.units') + 
-    collect_submodules('reportlab.platypus.SimpleDocTemplate') + 
-    collect_submodules('reportlab.platypus.Table') + 
-    collect_submodules('reportlab.platypus.TableStyle') + 
-    collect_submodules('reportlab.platypus.Paragraph') + 
-    collect_submodules('reportlab.platypus.Image') + 
-    collect_submodules('reportlab.pdfbase.pdfmetrics') + 
-    collect_submodules('reportlab.pdfbase.ttfonts') + 
-    collect_submodules('reportlab.lib.enums') + 
-    collect_submodules('reportlab.lib.styles')
-)
-
-# Other libraries you may be using
-pyautogui_hiddenimports = collect_submodules('pyautogui')
-convert_numbers_hiddenimports = collect_submodules('convert_numbers')
+# Bidi: Import required module
 bidi_hiddenimports = collect_submodules('bidi')
+
+# ReportLab: Import required modules
+reportlab_hiddenimports = collect_submodules('reportlab') + \
+                          collect_submodules('reportlab.lib') + \
+                          collect_submodules('reportlab.platypus') + \
+                          collect_submodules('reportlab.pdfbase') + \
+                          collect_submodules('reportlab.pdfbase.ttfonts')
 
 # Combine all hidden imports
 hidden_imports = (
     pyqt6_hiddenimports + 
     pillow_hiddenimports + 
     docx_hiddenimports + 
-    arabic_reshaper_hiddenimports + 
-    reportlab_hiddenimports + 
-    pyautogui_hiddenimports + 
     convert_numbers_hiddenimports + 
-    bidi_hiddenimports
+    pyautogui_hiddenimports +
+    arabic_reshaper_hiddenimports +
+    bidi_hiddenimports +
+    reportlab_hiddenimports
 )
 
 # Exclude unused PyQt6 modules to reduce size

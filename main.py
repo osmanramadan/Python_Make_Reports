@@ -375,55 +375,107 @@ if is_admin():
                     d = QMessageBox(parent=self.windowCreating,text="قاعدة البيانات غير صالحة")
                     d.setWindowTitle("ERROR")
                     d.setIcon(QMessageBox.Icon.Critical)
-                    d.exec()
 
-        # Functions To Get Saved Reports
+
         def savedReportsFun(self):
 
             self.windowSaved = Choices()
-            self.windowSaved.setFixedSize(600,500)
+            self.windowSaved.setFixedSize(600, 500)
             self.windowSaved.setWindowTitle(title)
             self.windowSaved.setWindowIcon(QIcon("icons/icon.ico"))
             self.savedReports = QTableWidget(self.windowSaved)
-            self.savedReports.setGeometry(15,5,570,450)
+            self.savedReports.setGeometry(15, 5, 570, 450)
             self.savedReports.setColumnCount(4)
-            self.savedReports.setColumnHidden(0,True)
-            self.savedReports.setColumnWidth(0,70)
-            self.savedReports.setColumnWidth(1,70)
-            self.savedReports.setColumnWidth(2,70)
-            self.savedReports.setColumnWidth(3,410)
-            self.savedReports.setHorizontalHeaderLabels(["","","","اسم التقرير"])
-    
-            cr.execute("SELECT id,reportName FROM reports")
-            for n,i in enumerate(cr.fetchall()):
-                self.savedReports.insertRow(self.savedReports.rowCount())
-                QPixmap("images/trashicon.png")
-                button = QPushButton()
-                button.setStyleSheet(f"Qproperty-icon:url(images/trashicon.png);qproperty-iconSize:30px 30px;background-color:rgb(253, 253, 253)")
-                button.clicked.connect(lambda x,row=n:self.deleteReport(row))
-                button.setCursor(Qt.CursorShape.PointingHandCursor)
-                self.savedReports.setIndexWidget(self.savedReports.model().index(n,1),button)
-                self.savedReports.setItem(n,3,QTableWidgetItem(i[1]))
-                self.savedReports.setCursor(Qt.CursorShape.PointingHandCursor)
-                self.savedReports.setItem(n,0,QTableWidgetItem(str(i[0])))
-                button = QRadioButton()
-                self.savedReports.setIndexWidget(self.savedReports.model().index(n,2),button)
-            for row in range(self.savedReports.rowCount()):
-                for col in range(self.savedReports.columnCount()):
-                    if col==3:
-                        self.savedReports.item(row,col).setFlags(Qt.ItemFlag.ItemIsEditable)
-                        
-            createButton = QPushButton("عرض",self.windowSaved)
-            createButton.clicked.connect(lambda:self.creating(str(i[0])))
-            createButton.setCursor(Qt.CursorShape.PointingHandCursor)
-            createButton.setStyleSheet("background-color:green")
-            createButton.setGeometry(150,460,150,30)
-            extractAllButton = QPushButton("word تصدير",self.windowSaved)
-            extractAllButton.clicked.connect(self.exportAllSummaryReports)
+            self.savedReports.setColumnHidden(0, True)
+            self.savedReports.setColumnWidth(0, 70)
+            self.savedReports.setColumnWidth(1, 70)
+            self.savedReports.setColumnWidth(2, 70)
+            self.savedReports.setColumnWidth(3, 410)
+            self.savedReports.setHorizontalHeaderLabels(["", "", "", "اسم التقرير"])
+
+            cr.execute("SELECT id, reportName FROM reports")
+            for n, i in enumerate(cr.fetchall()):
+               self.savedReports.insertRow(self.savedReports.rowCount())
+               # Create delete button
+               button = QPushButton()
+               button.setStyleSheet("QProperty-icon:url(images/trashicon.png); qproperty-iconSize:30px 30px; background-color:rgb(253, 253, 253)")
+               button.clicked.connect(lambda _, row=n: self.deleteReport(row))
+               button.setCursor(Qt.CursorShape.PointingHandCursor)
+               self.savedReports.setIndexWidget(self.savedReports.model().index(n, 1), button)
+               # Set report name in the table
+               self.savedReports.setItem(n, 3, QTableWidgetItem(i[1]))
+               self.savedReports.setCursor(Qt.CursorShape.PointingHandCursor)
+               self.savedReports.setItem(n, 0, QTableWidgetItem(str(i[0])))
+
+
+               radio_button = QRadioButton(self.windowSaved)
+               self.savedReports.setIndexWidget(self.savedReports.model().index(n, 2), radio_button)
+               radio_button.setStyleSheet("background-color:white")
+               radio_button.setGeometry(124, 31 + (n * 32), 50, 20)  # Adjust position for each row
+               radio_button.clicked.connect(lambda _, report_id=i[0]: self.creating(str(report_id)))
+
+            extractAllButton = QPushButton("word تصدير", self.windowSaved)
+            extractAllButton.clicked.connect(self.exportAllSummaryReportsAsWord)
             extractAllButton.setCursor(Qt.CursorShape.PointingHandCursor)
             extractAllButton.setStyleSheet("background-color:green")
-            extractAllButton.setGeometry(320,460,160,30)
-            self.windowSaved.show()
+            extractAllButton.setGeometry(320, 460, 160, 30)
+
+            
+            extractAllButton = QPushButton("pdf تصدير", self.windowSaved)
+            extractAllButton.clicked.connect(self.exportAllSummaryReportsAsWord)
+            extractAllButton.setCursor(Qt.CursorShape.PointingHandCursor)
+            extractAllButton.setStyleSheet("background-color:green")
+            extractAllButton.setGeometry(150, 460, 160, 30)
+
+            self.windowSaved.show()                   
+
+        # Functions To Get Saved Reports
+        # def savedReportsFun(self):
+
+        #     self.windowSaved = Choices()
+        #     self.windowSaved.setFixedSize(600,500)
+        #     self.windowSaved.setWindowTitle(title)
+        #     self.windowSaved.setWindowIcon(QIcon("icons/icon.ico"))
+        #     self.savedReports = QTableWidget(self.windowSaved)
+        #     self.savedReports.setGeometry(15,5,570,450)
+        #     self.savedReports.setColumnCount(4)
+        #     self.savedReports.setColumnHidden(0,True)
+        #     self.savedReports.setColumnWidth(0,70)
+        #     self.savedReports.setColumnWidth(1,70)
+        #     self.savedReports.setColumnWidth(2,70)
+        #     self.savedReports.setColumnWidth(3,410)
+        #     self.savedReports.setHorizontalHeaderLabels(["","","","اسم التقرير"])
+    
+        #     cr.execute("SELECT id,reportName FROM reports")
+        #     for n,i in enumerate(cr.fetchall()):
+        #         self.savedReports.insertRow(self.savedReports.rowCount())
+        #         QPixmap("images/trashicon.png")
+        #         button = QPushButton()
+        #         button.setStyleSheet(f"Qproperty-icon:url(images/trashicon.png);qproperty-iconSize:30px 30px;background-color:rgb(253, 253, 253)")
+        #         button.clicked.connect(lambda x,row=n:self.deleteReport(row))
+        #         button.setCursor(Qt.CursorShape.PointingHandCursor)
+        #         self.savedReports.setIndexWidget(self.savedReports.model().index(n,1),button)
+        #         self.savedReports.setItem(n,3,QTableWidgetItem(i[1]))
+        #         self.savedReports.setCursor(Qt.CursorShape.PointingHandCursor)
+        #         self.savedReports.setItem(n,0,QTableWidgetItem(str(i[0])))
+        #         button = QRadioButton()
+        #         self.savedReports.setIndexWidget(self.savedReports.model().index(n,2),button)
+        #     for row in range(self.savedReports.rowCount()):
+        #         for col in range(self.savedReports.columnCount()):
+        #             if col==3:
+        #                 self.savedReports.item(row,col).setFlags(Qt.ItemFlag.ItemIsEditable)
+                        
+        #     createButton = QPushButton("عرض",self.windowSaved)
+        #     createButton.clicked.connect(lambda:self.creating(str(i[0])))
+        #     createButton.setCursor(Qt.CursorShape.PointingHandCursor)
+        #     createButton.setStyleSheet("background-color:green")
+        #     createButton.setGeometry(150,460,150,30)
+        #     extractAllButton = QPushButton("word تصدير",self.windowSaved)
+        #     extractAllButton.clicked.connect(self.exportAllSummaryReports)
+        #     extractAllButton.setCursor(Qt.CursorShape.PointingHandCursor)
+        #     extractAllButton.setStyleSheet("background-color:green")
+        #     extractAllButton.setGeometry(320,460,160,30)
+        #     self.windowSaved.show()
 
         # Delete report from saved reports
         def deleteReport(self,row,fRom="Original"):
@@ -3356,7 +3408,7 @@ if is_admin():
 
 
         # Function To Get Summary Of Exist Reports
-        def exportAllSummaryReports(self):
+        def exportAllSummaryReportsAsWord(self):
                 
                 self.pdfFilesPaths = []
                 cr.execute("SELECT id FROM reports")
@@ -3373,7 +3425,7 @@ if is_admin():
                     if(folder_path):
                         for i in reports:
                           for j in i:
-                            self.completeExportAllSummaryReports(j,folder_path)
+                            self.completeExportAllSummaryReportsAsWord(j,folder_path)
 
                         d = QMessageBox(parent=self.windowCreating,text="تم تصدير الملفات على سطح المكتب بنجاح")
                         d.setWindowTitle("نجاح")
@@ -3391,7 +3443,7 @@ if is_admin():
 
 
 
-        def completeExportAllSummaryReports(self,idFun,folder_path):
+        def completeExportAllSummaryReportsAsWord(self,idFun,folder_path):
 
             try:
                 os.remove("pic1.png")

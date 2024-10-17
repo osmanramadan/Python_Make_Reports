@@ -44,6 +44,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
 
 
+
 xForImpo = 900
 yForImpo = 0
 title = "موثق البرامج"
@@ -415,67 +416,20 @@ if is_admin():
                radio_button.clicked.connect(lambda _, report_id=i[0]: self.creating(str(report_id)))
 
             extractAllButton = QPushButton("word تصدير", self.windowSaved)
-            extractAllButton.clicked.connect(self.exportAllSummaryReportsAsWord)
+            extractAllButton.clicked.connect(self.exportAllReportsAsWord)
             extractAllButton.setCursor(Qt.CursorShape.PointingHandCursor)
             extractAllButton.setStyleSheet("background-color:green")
             extractAllButton.setGeometry(320, 460, 160, 30)
 
             
             extractAllButton = QPushButton("pdf تصدير", self.windowSaved)
-            extractAllButton.clicked.connect(self.exportAllSummaryReportsAsWord)
+            extractAllButton.clicked.connect(self.exportAllReportsAsPdf)
             extractAllButton.setCursor(Qt.CursorShape.PointingHandCursor)
             extractAllButton.setStyleSheet("background-color:green")
             extractAllButton.setGeometry(150, 460, 160, 30)
 
             self.windowSaved.show()                   
 
-        # Functions To Get Saved Reports
-        # def savedReportsFun(self):
-
-        #     self.windowSaved = Choices()
-        #     self.windowSaved.setFixedSize(600,500)
-        #     self.windowSaved.setWindowTitle(title)
-        #     self.windowSaved.setWindowIcon(QIcon("icons/icon.ico"))
-        #     self.savedReports = QTableWidget(self.windowSaved)
-        #     self.savedReports.setGeometry(15,5,570,450)
-        #     self.savedReports.setColumnCount(4)
-        #     self.savedReports.setColumnHidden(0,True)
-        #     self.savedReports.setColumnWidth(0,70)
-        #     self.savedReports.setColumnWidth(1,70)
-        #     self.savedReports.setColumnWidth(2,70)
-        #     self.savedReports.setColumnWidth(3,410)
-        #     self.savedReports.setHorizontalHeaderLabels(["","","","اسم التقرير"])
-    
-        #     cr.execute("SELECT id,reportName FROM reports")
-        #     for n,i in enumerate(cr.fetchall()):
-        #         self.savedReports.insertRow(self.savedReports.rowCount())
-        #         QPixmap("images/trashicon.png")
-        #         button = QPushButton()
-        #         button.setStyleSheet(f"Qproperty-icon:url(images/trashicon.png);qproperty-iconSize:30px 30px;background-color:rgb(253, 253, 253)")
-        #         button.clicked.connect(lambda x,row=n:self.deleteReport(row))
-        #         button.setCursor(Qt.CursorShape.PointingHandCursor)
-        #         self.savedReports.setIndexWidget(self.savedReports.model().index(n,1),button)
-        #         self.savedReports.setItem(n,3,QTableWidgetItem(i[1]))
-        #         self.savedReports.setCursor(Qt.CursorShape.PointingHandCursor)
-        #         self.savedReports.setItem(n,0,QTableWidgetItem(str(i[0])))
-        #         button = QRadioButton()
-        #         self.savedReports.setIndexWidget(self.savedReports.model().index(n,2),button)
-        #     for row in range(self.savedReports.rowCount()):
-        #         for col in range(self.savedReports.columnCount()):
-        #             if col==3:
-        #                 self.savedReports.item(row,col).setFlags(Qt.ItemFlag.ItemIsEditable)
-                        
-        #     createButton = QPushButton("عرض",self.windowSaved)
-        #     createButton.clicked.connect(lambda:self.creating(str(i[0])))
-        #     createButton.setCursor(Qt.CursorShape.PointingHandCursor)
-        #     createButton.setStyleSheet("background-color:green")
-        #     createButton.setGeometry(150,460,150,30)
-        #     extractAllButton = QPushButton("word تصدير",self.windowSaved)
-        #     extractAllButton.clicked.connect(self.exportAllSummaryReports)
-        #     extractAllButton.setCursor(Qt.CursorShape.PointingHandCursor)
-        #     extractAllButton.setStyleSheet("background-color:green")
-        #     extractAllButton.setGeometry(320,460,160,30)
-        #     self.windowSaved.show()
 
         # Delete report from saved reports
         def deleteReport(self,row,fRom="Original"):
@@ -658,6 +612,9 @@ if is_admin():
             d.setIcon(QMessageBox.Icon.Information)
             d.exec()
             self.windowControl.destroy()
+            # the next code is under revision
+            os.execv(sys.executable, ['python'] + sys.argv)
+            app.closeAllWindows()
             
         # Create new content
         def creating(self,fromW):
@@ -2186,8 +2143,8 @@ if is_admin():
                 cr.execute("SELECT line4 FROM start")
                 line4=cr.fetchone()[0]
                 header_data = [[
-                 "",  # Placeholder for the second column (image)
-                 "",  # Placeholder for the third column (image)
+                 "", 
+                 "",  
                 Paragraph(f"""
                           {
                             get_display(f"{arabic_reshaper.reshape(line1)}")  
@@ -3407,8 +3364,8 @@ if is_admin():
                 pass
 
 
-        # Function To Get Summary Of Exist Reports
-        def exportAllSummaryReportsAsWord(self):
+        # Function To Get Summary _word_ Of Exist Reports
+        def exportAllReportsAsWord(self):
                 
                 self.pdfFilesPaths = []
                 cr.execute("SELECT id FROM reports")
@@ -3425,12 +3382,53 @@ if is_admin():
                     if(folder_path):
                         for i in reports:
                           for j in i:
-                            self.completeExportAllSummaryReportsAsWord(j,folder_path)
+                            self.completeexportAllReportsAsWord(j,folder_path)
 
                         d = QMessageBox(parent=self.windowCreating,text="تم تصدير الملفات على سطح المكتب بنجاح")
                         d.setWindowTitle("نجاح")
                         d.setIcon(QMessageBox.Icon.Information)
                         d.exec()
+                        # the next code is under revision
+                        os.execv(sys.executable, ['python'] + sys.argv)
+                        app.closeAllWindows()
+                    else:
+                      pass
+                    
+                else:
+                  d = QMessageBox()
+                  d.setText("ليس هناك ملفات للتصدير") 
+                  d.setIcon(QMessageBox.Icon.Critical)
+                  d.setStandardButtons(QMessageBox.StandardButton.Ok) 
+                  d.exec() 
+
+# ****************************************************************************8
+        # Function To Get Summary _pdf_ Of Exist Reports
+        def exportAllReportsAsPdf(self):
+                
+                self.pdfFilesPaths = []
+                cr.execute("SELECT id FROM reports")
+                reports = cr.fetchall()
+                if reports:
+                    self.eachValue = 100//len(reports)
+                    self.progressBarWindow = Choices()
+                    self.progressBarWindow.setFixedSize(250,30)
+                    self.progressBar = QProgressBar(self.progressBarWindow)
+                    self.progressBar.setGeometry(0,0,290,30)
+                    # choose desktop as dafault path
+                    folder_path = os.path.join(os.path.expanduser("~"), "Desktop")
+                    # folder_path = QFileDialog.getExistingDirectory(self.windowSaved,"اختر مسارا", desktopPath)
+                    if(folder_path):
+                        for i in reports:
+                          for j in i:
+                            self.completeexportAllReportsAsPdf(j,folder_path)
+
+                        d = QMessageBox(parent=self.windowCreating,text="تم تصدير الملفات على سطح المكتب بنجاح")
+                        d.setWindowTitle("نجاح")
+                        d.setIcon(QMessageBox.Icon.Information)
+                        d.exec()
+                        # the next code is under revision
+                        os.execv(sys.executable, ['python'] + sys.argv)
+                        app.closeAllWindows()
                     else:
                       pass
                     
@@ -3443,7 +3441,7 @@ if is_admin():
 
 
 
-        def completeExportAllSummaryReportsAsWord(self,idFun,folder_path):
+        def completeexportAllReportsAsWord(self,idFun,folder_path):
 
             try:
                 os.remove("pic1.png")
@@ -3951,7 +3949,381 @@ if is_admin():
                     i+=1
     
             doc.save(f"{folder_path}/{name}")
+            
+        # under update 
         
+        def completeexportAllReportsAsPdf(self,idFun,folder_path):
+
+            try:
+                os.remove("pic1.png")
+                os.remove("pic2.png")
+                os.remove("pic3.png")
+                os.remove("pic4.png")
+                os.remove("secretThing.png")
+            except:
+                pass
+
+            content = [] 
+            name = str(idFun)+".pdf"
+            pdf_file_path = f"{folder_path}/{name}"
+            doc = SimpleDocTemplate(pdf_file_path, pagesize=letter, rightMargin=0, leftMargin=0, topMargin=30, bottomMargin=5)
+
+            # Register the Amiri font
+            font_path = 'font/Amiri-Regular.ttf' 
+            pdfmetrics.registerFont(TTFont('ArabicFont', font_path))
+            font_path_bold = 'font/Amiri-Bold.ttf'  
+            pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_path_bold))
+            # Set up styles
+            styles = getSampleStyleSheet()
+            custom_style = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=16, spaceAfter=14, alignment=1)
+            custom_style.fontName = 'ArabicFont-bold'  
+
+            custom_style_header = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=14, alignment=TA_RIGHT)
+            custom_style_header.fontName = 'ArabicFont'  
+
+            # Prepare header data with text and placeholders for images
+            cr.execute("SELECT line1 FROM start")
+            line1=cr.fetchone()[0]
+            cr.execute("SELECT line2 FROM start")
+            line2=cr.fetchone()[0]
+            cr.execute("SELECT line3 FROM start")
+            line3=cr.fetchone()[0]
+            cr.execute("SELECT line4 FROM start")
+            line4=cr.fetchone()[0]
+            header_data = [[
+                "", 
+                "",  
+                Paragraph(f"""
+                          {
+                            get_display(f"{arabic_reshaper.reshape(line1)}")  
+                          }
+                          {'&nbsp;' * 4}
+                            <br/><br/>
+                          {
+                              get_display(arabic_reshaper.reshape(line2))
+                           }
+                           {'&nbsp;' * 8}
+                            <br/><br/>
+                           {
+                              get_display(arabic_reshaper.reshape(line3))
+                           }
+                            <br/><br/>
+                          {
+                              get_display(arabic_reshaper.reshape(line4))
+                           }
+                          """, 
+                          custom_style_header
+                          ), 
+                ]]
+            
+            # Add images to the header
+            if os.path.exists("images/logo.png"):
+                piclogo =img("images/logo.png", width=160, height=80) 
+                header_data[0][1] = piclogo  # Assign the first image to the second column
+            
+            try:
+                cr.execute(f"SELECT picLogo FROM reports WHERE id={idFun}")
+                picLogo = cr.fetchone()[0]
+                if picLogo !="":
+                    with open("secretThing.png","wb") as secretThing:
+                       secretThing.write(picLogo)
+                    logo = img("secretThing.png", width=165, height=80)  # Adjust dimensions as needed
+                    header_data[0][0] = logo  # Assign the second image to the third column
+            except:
+                pass
+
+
+            # Calculate dynamic column widths
+            page_width = letter[0]    # The width of the letter page
+            image_width = 2.6 * inch  # Width allocated for each image column
+            max_text_width = page_width - (2.3 * image_width) - 1 * inch  # Remaining width for the first column
+            # Create the header table
+            header_table = Table(header_data, colWidths=[max_text_width,image_width,image_width])
+            header_table.setStyle(TableStyle([
+                 ('SIZE', (0, 0), (-1, -1), 14), 
+                 ('VALIGN', (1, 0), (1, 0), 'RIGHT'),
+                 ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),  # Align all content to the right
+                 ('RIGHTPADDING', (0, 0), (-1, -1), -25),  # Remove right padding for all cells
+                 ('FONTNAME', (0, 0), (-1, 0),'ArabicFont'),
+                 ('BOTTOMPADDING', (0, 0), (-1, 0), 16)              
+            ]))
+
+            content.append(header_table)
+            # Add additional text (Title)
+            title = Paragraph(get_display(arabic_reshaper.reshape("\t\t\t\t\t\t\tتوثيق برنامج")), custom_style)
+            content.append(title)
+
+            # *Get Report Content*
+            # Style for the section names (right column)
+            section_right_style = ParagraphStyle(
+                name="rightContent",
+                alignment=TA_RIGHT,
+                textColor=colors.black,
+                fontSize=12,
+                spaceAfter=10,
+                leading=18
+            )
+                
+            section_right_style.fontName = 'ArabicFont-bold'  # Set the custom style font to ArabicFont
+            # Style for the section content (left column)
+            section_left_style = ParagraphStyle(
+                name="leftContent",
+                alignment=TA_RIGHT,
+                leading=15,  # Adjust this value to set the desired line spacing
+                fontSize=12,
+                spaceAfter=10
+            )
+            section_left_style.fontName = 'ArabicFont' 
+
+            data=[]
+
+            cr.execute(f"SELECT name FROM reports WHERE id={idFun}")  
+            namePrograme = cr.fetchone()[0]            
+            if namePrograme !="":
+                data.append(
+                   ((get_display(arabic_reshaper.reshape("اسم البرنامج")), get_display(arabic_reshaper.reshape(namePrograme))))
+                )
+
+            cr.execute(f"SELECT Goals FROM reports WHERE id={idFun}")  
+            Goals = cr.fetchone()[0]
+            if Goals !="":
+                goals_text = get_display(arabic_reshaper.reshape(Goals))
+                # Ensure line breaks are preserved
+                goals_text = goals_text.replace('\n', '<br/>')  # Convert newline characters to <br/>
+                data.append(   
+                    (get_display(arabic_reshaper.reshape("الأهداف")),goals_text)
+                )
+            cr.execute(f"SELECT description FROM reports WHERE id={idFun}")  
+            description = cr.fetchone()[0]
+            if description!="":
+                description_text = get_display(arabic_reshaper.reshape(description))
+                # Ensure line breaks are preserved
+                description_text = description_text.replace('\n', '<br/>')  # Convert newline characters to <br/>
+                data.append(   
+                    (get_display(arabic_reshaper.reshape("الوصف")),description_text)
+                )
+         
+            cr.execute(f"SELECT executer FROM reports WHERE id={idFun}")  
+            executer = cr.fetchone()[0]
+            if executer !="":
+                data.append(   
+                   (get_display(arabic_reshaper.reshape("المنفذ")),get_display(arabic_reshaper.reshape(executer)))
+                ) 
+            
+
+            cr.execute(f"SELECT executeDate FROM reports WHERE id={idFun}")
+            executeDate = cr.fetchone()[0]
+            if executeDate !="":
+                data.append(   
+                   (get_display(arabic_reshaper.reshape("تاريخ التنفيذ")),get_display(arabic_reshaper.reshape(executeDate)))
+                   )
+
+            cr.execute(f"SELECT benefits FROM reports WHERE id={idFun}")
+            benefits = cr.fetchone()[0]
+            if benefits:
+                data.append(   
+                   (get_display(arabic_reshaper.reshape("المستفيدون")),get_display(arabic_reshaper.reshape(benefits)))
+                   ) 
+            
+            
+            cr.execute(f"SELECT countBenefits FROM reports WHERE id={idFun}")
+            countBenefits = cr.fetchone()[0]
+
+            if countBenefits !="":
+                data.append(   
+                   (get_display(arabic_reshaper.reshape("عدد المستفيدين")),get_display(arabic_reshaper.reshape(countBenefits))))
+                
+        
+
+
+
+             # Create the table data by formatting each section name and content
+            table_items = []
+            for section_name, section_content in data:
+                # Right column: Section name (red text)
+                right_col = Paragraph(section_name,section_right_style)
+                # Left column: Section content
+                left_col = Paragraph(section_content,section_left_style)
+                # Append the two-column row to table_data
+                table_items.append([left_col, right_col])
+            table = Table(table_items, colWidths=[6.6 * inch, 1.3 * inch])
+
+            # Add some basic styling to the table (optional)
+            table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Center vertically
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),    # Center horizontally
+                ('BACKGROUND', (1, 0), (1, -1), colors.HexColor("#2ABCB5")),  # Right cell background
+                ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+                ('BOX', (0, 0), (-1, -1), 0.1, colors.black),
+                ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
+                ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
+                ('TOPPADDING', (0, 0), (-1, -1), 3) # Add top padding
+            ]))
+
+            content.append(table)
+ 
+             
+            #**** break
+            self.pictersPaths = []
+
+            cr.execute(f"SELECT pic1 FROM reports WHERE id={idFun}")
+            pic1B = cr.fetchone()[0]
+            if  pic1B is not None and isinstance(pic1B, bytes):
+                with open("pic1.png","wb") as pic1:
+                    pic1.write(pic1B)
+                self.pictersPaths.append("pic1.png")
+
+            cr.execute(f"SELECT pic2 FROM reports WHERE id={idFun}")
+            pic2B = cr.fetchone()[0]
+            if  pic2B is not None and isinstance(pic2B, bytes):
+                with open("pic2.png","wb") as pic2:
+                    pic2.write(pic2B)
+                self.pictersPaths.append("pic2.png")
+
+            cr.execute(f"SELECT pic3 FROM reports WHERE id={idFun}")
+            pic3B = cr.fetchone()[0]
+            if  pic3B is not None and isinstance(pic3B, bytes):
+                with open("pic3.png","wb") as pic3:
+                    pic3.write(pic3B)
+                self.pictersPaths.append("pic3.png")
+
+            cr.execute(f"SELECT pic4 FROM reports WHERE id={idFun}")
+            pic4B = cr.fetchone()[0]
+            
+            if  pic4B is not None and isinstance(pic4B, bytes):
+                with open("pic4.png","wb") as pic4:
+                    pic4.write(pic4B)
+                self.pictersPaths.append("pic4.png")
+
+            if len(self.pictersPaths) > 0:
+
+                images_data = []
+                max_images_per_row = 2 
+                current_row = []
+
+                for i in range(len(self.pictersPaths)):
+                    if self.pictersPaths[i] != "":
+                        # Calculate dynamic width for images
+                        page_width, _ = letter  # Get the width of the page
+                        image_width = (page_width / max_images_per_row) * 0.8  # Set image width to 80% of the divided space
+                        image = img(self.pictersPaths[i], width=281, height=135)  # Adjust dimensions as needed
+
+                        current_row.append(image)
+
+                        if len(current_row) == max_images_per_row:
+                          images_data.append(current_row)  # Add the current row without empty cells
+                          current_row = []  # Reset for the next row
+
+                if current_row:
+                  images_data.append(current_row)  # Add any remaining images in the last row
+
+
+                if images_data:
+                  # Calculate the total number of columns
+                  images_table = Table(images_data, colWidths=[4 * inch, 4 * inch])
+                  images_table.setStyle(TableStyle([
+                   ('SIZE', (0, 0), (-1, -1), 30),
+                   ('FONTNAME', (0, 0), (-1, -1), 'ArabicFont'),
+                   ('TOPPADDING', (0, 0), (-1, -1), 2.5),  
+                   ('BOTTOMPADDING', (0, 0), (-1, -1), 0),  
+                   ('LEFTPADDING', (0, 0), (-1, -1), 3.9  ) 
+                   ]))
+
+                  content.append(images_table)
+            # *Get Footer Content*
+            # Style for  (right column)
+            footer_right_style = ParagraphStyle(
+                name="rightContent",
+                alignment=TA_RIGHT,
+                textColor=colors.black,
+                fontSize=12,
+                spaceAfter=10
+            )
+            footer_right_style.fontName = 'ArabicFont-bold'  # Set the custom style font to ArabicFont
+             # Style for  (left column)
+            footer_left_style = ParagraphStyle(
+                name="leftContent",
+                alignment=TA_LEFT,
+                fontSize=12,
+                spaceAfter=10
+            )
+            footer_left_style.fontName = 'ArabicFont-bold' 
+            footer_data = [[[],[]],[[],[]]]
+
+
+
+            try:
+                cr.execute(f"SELECT label2Maybe FROM reports WHERE id={idFun}")
+                label2Maybe = cr.fetchone()[0]
+
+                if label2Maybe !="":
+                    footer_data[0][0].append(get_display(arabic_reshaper.reshape(self.label2Maye.text())))
+
+                
+                cr.execute(f"SELECT co_manger FROM reports WHERE id={idFun}")
+                co_manger = cr.fetchone()[0]
+
+                if co_manger !="":
+                    footer_data[1][1].append(get_display(arabic_reshaper.reshape(self.consultName.text())))       
+
+
+                cr.execute(f"SELECT label1Maybe FROM reports WHERE id={idFun}")
+                label1Maybe = cr.fetchone()[0]
+
+                if label1Maybe !="":
+                    footer_data[0][1].append(get_display(arabic_reshaper.reshape(self.label1Maye.text())))
+
+
+                cr.execute(f"SELECT manger FROM reports WHERE id={idFun}")
+                manger = cr.fetchone()[0]
+
+                if manger !="":
+                    footer_data[1][0].append(get_display(arabic_reshaper.reshape(self.MangerName.text())))
+
+                footer_table_items = []
+                for first_list, second_list in footer_data:
+                    # Convert lists to strings before creating Paragraphs
+                    first = ' '.join(first_list) if first_list else ''
+                    second = ' '.join(second_list) if second_list else ''
+                    right_col = Paragraph(first, footer_right_style)
+                    left_col = Paragraph(second, footer_left_style)
+                    # Append the two-column row to table_data
+                    footer_table_items.append([left_col, right_col])
+
+                # Create the Table
+                table = Table(footer_table_items, colWidths=[3.7 * inch, 3.7 * inch])
+
+                # Add some basic styling to the table (optional)
+                table.setStyle(TableStyle([
+                  ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
+                  ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
+                  ('LEFTPADDING', (0, 0), (-1, -1), 10),  # Add left padding
+                   ('RIGHTPADDING', (0, 0), (-1, -1), 10),  # Add right padding
+                   ('TOPPADDING', (0, 0), (-1, -1), 10),  # Add top padding
+                  ('BOTTOMPADDING', (0, 0), (-1, -1), 10),  # Add bottom padding
+                ]))
+
+                content.append(table)
+            except:
+                  pass
+
+
+            def add_border(canvas, doc):
+                # Draw a border around the page
+                width, height = letter  # Get the page dimensions
+                border_offset = 20  # Thickness of the border
+                canvas.setStrokeColor(colors.black)
+                canvas.setLineWidth(1)  # Border width
+                canvas.rect(border_offset, border_offset, width - 2 * border_offset, height - 2 * border_offset, stroke=1, fill=0)
+
+            # Build the PDF document
+            doc.build(content, onFirstPage=add_border, onLaterPages=add_border) 
+              
+            
+
+            
+
+
 
         def exportSummaryAsPdf(self):
                 try:

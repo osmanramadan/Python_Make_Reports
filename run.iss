@@ -35,7 +35,7 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputBaseFilename=توثيق
-SetupIconFile=E:\school_reports_python\python_make_reports\dist\برنامج توثيق\icons\icon.ico
+SetupIconFile=E:\school_reports_python\python_make_reports\icons\icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -53,7 +53,7 @@ Source: "E:\school_reports_python\python_make_reports\font\*"; DestDir: "{app}\f
 Source: "E:\school_reports_python\python_make_reports\icons\*"; DestDir: "{app}\icons"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "E:\school_reports_python\python_make_reports\images\*"; DestDir: "{app}\images"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "E:\school_reports_python\python_make_reports\dist\برنامج توثيق\_internal\*"; DestDir: "{app}\_internal"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "E:\school_reports_python\python_make_reports\dist\برنامج توثيق\app.db"; DestDir: "{app}"; Flags: ignoreversion
+Source: "E:\school_reports_python\python_make_reports\app.db"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]

@@ -3033,6 +3033,7 @@ if is_admin():
 
             cr.execute(f"SELECT name FROM reports WHERE id={idFun}")  
             namePrograme = cr.fetchone()[0]
+            
             if namePrograme!="":
                 text = namePrograme
                 listNubmers = ["1","2","3","4","5","6","7","8","9","0"]
@@ -3049,7 +3050,6 @@ if is_admin():
                 hdr_Cells[1].text = "اسم البرنامج"
                 hdr_Cells[0].text = ''.join(final_text)
                 programeNameProgrameTable.autofit = False
-
                 cell_xml_element = programeNameProgrameTable.rows[0].cells[1]._tc
                 table_cell_properties = cell_xml_element.get_or_add_tcPr()
                 shade_obj = OxmlElement("w:shd")
@@ -3439,7 +3439,7 @@ if is_admin():
                     row.height = heights[idx]
 
             subFilesD = [f for f in os.listdir(folder_path) if f.endswith(".docx")]
-            name = str(idFun)+".docx"
+            name =namePrograme+".docx"
             if name in subFilesD:
                 i = 1
                 while name in subFilesD:

@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QIcon, QFont, QPixmap
 from PyQt6 import uic
 from PyQt6.QtCore import Qt, pyqtSignal
+
 ## Standard Library Imports
 import sqlite3
 import sys
@@ -34,11 +35,11 @@ from docx.oxml.shared import qn
 from docx.oxml.ns import qn as qn2
 ## ReportLab Imports
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4, landscape, letter
+from reportlab.lib.pagesizes import letter
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table,TableStyle, Paragraph, Image as img
+from reportlab.platypus import SimpleDocTemplate,Table,TableStyle, Paragraph, Image as img
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 
@@ -377,6 +378,8 @@ if is_admin():
                     d.setIcon(QMessageBox.Icon.Critical)
 
 
+
+
         def savedReportsFun(self):
 
             self.windowSaved = Choices()
@@ -389,9 +392,11 @@ if is_admin():
             self.savedReports.setColumnHidden(0, True)
             self.savedReports.setColumnWidth(0, 70)
             self.savedReports.setColumnWidth(1, 70)
+
+
             self.savedReports.setColumnWidth(2, 70)
             self.savedReports.setColumnWidth(3, 410)
-            self.savedReports.setHorizontalHeaderLabels(["", "", "", "اسم التقرير"])
+            self.savedReports.setHorizontalHeaderLabels(["","","","", "اسم التقرير"])
 
             cr.execute("SELECT id, reportName FROM reports")
             for n, i in enumerate(cr.fetchall()):
@@ -401,18 +406,27 @@ if is_admin():
                button.setStyleSheet("QProperty-icon:url(images/trashicon.png); qproperty-iconSize:30px 30px; background-color:rgb(253, 253, 253)")
                button.clicked.connect(lambda _, row=n: self.deleteReport(row))
                button.setCursor(Qt.CursorShape.PointingHandCursor)
+
+
                self.savedReports.setIndexWidget(self.savedReports.model().index(n, 1), button)
                # Set report name in the table
                self.savedReports.setItem(n, 3, QTableWidgetItem(i[1]))
                self.savedReports.setCursor(Qt.CursorShape.PointingHandCursor)
                self.savedReports.setItem(n, 0, QTableWidgetItem(str(i[0])))
-               # self.savedReports.itemChanged.connect(lambda item, report_id=i[0]: self.saveReportName(report_id, item.text()))
 
                radio_button = QRadioButton(self.windowSaved)
                self.savedReports.setIndexWidget(self.savedReports.model().index(n, 2), radio_button)
                radio_button.setStyleSheet("background-color:white")
                radio_button.setGeometry(124, 31 + (n * 32), 50, 20) 
                radio_button.clicked.connect(lambda _, report_id=i[0]: self.creating(str(report_id)))
+
+               update_btn = QPushButton(self.savedReports)
+               self.savedReports.setIndexWidget(self.savedReports.model().index(n, 4), update_btn)
+               update_btn.setStyleSheet("QProperty-icon:url(images/edit.png); qproperty-iconSize:25px 12px; background-color:rgb(253, 253, 253)")
+               update_btn.setGeometry(110, 31 + (n * 30), 46, 19) 
+               item = self.savedReports.item(n, 3)
+               update_btn.clicked.connect(lambda _,row=item,report_id=i[0]: self.updateReportName(row.text(),str(report_id)))
+               update_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
             extractAllButton = QPushButton("word تصدير", self.windowSaved)
             extractAllButton.clicked.connect(self.exportAllReportsAsWord)
@@ -427,11 +441,15 @@ if is_admin():
             extractAllButton.setGeometry(150, 460, 160, 30)
 
             self.windowSaved.show()                   
-        
-        # def saveReportName(self,report_id):
-        #   cr.execute("UPDATE reports SET reportName = ? WHERE id = ?", ("new_name", report_id))
-        #   con.commit()  
 
+        def updateReportName(self,new_name,report_id):
+            cr.execute("UPDATE reports SET reportName = ? WHERE id = ?", (new_name, report_id))
+            con.commit() 
+            d = QMessageBox(parent=self.windowCreating,text="تم التعديل بنجاح")
+            d.setWindowTitle("نجاح")
+            d.setIcon(QMessageBox.Icon.Information)
+            d.exec()
+            self.load_data()
 
         # Delete report from saved reports
         def deleteReport(self,row,fRom="Original"):
@@ -458,6 +476,8 @@ if is_admin():
                       self.TableSummary.hideRow(row)
                     else:
                       self.savedReports.hideRow(row)
+                      self.windowSaved.destroy()
+                    
                     self.load_data()
             except Exception as e:
                 print(e)
@@ -2119,22 +2139,6 @@ if is_admin():
                 custom_style_header.fontName = 'ArabicFont'  
                 
 
-                # # Prepare header data with text and placeholders for images
-                # cr.execute("SELECT line1, line2, line3, line4 FROM start")
-                # lines = cr.fetchone()
-               
-
-                # header_data = [[
-                # "",  # Placeholder for the second column (image)
-                # "",  # Placeholder for the third column (image)
-                # Paragraph(
-                # "<br/><br/>".join(
-                #    get_display(arabic_reshaper.reshape(line)) for line in lines
-                #  ),
-                # custom_style_header
-                # ),
-                #  ]]
-
                 # Prepare header data with text and placeholders for images
                 cr.execute("SELECT line1 FROM start")
                 line1=cr.fetchone()[0]
@@ -2392,6 +2396,7 @@ if is_admin():
               d.exec()
             else:
                 pass
+
         def writeWord(self):            
             FileNameSave = QFileDialog.getSaveFileName(self.windowCreating,"Select File",desktopPath)
             if len(FileNameSave[0])>0:
@@ -3438,8 +3443,10 @@ if is_admin():
                 for idx,row in enumerate(addmins_table.rows):
                     row.height = heights[idx]
 
+            cr.execute(f"SELECT reportName FROM reports WHERE id={idFun}")
+            reportname = cr.fetchone()[0]
             subFilesD = [f for f in os.listdir(folder_path) if f.endswith(".docx")]
-            name =namePrograme+".docx"
+            name =reportname+".docx"
             if name in subFilesD:
                 i = 1
                 while name in subFilesD:
@@ -3461,9 +3468,6 @@ if is_admin():
                 pass
 
             content = [] 
-            name = str(idFun)+".pdf"
-            pdf_file_path = f"{folder_path}/{name}"
-            doc = SimpleDocTemplate(pdf_file_path, pagesize=letter, rightMargin=0, leftMargin=0, topMargin=30, bottomMargin=5)
 
             # Register the Amiri font
             font_path = 'font/Amiri-Regular.ttf' 
@@ -3806,13 +3810,22 @@ if is_admin():
                 canvas.setStrokeColor(colors.black)
                 canvas.setLineWidth(1)  # Border width
                 canvas.rect(border_offset, border_offset, width - 2 * border_offset, height - 2 * border_offset, stroke=1, fill=0)
+            cr.execute(f"SELECT reportName FROM reports WHERE id={idFun}")
+            reportname=cr.fetchone()[0]
+            subFilesD = [f for f in os.listdir(folder_path) if f.endswith(".pdf")]
+            name =reportname+".pdf"
+            if name in subFilesD:
+                i = 1
+                while name in subFilesD:
+                    name = f"({i}) {name}"
+                    i+=1
+            pdf_file_path = f"{folder_path}/{name}"
+            doc = SimpleDocTemplate(pdf_file_path, pagesize=letter, rightMargin=0, leftMargin=0, topMargin=30, bottomMargin=5)
 
             # Build the PDF document
             doc.build(content, onFirstPage=add_border, onLaterPages=add_border) 
               
-            
-
-        
+     
 
         def exportSummaryAsPdf(self):
                 try:
@@ -3837,14 +3850,15 @@ if is_admin():
                             header.reverse()  # Reverse the header for RTL direction
                             data = [header]  # Add header as the first row of the table
                         
+                            
                             for numberTemp, row in enumerate(fetched_data):
                                 reshaped_row = [                                
                                 str(numberTemp + 1),  # Number in Arabic format
-                                row[0],  # name
-                                row[1],  # Executer
-                                row[2],  # Execution Date
-                                row[3],  # Beneficiaries
-                                row[4],  # Count of beneficiaries
+                                get_display(arabic_reshaper.reshape(row[0])).replace('\n', '<br/><br/>'),  # name
+                                get_display(arabic_reshaper.reshape(row[1])).replace('\n', '<br/><br/>'),  # Executer
+                                get_display(arabic_reshaper.reshape(row[2])).replace('\n', '<br/>'),  # Execution Date
+                                get_display(arabic_reshaper.reshape(row[3])).replace('\n', '<br/>'),  # Beneficiaries
+                                get_display(arabic_reshaper.reshape(row[4])).replace('\n', '<br/>') # Count of beneficiaries
                                  ]
                                 reshaped_row.reverse()
                                 pdfmetrics.registerFont(TTFont('ArabicFont', 'font/Amiri-Regular.ttf'))
@@ -3852,26 +3866,42 @@ if is_admin():
                                 custom_style = ParagraphStyle(
                                 'CustomStyle',
                                 parent=styles['Normal'],
-                                fontSize=14, 
-                                alignment=1     
+                                fontSize=18, 
+                                alignment=2,
                                  )
                                 custom_style.fontName = 'ArabicFont'
-                                
-                                # Wrap each cell's text in a Paragraph
-                                wrapped_row = [Paragraph(get_display(arabic_reshaper.reshape(text)),custom_style) for text in reshaped_row]
+
+                                wrapped_row = [text for text in reshaped_row]
                                 data.append(wrapped_row)
 
-                            pdf_file_path = f"{folderFinle}/{nameFile}.pdf"
-                            doc = SimpleDocTemplate(pdf_file_path, pagesize=landscape(A4))
+                            def calculate_column_widths(data):
+                                # Calculate maximum width for each column based on content
+                                max_widths = []
+                                for col_idx in range(len(data[0])):
+                                   max_width = max(len(str(row[col_idx])) for row in data)  
+                                   max_widths.append(max_width * 7)  
+                                return max_widths
+                            
+                            column_widths = calculate_column_widths(data)                            
+                            def calculate_content_width(data, column_widths):
+                                total_width = sum(column_widths)
+                                return total_width + 0.5 * inch 
 
-                            column_widths = [1.2 * inch, 2.5 * inch, 2.1 * inch, 2.7 * inch, 2.7 * inch,0.3 * inch]  # Adjust as needed
-                            # column_widths = [80,120,100,255,240,25]
+ 
+                            content_width = calculate_content_width(data, column_widths)
+                            custom_page_size = (content_width, 10 * inch)  # Set height as needed (10 inches is a common height)
+
+                            pdf_file_path = f"{folderFinle}/{nameFile}.pdf"
+                            doc = SimpleDocTemplate(pdf_file_path, pagesize=custom_page_size,leftMargin=0, rightMargin=0, topMargin=7, bottomMargin=5)
+                            # column_widths = [1.2 * inch, 2.5 * inch, 1.4 * inch, 2.7 * inch, 2.7 * inch,0.3 * inch]  # Adjust as needed
+                            # column_widths = [40,120,100,255,240,120]
+                            # column_widths =[70,240,255,100,120,20]
                             styles = getSampleStyleSheet()
                             custom_style = ParagraphStyle(
                               'CustomStyle',
                                parent=styles['Normal'],
                                fontSize=16,
-                               spaceAfter=14,
+                               spaceAfter=17,
                                alignment=1 
                             )
                             font_path_bold = 'font/Amiri-Bold.ttf'  
@@ -3884,33 +3914,21 @@ if is_admin():
                             
                             table = Table(data, colWidths=column_widths)
                             table.setStyle(TableStyle([
-                                
-                            #  ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                            #  ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Set vertical alignment to top
-                            #  ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
-                            #  ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
-                            #  ('SIZE', (0, 0), (-1, -1), 14),  # Font size
-                            #  ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                            #  ('LEFTPADDING', (0, 0), (-1, -1), 5),  # Add left padding
-                            #  ('RIGHTPADDING', (0, 0), (-1, -1), 5),  # Add right padding
-                            #  ('TOPPADDING', (0, 0), (-1, -1), 10),  # Add top padding
-                            #  ('BOTTOMPADDING', (0, 0), (-1, -1), 20),  # Add bottom padding
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center align all
-                ('ALIGN', (0, 1), (-1, -1), 'CENTER'),  # Center align headers
-                ('ALIGN', (-1, 1), (-1, -1), 'RIGHT'),  # Left align last column (count of beneficiaries)
-                ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Font for header
-                ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Font for data
-                ('SIZE', (0, 0), (-1, -1), 14),  # Font size
-                ('GRID', (0, 0), (-1, -1), 1, colors.black),
-                ('LEFTPADDING', (0, 0), (-1, -1), 5),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 5),
-                ('TOPPADDING', (0, 0), (-1, -1), 10),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
+
+                             ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),  # Center align all
+                             ('VALIGN', (0, 0), (-1, -1), 'BOTTOM'),  # Left align last column (count of beneficiaries)
+                             ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Font for header
+                             ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Font for data
+                             ('SIZE', (0, 0), (-1, -1), 14),  # Font size
+                             ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                             ('LEFTPADDING', (0, 0), (-1, -1), 15),
+                             ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+                             ('TOPPADDING', (0, 0), (-1, -1), 7),
+                             ('BOTTOMPADDING', (0, 0), (-1, -1), 12)
+
                              ]))
 
-
-                            elements = [paragraph,table]
-                            doc.build(elements)
+                            doc.build([paragraph,table])
 
                             d = QMessageBox(parent=self.windowCreating, text=f"تم التصدير بنجاح")
                             d.setWindowTitle("نجاح")
@@ -3924,6 +3942,227 @@ if is_admin():
                     d.setText("حدث خطأ حاول مرة أخرى")
                     d.setIcon(QMessageBox.Icon.Warning)
                     d.exec() 
+
+
+        # def exportSummaryAsPdf(self):
+        #         try:
+                                
+        #                 FileNameSave = QFileDialog.getSaveFileName(self.windowCreating, "اختر مسارا", desktopPath)
+        #                 if len(FileNameSave[0]) > 0:
+        #                     folder = (str(FileNameSave[0]).split("/"))
+        #                     nameFile = folder[-1]
+        #                     folderFinle = "/".join(folder[:-1])
+        #                     cr.execute("SELECT name, executer, executeDate, benefits, countBenefits FROM reports")
+        #                     fetched_data = cr.fetchall()
+          
+        #                     header = [
+        #                     get_display(arabic_reshaper.reshape(' م ')),  # Number column header
+        #                     get_display(arabic_reshaper.reshape(' اسم البرنامج ')),  # Program name header
+        #                     get_display(arabic_reshaper.reshape(' المنفذ ')),  # Executer header
+        #                     get_display(arabic_reshaper.reshape(' تاريخ التنفيذ ')),  # Execution date header
+        #                     get_display(arabic_reshaper.reshape(' المستفيدون ')),  # Beneficiaries header
+        #                     get_display(arabic_reshaper.reshape(' عدد المستفيدين '))  # Count of beneficiaries header
+        #                     ]
+                        
+        #                     header.reverse()  # Reverse the header for RTL direction
+        #                     data = [header]  # Add header as the first row of the table
+                        
+        #                     for numberTemp, row in enumerate(fetched_data):
+        #                         reshaped_row = [                                
+        #                         str(numberTemp + 1),  # Number in Arabic format
+        #                         row[0],  # name
+        #                         row[1],  # Executer
+        #                         row[2],  # Execution Date
+        #                         row[3],  # Beneficiaries
+        #                         row[4],  # Count of beneficiaries
+        #                          ]
+        #                         reshaped_row.reverse()
+        #                         pdfmetrics.registerFont(TTFont('ArabicFont', 'font/Amiri-Regular.ttf'))
+        #                         styles = getSampleStyleSheet()
+        #                         custom_style = ParagraphStyle(
+        #                         'CustomStyle',
+        #                         parent=styles['Normal'],
+        #                         fontSize=14, 
+        #                         alignment=1     
+        #                          )
+        #                         custom_style.fontName = 'ArabicFont'
+                                
+        #                         # Wrap each cell's text in a Paragraph
+        #                         wrapped_row = [Paragraph(get_display(arabic_reshaper.reshape(text)),custom_style) for text in reshaped_row]
+        #                         data.append(wrapped_row)
+
+        #                     pdf_file_path = f"{folderFinle}/{nameFile}.pdf"
+        #                     doc = SimpleDocTemplate(pdf_file_path, pagesize=landscape(A4))
+
+        #                     # column_widths = [1.2 * inch, 2.5 * inch, 2.1 * inch, 2.7 * inch, 2.7 * inch,0.3 * inch]  # Adjust as needed
+        #                     column_widths = [80,120,100,255,240,25]
+        #                     styles = getSampleStyleSheet()
+        #                     custom_style = ParagraphStyle(
+        #                       'CustomStyle',
+        #                        parent=styles['Normal'],
+        #                        fontSize=16,
+        #                        spaceAfter=14,
+        #                        alignment=1 
+        #                     )
+        #                     font_path_bold = 'font/Amiri-Bold.ttf'  
+        #                     pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_path_bold))
+        #                     # Set the font for the custom style
+        #                     custom_style.fontName = 'ArabicFont-bold'
+        #                     # Create a paragraph before the table
+        #                     paragraph_text = get_display(arabic_reshaper.reshape("ملخص تقارير البرامج"))
+        #                     paragraph = Paragraph(paragraph_text, custom_style)  # Use your desired style
+                            
+        #                     table = Table(data, colWidths=column_widths)
+        #                     table.setStyle(TableStyle([
+
+        #                      ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center align all
+        #                      ('ALIGN', (0, 1), (-1, -1), 'CENTER'),  # Center align headers
+        #                      ('ALIGN', (-1, 1), (-1, -1), 'RIGHT'),  # Left align last column (count of beneficiaries)
+        #                      ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Font for header
+        #                      ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Font for data
+        #                      ('SIZE', (0, 0), (-1, -1), 14),  # Font size
+        #                      ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        #                      ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        #                      ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        #                      ('TOPPADDING', (0, 0), (-1, -1), 10),
+        #                      ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
+        #                      ]))
+
+
+        #                     elements = [paragraph,table]
+        #                     doc.build(elements)
+
+        #                     d = QMessageBox(parent=self.windowCreating, text=f"تم التصدير بنجاح")
+        #                     d.setWindowTitle("نجاح")
+        #                     d.setIcon(QMessageBox.Icon.Information)
+        #                     d.exec()
+   
+        #         except Exception as e:
+        #             print(e)
+        #             d = QMessageBox(parent=self.windowCreating)  
+        #             d.setWindowTitle("فشل")  
+        #             d.setText("حدث خطأ حاول مرة أخرى")
+        #             d.setIcon(QMessageBox.Icon.Warning)
+        #             d.exec() 
+
+        # def exportSummaryAsPdf(self):
+        #         try:
+        #                 content=[]    
+        #                 FileNameSave = QFileDialog.getSaveFileName(self.windowCreating, "اختر مسارا", desktopPath)
+        #                 if len(FileNameSave[0]) > 0:
+        #                     folder = (str(FileNameSave[0]).split("/"))
+        #                     nameFile = folder[-1]
+        #                     folderFinle = "/".join(folder[:-1])
+        #                     cr.execute("SELECT name, executer, executeDate, benefits, countBenefits FROM reports")
+        #                     fetched_data = cr.fetchall()
+        #                     # Register the Amiri font
+        #                     font_path = 'font/Amiri-Regular.ttf' 
+        #                     pdfmetrics.registerFont(TTFont('ArabicFont', font_path))
+        #                     font_path_bold = 'font/Amiri-Bold.ttf'  
+        #                     pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_path_bold))
+        #                     # Set up styles
+        #                     styles = getSampleStyleSheet()
+        #                     custom_style = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=9, spaceAfter=4, alignment=1)
+        #                     custom_style.fontName = 'ArabicFont-bold'  
+        #                     # Add additional text (Title)
+        #                     title = Paragraph(get_display(arabic_reshaper.reshape("\t\t\t\t\t\t\tملخص تقارير البرامج")), custom_style)
+        #                     content.append(title)
+
+        #                     # *Get Report Content*
+        #                     # Style for the section names (right column)
+        #                     section_right_style = ParagraphStyle(
+        #                       name="rightSummaryContent",
+        #                       alignment=TA_RIGHT,
+        #                       textColor=colors.black,
+        #                       fontSize=9,
+        #                       spaceAfter=10,
+        #                       leading=18
+        #                      )
+                
+        #                     section_right_style.fontName = 'ArabicFont-bold'  # Set the custom style font to ArabicFont
+        #                     # Style for the section content (left column)
+        #                     section_left_style = ParagraphStyle(
+        #                       name="leftSummaryContent",
+        #                       alignment=TA_RIGHT,
+        #                       leading=15,
+        #                       fontSize=9,
+        #                       spaceAfter=10
+        #                      )
+        #                     section_left_style.fontName = 'ArabicFont' 
+        #                     data=[]
+                            
+        #                     for numberTemp, row in enumerate(fetched_data):
+        #                         # 0
+        #                         data.append(
+        #                         ((get_display(arabic_reshaper.reshape("م")),str(numberTemp+1)))
+        #                         )
+        #                         # 1
+        #                         data.append(
+        #                         ((get_display(arabic_reshaper.reshape("اسم البرنامج")), get_display(arabic_reshaper.reshape(row[0]))))
+        #                         )
+        #                         # 2
+        #                         data.append(   
+        #                         (get_display(arabic_reshaper.reshape("المنفذ")),get_display(arabic_reshaper.reshape(row[1])))
+        #                        ) 
+        #                         # 3
+        #                         data.append(
+        #                         ((get_display(arabic_reshaper.reshape("تاريخ التنفيذ")), get_display(arabic_reshaper.reshape(row[2]))))
+        #                         )
+        #                         # 4
+        #                         data.append(
+        #                         ((get_display(arabic_reshaper.reshape("المستفيدون")), get_display(arabic_reshaper.reshape(row[3]))))
+        #                         )
+        #                         # 5
+        #                         data.append(
+        #                         ((get_display(arabic_reshaper.reshape("عدد المستفيدين")), get_display(arabic_reshaper.reshape(row[4]))))
+        #                         )
+                                    
+        #                         # Create the table data by formatting each section name and content
+        #                         table_items = []
+        #                         for section_name, section_content in data:
+        #                          # Right column: Section name (red text)
+        #                           right_col = Paragraph(section_name,section_right_style)
+        #                          # Left column: Section content
+        #                           left_col = Paragraph(section_content,section_left_style)
+        #                          # Append the two-column row to table_data
+        #                           table_items.append([left_col, right_col])
+
+        #                         table = Table(table_items, colWidths=[6.6 * inch, 1.3 * inch],rowHeights=15.4)
+        #                         # Add some basic styling to the table (optional)
+        #                         table.setStyle(TableStyle([
+        #                          ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Center vertically
+        #                          ('ALIGN', (0, 0), (-1, -1), 'CENTER'),    # Center horizontally
+        #                          ('BACKGROUND', (1, 0), (1, -1), colors.HexColor("#2ABCB5")),  # Right cell background
+        #                          ('INNERGRID', (0, 0), (-1, -1), 0.25, colors.black),
+        #                          ('BOX', (0, 0), (-1, -1), 0.1, colors.black),
+        #                          ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
+        #                          ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
+        #                          ('TOPPADDING', (0, 0), (-1, -1), 1), # Add top padding
+        #                           ('BOTTOMPADDING', (0, 0), (-1, -1), 1)
+        #                          ]))
+
+        #                         content.append(table)
+        #                         content.append(Spacer(1, 1.6))  # Adjust the height as needed
+        #                         data=[]
+
+        #                     pdf_file_path = f"{folderFinle}/{nameFile}.pdf"
+        #                     doc = SimpleDocTemplate(pdf_file_path, pagesize=landscape(A4),
+        #                             leftMargin=0, rightMargin=0, topMargin=0, bottomMargin=0)
+        #                     # doc = SimpleDocTemplate(pdf_file_path, pagesize=landscape(A4))
+        #                     doc.build(content)
+
+        #                     d = QMessageBox(parent=self.windowCreating, text=f"تم التصدير بنجاح")
+        #                     d.setWindowTitle("نجاح")
+        #                     d.setIcon(QMessageBox.Icon.Information)
+        #                     d.exec()
+   
+        #         except Exception as e:
+        #             print(e)
+        #             d = QMessageBox(parent=self.windowCreating)  
+        #             d.setWindowTitle("فشل")  
+        #             d.setText("حدث خطأ حاول مرة أخرى")
+        #             d.setIcon(QMessageBox.Icon.Warning)
+        #             d.exec() 
 
         
         def exportSummaryAsWord(self):

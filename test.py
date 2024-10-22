@@ -4207,3 +4207,115 @@ else:
         #         os.remove("secretThing.png")
         #     except:
         #         pass        
+        # def exportSummaryAsPdf(self):
+        #         try:
+                                
+        #                 FileNameSave = QFileDialog.getSaveFileName(self.windowCreating, "اختر مسارا", desktopPath)
+        #                 if len(FileNameSave[0]) > 0:
+        #                     folder = (str(FileNameSave[0]).split("/"))
+        #                     nameFile = folder[-1]
+        #                     folderFinle = "/".join(folder[:-1])
+        #                     cr.execute("SELECT name, executer, executeDate, benefits, countBenefits FROM reports")
+        #                     fetched_data = cr.fetchall()
+          
+        #                     header = [
+        #                     get_display(arabic_reshaper.reshape(' م ')),  # Number column header
+        #                     get_display(arabic_reshaper.reshape(' اسم البرنامج ')),  # Program name header
+        #                     get_display(arabic_reshaper.reshape(' المنفذ ')),  # Executer header
+        #                     get_display(arabic_reshaper.reshape(' تاريخ التنفيذ ')),  # Execution date header
+        #                     get_display(arabic_reshaper.reshape(' المستفيدون ')),  # Beneficiaries header
+        #                     get_display(arabic_reshaper.reshape(' عدد المستفيدين '))  # Count of beneficiaries header
+        #                     ]
+                        
+        #                     header.reverse()  # Reverse the header for RTL direction
+        #                     data = [header]  # Add header as the first row of the table
+                        
+        #                     for numberTemp, row in enumerate(fetched_data):
+        #                         reshaped_row = [                                
+        #                         str(numberTemp + 1),  # Number in Arabic format
+        #                         row[0],  # name
+        #                         row[1],  # Executer
+        #                         row[2],  # Execution Date
+        #                         row[3],  # Beneficiaries
+        #                         row[4],  # Count of beneficiaries
+        #                          ]
+        #                         reshaped_row.reverse()
+        #                         pdfmetrics.registerFont(TTFont('ArabicFont', 'font/Amiri-Regular.ttf'))
+        #                         styles = getSampleStyleSheet()
+        #                         custom_style = ParagraphStyle(
+        #                         'CustomStyle',
+        #                         parent=styles['Normal'],
+        #                         fontSize=14, 
+        #                         alignment=1     
+        #                          )
+        #                         custom_style.fontName = 'ArabicFont'
+                                
+        #                         # Wrap each cell's text in a Paragraph
+        #                         wrapped_row = [Paragraph(get_display(arabic_reshaper.reshape(text)),custom_style) for text in reshaped_row]
+        #                         data.append(wrapped_row)
+
+        #                     pdf_file_path = f"{folderFinle}/{nameFile}.pdf"
+        #                     doc = SimpleDocTemplate(pdf_file_path, pagesize=landscape(A4))
+
+        #                     # column_widths = [1.2 * inch, 2.5 * inch, 2.1 * inch, 2.7 * inch, 2.7 * inch,0.3 * inch]  # Adjust as needed
+        #                     column_widths = [80,120,100,255,240,25]
+        #                     styles = getSampleStyleSheet()
+        #                     custom_style = ParagraphStyle(
+        #                       'CustomStyle',
+        #                        parent=styles['Normal'],
+        #                        fontSize=16,
+        #                        spaceAfter=14,
+        #                        alignment=1 
+        #                     )
+        #                     font_path_bold = 'font/Amiri-Bold.ttf'  
+        #                     pdfmetrics.registerFont(TTFont('ArabicFont-Bold', font_path_bold))
+        #                     # Set the font for the custom style
+        #                     custom_style.fontName = 'ArabicFont-bold'
+        #                     # Create a paragraph before the table
+        #                     paragraph_text = get_display(arabic_reshaper.reshape("ملخص تقارير البرامج"))
+        #                     paragraph = Paragraph(paragraph_text, custom_style)  # Use your desired style
+                            
+        #                     table = Table(data, colWidths=column_widths)
+        #                     table.setStyle(TableStyle([
+                                
+        #                     #  ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        #                     #  ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),  # Set vertical alignment to top
+        #                     #  ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Use the registered font name
+        #                     #  ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Use the registered font name for data
+        #                     #  ('SIZE', (0, 0), (-1, -1), 14),  # Font size
+        #                     #  ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        #                     #  ('LEFTPADDING', (0, 0), (-1, -1), 5),  # Add left padding
+        #                     #  ('RIGHTPADDING', (0, 0), (-1, -1), 5),  # Add right padding
+        #                     #  ('TOPPADDING', (0, 0), (-1, -1), 10),  # Add top padding
+        #                     #  ('BOTTOMPADDING', (0, 0), (-1, -1), 20),  # Add bottom padding
+        #         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),  # Center align all
+        #         ('ALIGN', (0, 1), (-1, -1), 'CENTER'),  # Center align headers
+        #         ('ALIGN', (-1, 1), (-1, -1), 'RIGHT'),  # Left align last column (count of beneficiaries)
+        #         ('FONTNAME', (0, 0), (-1, 0), 'ArabicFont'),  # Font for header
+        #         ('FONTNAME', (0, 1), (-1, -1), 'ArabicFont'),  # Font for data
+        #         ('SIZE', (0, 0), (-1, -1), 14),  # Font size
+        #         ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        #         ('LEFTPADDING', (0, 0), (-1, -1), 5),
+        #         ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+        #         ('TOPPADDING', (0, 0), (-1, -1), 10),
+        #         ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
+        #                      ]))
+
+
+        #                     elements = [paragraph,table]
+        #                     doc.build(elements)
+
+        #                     d = QMessageBox(parent=self.windowCreating, text=f"تم التصدير بنجاح")
+        #                     d.setWindowTitle("نجاح")
+        #                     d.setIcon(QMessageBox.Icon.Information)
+        #                     d.exec()
+   
+        #         except Exception as e:
+        #             print(e)
+        #             d = QMessageBox(parent=self.windowCreating)  
+        #             d.setWindowTitle("فشل")  
+        #             d.setText("حدث خطأ حاول مرة أخرى")
+        #             d.setIcon(QMessageBox.Icon.Warning)
+        #             d.exec() 
+
+

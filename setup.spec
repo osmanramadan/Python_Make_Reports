@@ -80,7 +80,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='برنامج توثيق',  # Name of your executable
+    name='موثق البرامج',  # Name of your executable
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -101,5 +101,5 @@ coll = COLLECT(
     strip=False,
     upx=True,  # Use UPX compression for additional files
     upx_exclude=[],
-    name='برنامج توثيق',
+    name='موثق البرامج',
 )

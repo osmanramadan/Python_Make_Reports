@@ -38,6 +38,8 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.pagesizes import A4
+
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate,Table,TableStyle, Paragraph, Image as img
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT
@@ -2123,7 +2125,7 @@ if is_admin():
           
             if len(FileNameSave[0]) > 0:
                 pdf_file_path = FileNameSave[0]
-                doc = SimpleDocTemplate(pdf_file_path, pagesize=letter, rightMargin=0, leftMargin=0, topMargin=30, bottomMargin=5)
+                doc = SimpleDocTemplate(pdf_file_path, pagesize=letter, rightMargin=0, leftMargin=0, topMargin=0, bottomMargin=0)
 
                 # Register the Amiri font
                 font_path = 'font/Amiri-Regular.ttf' 
@@ -2135,7 +2137,7 @@ if is_admin():
                 custom_style = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=16, spaceAfter=14, alignment=1)
                 custom_style.fontName = 'ArabicFont-bold'  
 
-                custom_style_header = ParagraphStyle('CustomStyle', parent=styles['Normal'], fontSize=14, alignment=TA_RIGHT)
+                custom_style_header = ParagraphStyle('CustomStyle', parent=styles['Normal'],fontSize=14, alignment=TA_RIGHT)
                 custom_style_header.fontName = 'ArabicFont'  
                 
 
@@ -2198,7 +2200,8 @@ if is_admin():
                  ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),  # Align all content to the right
                  ('RIGHTPADDING', (0, 0), (-1, -1), -25),  # Remove right padding for all cells
                  ('FONTNAME', (0, 0), (-1, 0),'ArabicFont'),
-                 ('BOTTOMPADDING', (0, 0), (-1, 0), 16)
+                 ('BOTTOMPADDING', (0, 0), (-1, 0), 16),
+                 ('TOPPADDING', (0, 0), (-1, 0), 25),
                                  
                 ]))
 

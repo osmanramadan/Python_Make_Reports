@@ -136,13 +136,21 @@ The application supports printing reports directly through the browser's native 
 ---
 
 ## 🛠️ Tech Stack
-
-- **Language:** Python
-- **GUI Framework:** Tkinter
-- **PDF Generation:** HTML-to-PDF via browser / dedicated PDF library
-- **Word Generation:** `python-docx`
-- **Database:** SQLite
-- **Report Layout:** HTML + CSS (rendered for print)
+ 
+| Library | Purpose |
+|---|---|
+| **Python** | Core programming language |
+| **PyQt6** | Desktop GUI framework (widgets, layouts, signals, events) |
+| **sqlite3** | Built-in database for storing program records |
+| **Pillow (PIL)** | Image loading, resizing, and processing |
+| **python-docx** | Generating and formatting `.docx` Word reports |
+| **aspose.words** | Advanced Word/PDF document conversion and rendering |
+| **webbrowser** | Opening HTML reports in the browser for printing |
+| **pyautogui** | UI automation (e.g. triggering print dialogs) |
+| **convert_numbers** | Converting between Arabic-Indic and Western numerals |
+| **shutil** | File and directory operations (copying assets, cleanup) |
+| **ctypes** | Low-level Windows API calls |
+| **sys / os** | System and file path utilities |
 
 ---
 
@@ -150,10 +158,10 @@ The application supports printing reports directly through the browser's native 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/your-repo-name.git
+git clone https://github.com/osmanramadan/Python_Make_Reports.git
 
 # Navigate to project directory
-cd your-repo-name
+cd Python_Make_Reports
 
 # Install dependencies
 pip install -r requirements.txt
@@ -167,15 +175,18 @@ python main.py
 ## 📁 Project Structure
 
 ```
-├── main.py                 # Application entry point
-├── requirements.txt        # Python dependencies
-├── assets/
-│   └── logo.png            # Default Ministry of Education logo
-├── database/
-│   └── programs.db         # SQLite database (auto-created)
-├── templates/
-│   └── report.html         # HTML template for PDF/print reports
-└── screenshots/            # App screenshots (1.png – 9.png)
+
+├──  design/
+├──  font/
+├──  icons/
+│    └── logo.ico            # Default Ministry of Education logo
+│    └── icon.ico            # The icon of the App
+├──  images/
+├──  README.md
+├──  app.db                  # SQLite database (auto-created)
+├──  main.py                 # Application entry point
+
+└──  requirements.txt        # Python dependencies               
 ```
 
 ---

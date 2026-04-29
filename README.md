@@ -103,7 +103,7 @@ A summary report (ملخص تقارير البرامج) exported as PDF containi
 - Beneficiaries
 - Number of Beneficiaries
 
-> **Note:** In this screenshot a formatting bug is visible — raw HTML tags (`<br/>`) appear in the date column. This is a known issue where HTML content was not properly stripped before rendering in the PDF summary.
+
 
 ---
 

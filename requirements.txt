@@ -1,0 +1,6 @@
+PyQt6
+Pillow
+python-docx
+aspose-words
+pyautogui
+convert-numbers

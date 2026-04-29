@@ -7,7 +7,7 @@ A desktop application built with Python for documenting and managing educational
 ## 🖥️ Screenshots
 
 ### 1. Main Interface — Program Report View
-![Main Interface](screenshots/1.png)
+![Main Interface](images/1.png)
 
 The main window is divided into three panels:
 - **Left panel** — *Saved Reports* sidebar listing all previously saved programs for quick access

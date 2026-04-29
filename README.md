@@ -17,7 +17,7 @@ The main window is divided into three panels:
 ---
 
 ### 2. Report Creation Dialog — Field Selection
-![Report Creation Dialog](screenshots/2.png)
+![Report Creation Dialog](images/2.png)
 
 When clicking **"إنشاء تقرير"** (Create Report), a dialog appears allowing the user to:
 - Choose the **number of images** to include (up to 4, as enforced by the red validation note)
@@ -34,7 +34,7 @@ When clicking **"إنشاء تقرير"** (Create Report), a dialog appears allo
 ---
 
 ### 3. Saved Reports Manager — Database View
-![Saved Reports Manager](screenshots/3.png)
+![Saved Reports Manager](images/3.png)
 
 A popup window showing all programs saved in the database as a table with columns:
 - Program Name
@@ -48,7 +48,7 @@ Each row has a **red delete button** (🗑️) to remove a record. This view pro
 ---
 
 ### 4. Institution Header Settings
-![Header Settings](screenshots/4.png)
+![Header Settings](images/4.png)
 
 A settings dialog that allows the user to customize the **report header** with:
 - **First header line** — e.g., "المملكة العربية السعودية" (Kingdom of Saudi Arabia)
@@ -61,7 +61,7 @@ A settings dialog that allows the user to customize the **report header** with:
 ---
 
 ### 5. PDF Report Output — Print Preview
-![PDF Report Preview](screenshots/5.png)
+![PDF Report Preview](images/5.png)
 
 A clean, print-ready single-page PDF report that includes:
 - Full institution header with logo
@@ -72,7 +72,7 @@ A clean, print-ready single-page PDF report that includes:
 ---
 
 ### 6. Word Document Export
-![Word Export](screenshots/6.png)
+![Word Export](images/6.png)
 
 The exported `.docx` file opened in Microsoft Word, featuring a two-column layout:
 - **Left column** — The program documentation table with all fields
@@ -83,7 +83,7 @@ The document is fully editable and formatted for official use.
 ---
 
 ### 7. Reports List — Export & Delete
-![Reports List](screenshots/7.png)
+![Reports List](images/7.png)
 
 A dialog showing saved reports in a list with:
 - **Delete button** (🗑️) per row for individual deletion
@@ -94,7 +94,7 @@ A dialog showing saved reports in a list with:
 ---
 
 ### 8. Summary PDF — All Programs Table
-![Summary PDF](screenshots/8.png)
+![Summary PDF](images/8.png)
 
 A summary report (ملخص تقارير البرامج) exported as PDF containing a table that lists all saved programs with:
 - Program Name
@@ -108,7 +108,7 @@ A summary report (ملخص تقارير البرامج) exported as PDF containi
 ---
 
 ### 9. Browser Print Dialog — PDF via Browser
-![Browser Print](screenshots/9.png)
+![Browser Print](images/9.png)
 
 The application supports printing reports directly through the browser's native print dialog. The report is rendered as an HTML page and opened in the default browser, allowing the user to:
 - Choose printer or save as PDF
